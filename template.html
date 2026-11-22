@@ -34,6 +34,10 @@ tr.row{cursor:pointer}tr.row:hover td{background:var(--panel2)}
 .part{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
 .part .n{font-weight:700;color:var(--acc2);font-size:18px;text-align:center}
 .part .vn{font-size:16px;font-weight:600}.part .vs{color:var(--mute);font-size:12px}
+.fd{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--mute)}
+.fd .fv{font-variant-numeric:tabular-nums;color:var(--fg);min-width:34px;text-align:center;font-weight:600}
+.fd input.vert{writing-mode:vertical-lr;direction:rtl;-webkit-appearance:slider-vertical;appearance:slider-vertical;width:26px;height:96px;padding:0;margin:0}
+.faders{display:flex;gap:14px;align-items:flex-end}
 .sl{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--mute)}
 .sl label{display:flex;gap:6px;align-items:center}.sl input[type=range]{width:90px;padding:0}.sl input[type=number]{width:62px;padding:2px 4px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
@@ -263,6 +267,7 @@ function fxTab(i){const P=lib[i].P,t=()=>touch(i),out=h('div');
  out.append(sec('Master EQ',h('div',{},g,h('div',{class:'hint'},'Five-band EQ over the whole performance. With Peaking shape the lowest usable frequency is 63 Hz.'))));
  return out}
 // ---------- Detail ----------
+const fdv=(f,v)=>f===15?(v<64?'L'+(64-v):v===64?'C':'R'+(v-64)):String(v);
 function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.tab||'voices';
  const act=P.parts.map((p,k)=>C.active(p)?k:-1).filter(k=>k>=0);
  let h0=`<div class="crumb"><a id="back">All performances</a> › ${slotName(i)} ${modLabel(l)}</div>
@@ -274,7 +279,7 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  <label>Name<input id="nm" maxlength="10" value="${esc(C.getName(c))}"></label>
  <label>Keyboard mode<select id="md">${MODES.map((m,k)=>`<option value="${k}" ${c[CO_MODE]==k?'selected':''}>${m}</option>`).join('')}</select></label>
  <label>Split point (note ${NOTE(c[0x42])})<input id="sp" type="number" min="1" max="127" value="${c[0x42]}"></label>
- <label>Performance volume<input id="pv" type="range" min="0" max="127" value="${c[0x38]}"></label>
+ <label>Performance volume <b id="pvv" style="color:var(--fg)">${c[0x38]}</b><input id="pv" type="range" min="0" max="127" value="${c[0x38]}"></label>
  <label>Arpeggio<select id="ar"><option value="0" ${P.arpc[4]?'':'selected'}>off</option><option value="1" ${P.arpc[4]?'selected':''}>on</option></select></label>
  <label>Tempo<input id="tp" type="number" min="5" max="300" value="${(P.arpc[2]<<7)|P.arpc[3]}"></label></div></div>
  <div class="tabs"><button id="t-voices" class="${tab==='voices'?'on':''}">Voices (${act.length}/16)</button><button id="t-fx" class="${tab==='fx'?'on':''}">Effects &amp; EQ</button></div>
@@ -286,7 +291,7 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  $('#t-voices').onclick=()=>{view.tab='voices';renderDetail()};$('#t-fx').onclick=()=>{view.tab='fx';renderDetail()};
  $('#nm').oninput=e=>{C.setName(c,e.target.value);touch(i)};
  $('#md').onchange=e=>{c[CO_MODE]=+e.target.value;touch(i)};$('#sp').oninput=e=>{c[0x42]=Math.max(1,Math.min(127,+e.target.value||1));touch(i)};
- $('#pv').oninput=e=>{c[0x38]=+e.target.value;touch(i)};$('#ar').onchange=e=>{P.arpc[4]=+e.target.value;touch(i)};
+ $('#pv').oninput=e=>{c[0x38]=+e.target.value;$('#pvv').textContent=e.target.value;touch(i)};$('#ar').onchange=e=>{P.arpc[4]=+e.target.value;touch(i)};
  $('#tp').onchange=e=>{const t=Math.max(5,Math.min(300,+e.target.value||90));P.arpc[2]=t>>7;P.arpc[3]=t&127;touch(i)};
  $('#aud').onclick=()=>audition(i).catch(e=>status(e.message));$('#wr').onclick=()=>writeSlot(i).catch(e=>status(e.message));
  $('#rd').onclick=()=>readSlot(i).then(renderDetail).catch(e=>status('Read failed: '+e.message));
@@ -301,14 +306,13 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  act.forEach(k=>{const p=P.parts[k],vo=voiceOf(p);
   v+=`<div class="part" data-k="${k}"><div class="n">${k+1}</div><div><div class="vn">${esc(vo?vo.n:'Unknown voice '+p[1]+'/'+p[2]+'/'+(p[3]+1))}</div>
   <div class="vs">${vo?`${vo.m} › ${vo.s} · `:''}MSB ${p[1]} LSB ${p[2]} PC ${p[3]+1}</div>
-  <div class="sl"><label>Vol <input type="range" data-f="14" min="0" max="127" value="${p[14]}"></label><label>Pan <input type="range" data-f="15" min="1" max="127" value="${p[15]}"></label>
-  <label>Rev <input type="range" data-f="18" min="0" max="127" value="${p[18]}"></label><label>Cho <input type="range" data-f="19" min="0" max="127" value="${p[19]}"></label>
-  <label>Note ≥ <input type="number" data-f="8" min="0" max="127" value="${p[8]}" title="${NOTE(p[8])}"></label><label>≤ <input type="number" data-f="9" min="0" max="127" value="${p[9]}" title="${NOTE(p[9])}"></label>
+  <div class="faders">${[['Vol',14,0,127],['Pan',15,1,127],['Rev',18,0,127],['Cho',19,0,127]].map(([n,f,mn,mx])=>`<label class="fd"><span class="fv" data-v="${f}">${fdv(f,p[f])}</span><input class="vert" type="range" data-f="${f}" min="${mn}" max="${mx}" value="${p[f]}" aria-label="${n}"><span>${n}</span></label>`).join('')}</div>
+  <div class="sl"><label>Note ≥ <input type="number" data-f="8" min="0" max="127" value="${p[8]}" title="${NOTE(p[8])}"></label><label>≤ <input type="number" data-f="9" min="0" max="127" value="${p[9]}" title="${NOTE(p[9])}"></label>
   <label>Shift <input type="number" data-f="22" min="40" max="88" value="${p[22]}" title="64 = 0"></label><label>Ch <input type="number" data-f="4" min="0" max="15" value="${p[4]}" title="0-based receive channel"></label></div></div>
   <div style="display:flex;gap:6px;flex-direction:column"><button class="edv">Edit voice</button><button class="chg">Change voice</button><button class="rm dng">Remove</button></div></div>`});
  v+='</div>';body.innerHTML=v;
  document.querySelectorAll('.part').forEach(el=>{const k=+el.dataset.k;
-  el.querySelectorAll('[data-f]').forEach(inp=>inp.oninput=()=>{P.parts[k][+inp.dataset.f]=+inp.value;touch(i)});
+  el.querySelectorAll('[data-f]').forEach(inp=>inp.oninput=()=>{const f=+inp.dataset.f;P.parts[k][f]=+inp.value;const fv=el.querySelector(`.fv[data-v="${f}"]`);if(fv)fv.textContent=fdv(f,+inp.value);touch(i)});
   el.querySelector('.rm').onclick=()=>{C.removeVoice(P,k);touch(i);renderDetail()};
   el.querySelector('.chg').onclick=()=>pick(v=>{C.setVoice(P.parts[k],v);touch(i);renderDetail()});
   el.querySelector('.edv').onclick=()=>{const vo=voiceOf(P.parts[k]);if(!vo)return alert('This voice is not in the Data List, so it cannot be loaded for editing.');
