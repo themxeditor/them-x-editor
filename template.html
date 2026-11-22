@@ -1,0 +1,403 @@
+<!doctype html>
+<!--
+ MX Performance Editor v0.0.1
+ Copyright (C) the MX Performance Editor contributors
+ This program is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License version 3 as published by the Free Software Foundation.
+ It is distributed WITHOUT ANY WARRANTY, without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See https://www.gnu.org/licenses/gpl-3.0.html
+ Source: https://github.com/YamMXEditor/yammxeditor
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MX Performance Editor</title>
+<style>
+:root{--bg:#14161a;--panel:#1d2026;--panel2:#252932;--line:#323845;--fg:#e8eaee;--mute:#8b93a3;--acc:#ff6a3d;--acc2:#3dd6ff;--ok:#4cd694;--bad:#ff5468;color-scheme:dark}
+@media(prefers-color-scheme:light){:root:not(.dark){--bg:#f3f4f7;--panel:#fff;--panel2:#eef0f4;--line:#d5d9e2;--fg:#1b1e25;--mute:#667085;--acc:#e24a1b;--acc2:#0a7ea8;color-scheme:light}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+h1{font-size:16px;margin:0 8px 0 0;letter-spacing:.5px}h1 b{color:var(--acc)}
+select,input,button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
+button{cursor:pointer}button:hover{border-color:var(--acc)}button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button.dng:hover{border-color:var(--bad);color:var(--bad)}button:disabled{opacity:.4;cursor:default}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bad);display:inline-block}.dot.on{background:var(--ok)}
+main{max-width:1100px;margin:0 auto;padding:16px}
+#status{color:var(--mute);font-size:12px;margin-left:auto}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+th{font-size:11px;text-transform:uppercase;color:var(--mute);background:var(--panel2)}
+tr.row{cursor:pointer}tr.row:hover td{background:var(--panel2)}
+.tag{font-size:11px;padding:1px 6px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);color:var(--mute)}
+.tag.dev{color:var(--ok);border-color:var(--ok)}.tag.mod{color:var(--acc);border-color:var(--acc)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+.parts{display:grid;gap:10px}
+.part{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
+.part .n{font-weight:700;color:var(--acc2);font-size:18px;text-align:center}
+.part .vn{font-size:16px;font-weight:600}.part .vs{color:var(--mute);font-size:12px}
+.sl{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--mute)}
+.sl label{display:flex;gap:6px;align-items:center}.sl input[type=range]{width:90px;padding:0}.sl input[type=number]{width:62px;padding:2px 4px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.grid2 label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
+.crumb{margin-bottom:10px;color:var(--mute)}.crumb a{color:var(--acc2);cursor:pointer}
+dialog{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:0;width:min(760px,95vw);max-height:85vh}
+dialog::backdrop{background:#0008}.dh{padding:12px;display:flex;gap:8px;border-bottom:1px solid var(--line)}
+.dl{overflow:auto;max-height:60vh}.dl div{padding:6px 12px;display:flex;gap:10px;cursor:pointer;border-bottom:1px solid var(--line)}
+.dl div:hover{background:var(--panel2)}.dl .c{color:var(--mute);width:120px;flex:none;font-size:12px}
+#log{font:11px ui-monospace,monospace;color:var(--mute);max-height:90px;overflow:auto;margin-top:12px}
+.tabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:8px 14px;color:var(--mute)}
+.tabs button.on{color:var(--fg);border-color:var(--acc);font-weight:600}.tabs button.off{opacity:.5}
+details.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:10px}
+details.sec>summary{cursor:pointer;padding:9px 12px;font-weight:600;list-style:none}details.sec>summary::before{content:'▸ ';color:var(--acc)}details.sec[open]>summary::before{content:'▾ '}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 18px;padding:4px 12px 12px}
+.pr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;font-size:12px}
+.pr .pn{color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pr .pv{font-variant-numeric:tabular-nums;text-align:right;min-width:60px}
+.pr input[type=range]{grid-column:1/3;width:100%;padding:0}.pr select{grid-column:1/3}
+.fxh{display:flex;gap:10px;align-items:center;padding:10px 12px;flex-wrap:wrap}.fxh select{min-width:220px}
+.hint{color:var(--mute);font-size:12px;padding:0 12px 8px}
+dialog.big{width:min(1000px,96vw);max-height:92vh}.big .body{padding:12px;overflow:auto;max-height:72vh}
+.dl .ed{margin-left:8px;font-size:12px;padding:2px 8px}
+.empty{color:var(--mute);padding:20px;text-align:center}
+.warn{background:#ff54681a;border:1px solid var(--bad);padding:8px 12px;border-radius:8px;margin-bottom:12px}
+</style></head><body>
+<header>
+ <h1>MX <b>Performance</b> Editor</h1>
+ <span class="dot" id="dot"></span>
+ <select id="mi" title="MIDI input"></select><select id="mo" title="MIDI output"></select>
+ <label style="font-size:12px;color:var(--mute)">Dev# <input id="dev" type="number" min="1" max="16" value="1" style="width:56px"></label>
+ <label style="font-size:12px;color:var(--mute);display:flex;gap:4px;align-items:center" title="When on, selecting a performance here also switches the keyboard to it"><input id="follow" type="checkbox" checked style="width:auto"> Follow</label>
+ <label style="font-size:12px;color:var(--mute)">Ch <input id="fch" type="number" min="1" max="16" value="1" style="width:52px" title="MIDI channel the keyboard receives program changes on"></label>
+ <label style="font-size:12px;color:var(--mute)" title="How long the keyboard pauses between the SysEx messages it sends. Lower is much faster. Stored in the keyboard (Utility: Bulk Dump Interval)">Bulk interval <select id="bulk" disabled style="padding:4px 6px"></select></label>
+ <button id="conn" class="pri">Connect MIDI</button><button id="about" title="About this editor">About</button>
+ <span id="status">Not connected</span>
+</header>
+<main id="app"></main>
+<script>/*CORE*/</script>
+<script>const DATA=/*DATA*/;const FX=/*FX*/;const VSPEC=/*VSPEC*/;</script>
+<script>
+'use strict';
+const C=MXCore,$=s=>document.querySelector(s),OFF=C.OFF;
+const slotName=i=>'ABCDEFGH'[i>>4]+String((i&15)+1).padStart(2,'0');
+const vByKey=new Map(),vByName=new Map();
+DATA.voices.forEach(v=>{vByKey.set(v.b+':'+v.l+':'+v.p,v);if(!vByName.has(v.n))vByName.set(v.n,v)});
+const voiceOf=p=>vByKey.get(C.getVoiceKey(p));
+const MODES=['single','layer','split'];
+const NOTE=n=>C.noteName(n);
+// ---- library: 128 slots {P, src:'list'|'dev'|'edit', dirty}
+let lib=[];
+function fromList(f,i){const P=C.newPerformance(f.name);P.common[CO_MODE]=MODES.indexOf(f.mode);
+ const m=/^([A-G]#?)(-?\d)$/.exec(f.split);if(m){P.common[0x42]=(['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'].indexOf(m[1]))+(+m[2]+2)*12}
+ [0,1,9].forEach((pi,k)=>{const v=vByName.get(f.v[k]);if(v){const p=P.parts[pi];p.set(C.newPart(pi));C.setVoice(p,v)}});
+ P.arpc[4]=f.arp==='on'?1:0;P.common[0x49]=f.ak==='on'?1:0;return P}
+const CO_MODE=0x41;
+function loadLib(){let saved=null;try{saved=JSON.parse(localStorage.getItem('mxlib')||'null')}catch(e){}
+ lib=DATA.perfs.map((f,i)=>{const s=saved&&saved[i];if(s){return{P:unpack(s.P),src:s.src,dirty:s.dirty}}return{P:fromList(f,i),src:'list',dirty:false}})}
+const pack=P=>({common:[...P.common],rev:[...P.rev],cho:[...P.cho],eq:[...P.eq],arpc:[...P.arpc],parts:P.parts.map(x=>[...x]),arps:P.arps.map(x=>[...x])});
+const unpack=o=>({common:Uint8Array.from(o.common),rev:Uint8Array.from(o.rev),cho:Uint8Array.from(o.cho),eq:Uint8Array.from(o.eq),arpc:Uint8Array.from(o.arpc),parts:o.parts.map(x=>Uint8Array.from(x)),arps:o.arps.map(x=>Uint8Array.from(x))});
+function save(){try{localStorage.setItem('mxlib',JSON.stringify(lib.map(l=>({P:pack(l.P),src:l.src,dirty:l.dirty}))))}catch(e){}}
+// ---- MIDI
+let access=null,inp=null,out=null,asm=new C.Assembler(),waiter=null;
+const dev=()=>Math.max(0,Math.min(15,(+$('#dev').value||1)-1));
+function status(t){$('#status').textContent=t}
+function log(t){const l=$('#log');if(l){l.textContent+=t+'\n';l.scrollTop=1e9}}
+async function connect(){
+ if(!navigator.requestMIDIAccess){status('Web MIDI not supported — use Chrome or Edge');return}
+ try{access=await navigator.requestMIDIAccess({sysex:true})}catch(e){status('MIDI access denied: '+e.message);return}
+ access.onstatechange=fillPorts;fillPorts();}
+function fillPorts(){
+ const f=(sel,map,pref)=>{const cur=sel.value;sel.innerHTML='<option value="">— none —</option>'+[...map.values()].map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const m=[...map.values()].find(p=>/mx/i.test(p.name));sel.value=cur&&map.get(cur)?cur:(m?m.id:'')};
+ f($('#mi'),access.inputs);f($('#mo'),access.outputs);bindPorts()}
+function bindPorts(){
+ if(inp)inp.onmidimessage=null;inp=access.inputs.get($('#mi').value)||null;out=access.outputs.get($('#mo').value)||null;
+ if(inp){inp.onmidimessage=onMsg}
+ $('#dot').classList.toggle('on',!!(inp&&out));status(inp&&out?`Connected: ${out.name}`:'Select MIDI in/out ports');render();
+ fillBulk(false);if(inp&&out&&namesFor!==out.id){namesFor=out.id;readBulk().then(autoReadNames)}}
+let namesFor=null,namesBusy=false;
+async function autoReadNames(){if(namesBusy)return;namesBusy=true;const known=userVoices();let n=0;
+ try{for(let nn=0;nn<128;nn++){if(known[nn]!==undefined)continue;try{const V=await requestVoice([0x0e,0x0a,nn]);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'));n++;if(n===1&&nn>2&&!Object.keys(userVoices()).length)break}catch(e){if(!n&&nn>=2){namesFor=null;return}}
+   if(nn%16===15&&view.type!=='detail')render()}
+  if(n){status('Read '+n+' user voice names');render()}}finally{namesBusy=false}}
+const BULK=[0,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900];let bulkIdx=18;
+const bulkMs=()=>BULK[bulkIdx]??900;
+function fillBulk(known){const b=$('#bulk');b.innerHTML=(known?'':'<option value="-1">? ms</option>')+BULK.map((v,i)=>`<option value="${i}">${v} ms</option>`).join('');b.value=known?bulkIdx:-1;b.disabled=!(inp&&out)}
+function readBulk(){return new Promise(res=>{if(!out)return res();const t=setTimeout(()=>{bulkWait=null;res()},1200);bulkWait=()=>{clearTimeout(t);bulkWait=null;res()};try{send([0xf0,0x43,0x30|dev(),0x7f,0x17,0,0,0x1f,0xf7])}catch(e){res()}})}
+let bulkWait=null;
+let vasm=new C.VoiceAssembler(),vwaiter=null;
+function onMsg(e){const d=e.data;if(d[0]!==0xf0)return;
+ if((d[2]&0xf0)===0x10&&d[5]===0&&d[6]===0&&d[7]===0x1f&&d[8]<BULK.length){bulkIdx=d[8];fillBulk(true);if(bulkWait)bulkWait();return}
+const r=asm.feed(d);if(r&&waiter)waiter(r);const v=vasm.feed(d);if(v&&vwaiter)vwaiter(v)}
+function requestVoice(addr,timeout=2500+22*bulkMs()){return new Promise((res,rej)=>{vasm=new C.VoiceAssembler();const t=setTimeout(()=>{vwaiter=null;rej(new Error('timeout'))},timeout);
+ vwaiter=r=>{clearTimeout(t);vwaiter=null;res(r)};send(C.requestMsg(dev(),addr))})}
+function send(m){if(!out)throw new Error('No MIDI output selected');out.send(m)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function request(target,timeout=2000+45*bulkMs()){return new Promise((res,rej)=>{asm=new C.Assembler();const t=setTimeout(()=>{waiter=null;rej(new Error('timeout'))},timeout);
+ waiter=r=>{clearTimeout(t);waiter=null;res(r)};send(C.requestFor(dev(),target))})}
+async function sendPerf(P,target){const ms=C.build(dev(),P,target);for(const m of ms){send(m);await sleep(12)}}
+async function readSlot(i){const P=await request(i);lib[i]={P,src:'dev',dirty:false};save()}
+async function readAll(){let ok=0;for(let i=0;i<128;i++){try{status(`Reading ${slotName(i)} (${i+1}/128)…`);await readSlot(i);ok++;if(view.type==='list')renderList()}catch(e){log('read '+slotName(i)+' failed: '+e.message);if(!ok&&i>=2){status('No response from keyboard — check ports, Device# and that USB MIDI is on');return}}}
+ status(`Read ${ok}/128 performances`);render()}
+async function writeSlot(i){if(!confirm(`Overwrite performance ${slotName(i)} on the keyboard?\n(Bulk Protect must be OFF on the instrument.)`))return;
+ status('Writing '+slotName(i)+'…');await sendPerf(lib[i].P,i);lib[i].dirty=false;lib[i].src='dev';save();status('Wrote '+slotName(i));render()}
+async function audition(i){status('Sending to edit buffer…');await sendPerf(lib[i].P,'edit');status('Sent to the edit buffer — play the keyboard (performance mode)')}
+function note(on){if(!out)return;const ch=0;out.send(on?[0x90|ch,60,100]:[0x80|ch,60,0])}
+// ---- views
+let view={type:'list'};
+function go(v){const changed=v.type==='detail'&&(view.type!=='detail'||view.i!==v.i);view=v;render();scrollTo(0,0);if(changed)recall(v.i).catch(e=>status('Could not switch keyboard: '+e.message))}
+// Make the keyboard switch to the selected performance. Unsaved local edits go to the edit buffer; otherwise recall the stored slot.
+async function recall(i){if(!out||!$('#follow').checked)return;const ch=Math.max(0,Math.min(15,(+$('#fch').value||1)-1));
+ if(lib[i].dirty){await sendPerf(lib[i].P,'edit');status(`Sent ${slotName(i)} (with your edits) to the edit buffer`)}
+ else{out.send([0xb0|ch,0,63]);out.send([0xb0|ch,32,80]);out.send([0xc0|ch,i]);status(`Keyboard switched to ${slotName(i)}`)}}
+function render(){view.type==='list'?renderList():renderDetail()}
+function modLabel(l){return l.dirty?'<span class="tag mod">modified</span>':l.src==='dev'?'<span class="tag dev">from keyboard</span>':'<span class="tag">factory list</span>'}
+function vnames(P){return P.parts.map((p,i)=>C.active(p)?(voiceOf(p)?.n||`${p.slice(1,4).join('/')}`):null).filter(Boolean)}
+function renderList(){const q=(view.q||'').toLowerCase();
+ let h=`<div class="bar"><input id="q" placeholder="Search name or voice…" value="${view.q||''}" style="flex:1;min-width:200px">
+ <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="rst" class="dng">Reset library</button></div>
+ <div class="warn" ${out?'hidden':''}>Not connected. You can browse and edit the factory list offline; connect to read, audition and write your real performances.</div>
+ <table><thead><tr><th>Slot</th><th>Name</th><th>Mode</th><th>Voices</th><th>#</th><th>Source</th></tr></thead><tbody>`;
+ lib.forEach((l,i)=>{const names=vnames(l.P);const nm=C.getName(l.P.common);
+  if(q&&!(nm+' '+names.join(' ')+slotName(i)).toLowerCase().includes(q))return;
+  h+=`<tr class="row" data-i="${i}"><td>${slotName(i)}</td><td><b>${esc(nm)}</b></td><td>${MODES[l.P.common[CO_MODE]]||'?'}</td><td title="${esc(names.join(', '))}">${esc(names.join(' · '))}</td><td>${names.length}</td><td>${modLabel(l)}</td></tr>`});
+ h+=`</tbody></table><pre id="log"></pre><input type="file" id="file" accept=".syx" multiple hidden>`;
+ $('#app').innerHTML=h;const qi=$('#q');qi.oninput=()=>{view.q=qi.value;const p=qi.selectionStart;renderList();$('#q').focus();$('#q').setSelectionRange(p,p)};
+ document.querySelectorAll('tr.row').forEach(r=>r.onclick=()=>go({type:'detail',i:+r.dataset.i}));
+ $('#rall').onclick=readAll;$('#rst').onclick=()=>{if(confirm('Discard local edits and reload the factory list?')){localStorage.removeItem('mxlib');loadLib();render()}};
+ $('#imp').onclick=()=>$('#file').click();
+ $('#file').onchange=async e=>{const files=[...e.target.files];e.target.value='';let perfs=[],voices=[],skipped=0;
+  for(const f of files){const r=C.parseSyxAll(new Uint8Array(await f.arrayBuffer()));perfs.push(...r.perfs);voices.push(...r.voices);skipped+=r.skipped}
+  if(!perfs.length&&!voices.length){alert('No performances or user voices found in the selected file'+(files.length>1?'s':'')+'.'+(skipped?` (${skipped} preset/edit-buffer voice dump(s) can\'t be imported.)`:''));return}
+  const ask=(what,slot)=>{const t=+(prompt(`1 ${what} found. Import it into slot number (1-128):`,String(slot>=0?slot+1:1))||0);return t>=1&&t<=128?t-1:-1};
+  if(perfs.length===1)perfs[0].slot=ask('performance',perfs[0].slot);
+  if(voices.length===1)voices[0].slot=ask('user voice',voices[0].slot);
+  const pOK=perfs.filter(x=>x.slot>=0),vOK=voices.filter(x=>x.slot>=0),lost=perfs.length-pOK.length+voices.length-vOK.length;
+  if(!pOK.length&&!vOK.length)return;
+  if(!confirm(`Import ${pOK.length} performance(s) and ${vOK.length} user voice(s)?\nThey replace the same slots in this editor and are marked "modified" until you write them to the keyboard.`+(lost||skipped?`\n\nSkipped: ${lost} without a usable slot, ${skipped} preset/edit-buffer voice dump(s).`:'')))return;
+  pOK.forEach(x=>{lib[x.slot]={P:x.P,src:'dev',dirty:true}});
+  vOK.forEach(x=>{cacheVoice(x.slot,x.V,true);registerUser(x.slot,C.voiceName(x.V)||'User '+String(x.slot+1).padStart(3,'0'))});
+  save();status(`Imported ${pOK.length} performance(s), ${vOK.length} user voice(s)`);render()};
+ $('#wall').onclick=()=>writeModified().catch(e=>status(e.message));
+ $('#expperf').onclick=()=>download('mx-performances.syx',lib.flatMap((l,i)=>C.build(dev(),l.P,i)));
+ $('#expall').onclick=()=>{const fake=lib.filter(l=>l.src==='list'&&!l.dirty).length;let incl=true;
+  if(fake)incl=confirm(`${fake} of 128 performances haven't been read from the keyboard (they are factory-list approximations).\nOK = include them anyway, Cancel = leave them out.`);
+  const msgs=[];lib.forEach((l,i)=>{if(incl||!(l.src==='list'&&!l.dirty))msgs.push(...C.build(dev(),l.P,i))});
+  Object.keys(vcache).map(Number).sort((a,b)=>a-b).forEach(nn=>msgs.push(...C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn])));
+  const nv=Object.keys(vcache).length;if(!nv)status('No user voices cached yet — connect (or press Read user voices) to include them');
+  download('mx-everything.syx',msgs)}}
+async function writeModified(){const ps=lib.map((l,i)=>l.dirty?i:-1).filter(i=>i>=0),vs=[...vdirty].sort((a,b)=>a-b);
+ if(!out)return alert('Connect MIDI first.');if(!ps.length&&!vs.length)return alert('Nothing has been modified.');
+ if(!confirm(`Write ${ps.length} modified performance(s) and ${vs.length} modified user voice(s) to the keyboard?\nThis overwrites those slots. Bulk Protect must be off.`))return;
+ let k=0;const tot=ps.length+vs.length;
+ for(const nn of vs){status(`Writing user voice ${nn+1} (${++k}/${tot})…`);for(const m of C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn])){send(m);await sleep(12)}await sleep(150);vdirty.delete(nn)}
+ for(const i of ps){status(`Writing ${slotName(i)} (${++k}/${tot})…`);await sendPerf(lib[i].P,i);await sleep(100);lib[i].dirty=false;lib[i].src='dev'}
+ saveVoices();save();status(`Wrote ${ps.length} performance(s) and ${vs.length} user voice(s)`);render()}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function download(name,msgs){const b=new Blob(msgs,{type:'application/octet-stream'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function touch(i){lib[i].dirty=true;save()}
+// ---------- small DOM helper ----------
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in(attrs||{})){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else if(attrs[k]!==false&&attrs[k]!=null)e.setAttribute(k,attrs[k])}
+ for(const x of kids.flat())if(x!=null)e.append(x.nodeType?x:document.createTextNode(x));return e}
+// ---------- value display ----------
+const num=(v,d)=>(+v).toFixed(d).replace(/\.?0+$/,m=>d?'':m);
+function specDisp(sp,v){
+ if(sp.lab)return sp.lab[v]??('#'+v);
+ if(sp.k==='note')return C.noteName(v);
+ if(sp.k==='wave')return String(v+1);
+ if(sp.k==='pan')return v<64?'L'+(64-v):v===64?'C':'R'+(v-64);
+ if(sp.k==='lin'){const{a,b,u}=sp,span=sp.hi-sp.lo;let x;
+  if(Math.abs((b-a)-span)<1e-9)x=a+(v-sp.lo);else if(u==='%'||/cent|dB|ms|Hz/.test(u))x=a+(v-sp.lo)*(b-a)/span;else return String(v);
+  const t=Number.isInteger(x)?String(x):x.toFixed(1);return(a<0&&x>0?'+':'')+t+(u&&u!=='Description'?u:'')}
+ return String(v)}
+const RX=/^(-?\+?[\d.]+)\s*([a-zA-Zμ%]*)\s*[–-]\s*(-?\+?[\d.]+)\s*([a-zA-Zμ%]*)$/;
+function fxDisp(p,v,tname){
+ const[,name,range,mn,mx,tb]=p;
+ if(tb){const id=tb.includes('/')?(/HALL/.test(tname||'')?tb.split('/')[0]:tb.split('/')[1]):tb;const val=(FX.tables[id]||[])[v];
+  if(val!==undefined&&val!==''){const u=(RX.exec(range)||[])[4]||'';return /Hz/.test(u)||/Hz|^THRU/.test(val)?(/Hz|THRU/.test(val)?val:val+'Hz'):/^[\d.\-+]+$/.test(val)?val+u:val}}
+ if(/^[DE]63/.test(range)){const L=range[0];return v<64?`${L}${64-v}>${L==='D'?'W':'R'}`:v===64?`${L}=${L==='D'?'W':'R'}`:`${L}<${L==='D'?'W':'R'}${v-64}`}
+ const m=RX.exec(range);
+ if(m&&!tb){const a=parseFloat(m[1]),b=parseFloat(m[3]),u=m[4]||m[2]||'',span=mx-mn;if(span>0){const x=a+(v-mn)*(b-a)/span;const dec=Math.max((m[1].split('.')[1]||'').length,(m[3].split('.')[1]||'').length);
+   const t=dec?x.toFixed(dec):String(Math.round(x));return(a<0&&x>0?'+':'')+t+u}}
+ const parts=range.split(',').map(x=>x.trim());if(parts.length===mx-mn+1&&parts.length>1)return parts[v-mn]??String(v);
+ return String(v)}
+// ---------- generic parameter row ----------
+function row(name,ctl,disp){return h('label',{class:'pr'},h('span',{class:'pn',title:name},name),disp||'',ctl)}
+function slider(name,min,max,get,set,fmt){const pv=h('span',{class:'pv'},fmt(get()));
+ const inp=h('input',{type:'range',min,max,value:get()});inp.oninput=()=>{const v=+inp.value;set(v);pv.textContent=fmt(v)};return row(name,inp,pv)}
+function select(name,opts,get,set){const sel=h('select',{},opts.map(([v,t])=>h('option',{value:v},t)));let cur=get();if(!opts.some(o=>o[0]==cur))sel.append(h('option',{value:cur},'#'+cur));sel.value=cur;sel.onchange=()=>set(+sel.value);return row(name,sel)}
+function specRow(buf,sp,touch){
+ if(sp.lab){const ks=Object.keys(sp.lab).map(Number).sort((a,b)=>a-b);return select(sp.n,ks.map(k=>[k,sp.lab[k]]),()=>C.pget(buf,sp),v=>{C.pset(buf,sp,v);touch()})}
+ return slider(sp.n,sp.lo,sp.hi,()=>Math.max(sp.lo,Math.min(sp.hi,C.pget(buf,sp))),v=>{C.pset(buf,sp,v);touch()},v=>specDisp(sp,v))}
+// ---------- effect panel (reverb / chorus / insertion) ----------
+function fxPanel(blk,kind,touch,extra){
+ const box=h('div');const types=FX.types.filter(t=>t[{rev:3,cho:4,ins:5}[kind]]);
+ const draw=()=>{box.innerHTML='';const tm=blk[0],tl=blk[1];let idx=types.findIndex(t=>t[1]===tm&&t[2]===tl);
+  const sel=h('select',{},types.map((t,k)=>h('option',{value:k},t[0])));if(idx<0){sel.append(h('option',{value:-1},`Unknown (${tm}/${tl})`));idx=-1}
+  sel.value=idx;sel.onchange=()=>{const t=types[+sel.value];if(!t)return;C.setFxType(blk,t);touch();draw()};
+  box.append(h('div',{class:'fxh'},h('b',{},'Effect type'),sel));
+  const t=types[idx];
+  if(t){const ps=t[6].filter(p=>!(kind==='cho'&&/Dry\/Wet|^Mix$/.test(p[1])));
+   if(!ps.length)box.append(h('div',{class:'hint'},'This type has no adjustable parameters.'));
+   else{const g=h('div',{class:'pgrid'});ps.forEach(p=>g.append(slider(p[1],p[3],p[4],()=>Math.max(p[3],Math.min(p[4],C.fxGet(blk,p[0]-1))),v=>{C.fxSet(blk,p[0]-1,v);touch()},v=>fxDisp(p,v,t[0]))));box.append(g)}
+   box.append(h('div',{class:'hint'},'Switching type loads neutral starting values (the exact factory presets are not in the Data List); tweak from there. Values marked with units come from the Data List tables.'))}
+  if(extra)box.append(extra)};
+ draw();return box}
+function sec(title,body,open=true){const d=h('details',{class:'sec'},h('summary',{},title),body);if(open)d.open=true;return d}
+function simpleGrid(rows){return h('div',{class:'pgrid'},rows)}
+// ---------- Effects & EQ tab ----------
+function fxTab(i){const P=lib[i].P,t=()=>touch(i),out=h('div');
+ const retRows=(blk,withSend)=>{const r=[slider('Return level',0,127,()=>blk[0x24],v=>{blk[0x24]=v;t()},v=>v===0?'-∞':String(v)+(v===96?' (0 dB)':'')),
+   slider('Pan',1,127,()=>blk[0x25],v=>{blk[0x25]=v;t()},v=>v<64?'L'+(64-v):v===64?'C':'R'+(v-64))];
+  if(withSend)r.push(slider('Send chorus to reverb',0,127,()=>blk[0x26],v=>{blk[0x26]=v;t()},v=>String(v)));return simpleGrid(r)};
+ out.append(h('div',{class:'hint',style:'padding:0 0 10px'},'Reverb and chorus are the performance-wide effects. Each part sends to them with its own Rev and Cho levels on the Voices tab.'));
+ out.append(sec('Reverb',h('div',{},fxPanel(P.rev,'rev',t),retRows(P.rev,false))));
+ out.append(sec('Chorus',h('div',{},fxPanel(P.cho,'cho',t),retRows(P.cho,true))));
+ const e=P.eq,bands=[['Low',0,'low'],['Low-mid',4],['Mid',8],['High-mid',12],['High',16,'high']];
+ const frng={Low:[4,40],'Low-mid':[14,54],Mid:[14,54],'High-mid':[14,54],High:[28,58]};
+ const tb=FX.tables['3'];
+ const g=h('div',{class:'pgrid'});
+ bands.forEach(([n,o,sh])=>{const[lo,hi]=frng[n];
+  g.append(slider(n+' gain',52,76,()=>e[o],v=>{e[o]=v;t()},v=>{const x=v-64;return(x>0?'+':'')+x+' dB'}),
+   slider(n+' frequency',lo,hi,()=>Math.max(lo,Math.min(hi,e[o+1])),v=>{e[o+1]=v;t()},v=>(tb[v]||v)+(/k$/.test(tb[v]||'')?'Hz':'Hz')),
+   slider(n+' Q',1,120,()=>e[o+2]||1,v=>{e[o+2]=v;t()},v=>(v/10).toFixed(1)));
+  if(sh)g.append(select(n+' shape',[[0,'Shelving'],[1,'Peaking']],()=>e[sh==='low'?3:19],v=>{e[sh==='low'?3:19]=v;t()}))});
+ out.append(sec('Master EQ',h('div',{},g,h('div',{class:'hint'},'Five-band EQ over the whole performance. With Peaking shape the lowest usable frequency is 63 Hz.'))));
+ return out}
+// ---------- Detail ----------
+function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.tab||'voices';
+ const act=P.parts.map((p,k)=>C.active(p)?k:-1).filter(k=>k>=0);
+ let h0=`<div class="crumb"><a id="back">All performances</a> › ${slotName(i)} ${modLabel(l)}</div>
+ <div class="bar"><button id="pr" ${i>0?'':'disabled'}>◀</button><button id="nx" ${i<127?'':'disabled'}>▶</button>
+ <button id="aud" class="pri" ${out?'':'disabled'}>Audition (send to edit buffer)</button><button id="wr" ${out?'':'disabled'}>Write to ${slotName(i)}</button>
+ <button id="rd" ${out?'':'disabled'}>Re-read from keyboard</button><button id="tn" ${out?'':'disabled'}>Test note</button>
+ <button id="exp">Export .syx</button><button id="dup">Copy to…</button><button id="clr" class="dng">Clear performance</button></div>
+ <div class="card"><div class="grid2">
+ <label>Name<input id="nm" maxlength="10" value="${esc(C.getName(c))}"></label>
+ <label>Keyboard mode<select id="md">${MODES.map((m,k)=>`<option value="${k}" ${c[CO_MODE]==k?'selected':''}>${m}</option>`).join('')}</select></label>
+ <label>Split point (note ${NOTE(c[0x42])})<input id="sp" type="number" min="1" max="127" value="${c[0x42]}"></label>
+ <label>Performance volume<input id="pv" type="range" min="0" max="127" value="${c[0x38]}"></label>
+ <label>Arpeggio<select id="ar"><option value="0" ${P.arpc[4]?'':'selected'}>off</option><option value="1" ${P.arpc[4]?'selected':''}>on</option></select></label>
+ <label>Tempo<input id="tp" type="number" min="5" max="300" value="${(P.arpc[2]<<7)|P.arpc[3]}"></label></div></div>
+ <div class="tabs"><button id="t-voices" class="${tab==='voices'?'on':''}">Voices (${act.length}/16)</button><button id="t-fx" class="${tab==='fx'?'on':''}">Effects &amp; EQ</button></div>
+ <div id="tabbody"></div><pre id="log"></pre>
+ <dialog id="dlg"><div class="dh"><input id="vq" placeholder="Search voices…" style="flex:1"><select id="vc"><option value="">All categories</option>${[...new Set(DATA.voices.map(v=>v.m))].map(m=>`<option>${m}</option>`).join('')}</select><button id="vu" title="Reads the names of the 128 user voices from the keyboard">Read user voices</button><button id="vx">Close</button></div><div class="dl" id="vl"></div></dialog>
+ <dialog id="ved" class="big"></dialog><input type="file" id="file" accept=".syx" hidden>`;
+ $('#app').innerHTML=h0;
+ $('#back').onclick=()=>go({type:'list'});$('#pr').onclick=()=>go({type:'detail',i:i-1,tab:view.tab});$('#nx').onclick=()=>go({type:'detail',i:i+1,tab:view.tab});
+ $('#t-voices').onclick=()=>{view.tab='voices';renderDetail()};$('#t-fx').onclick=()=>{view.tab='fx';renderDetail()};
+ $('#nm').oninput=e=>{C.setName(c,e.target.value);touch(i)};
+ $('#md').onchange=e=>{c[CO_MODE]=+e.target.value;touch(i)};$('#sp').oninput=e=>{c[0x42]=Math.max(1,Math.min(127,+e.target.value||1));touch(i)};
+ $('#pv').oninput=e=>{c[0x38]=+e.target.value;touch(i)};$('#ar').onchange=e=>{P.arpc[4]=+e.target.value;touch(i)};
+ $('#tp').onchange=e=>{const t=Math.max(5,Math.min(300,+e.target.value||90));P.arpc[2]=t>>7;P.arpc[3]=t&127;touch(i)};
+ $('#aud').onclick=()=>audition(i).catch(e=>status(e.message));$('#wr').onclick=()=>writeSlot(i).catch(e=>status(e.message));
+ $('#rd').onclick=()=>readSlot(i).then(renderDetail).catch(e=>status('Read failed: '+e.message));
+ $('#tn').onclick=()=>{note(1);setTimeout(()=>note(0),600)};
+ $('#exp').onclick=()=>download(`${slotName(i)}-${C.getName(c).trim()||'perf'}.syx`,C.build(dev(),P,i));
+ $('#dup').onclick=()=>{const t=+(prompt('Copy to slot number (1-128):',String(i+2))||0);if(t>=1&&t<=128){lib[t-1]={P:C.clonePerf(P),src:'dev',dirty:true};save();go({type:'detail',i:t-1})}};
+ $('#clr').onclick=()=>{if(confirm('Remove all voices and reset this performance?')){const old=P;lib[i]={P:C.newPerformance('Init Perf',old),src:'dev',dirty:true};save();renderDetail()}};
+ const body=$('#tabbody');
+ if(tab==='fx'){body.append(fxTab(i));return}
+ let v='<div class="bar"><button id="add" class="pri" '+(act.length>=16?'disabled':'')+'>＋ Add voice</button></div><div class="parts">';
+ if(!act.length)v+='<div class="empty">No voices in this performance. Add one.</div>';
+ act.forEach(k=>{const p=P.parts[k],vo=voiceOf(p);
+  v+=`<div class="part" data-k="${k}"><div class="n">${k+1}</div><div><div class="vn">${esc(vo?vo.n:'Unknown voice '+p[1]+'/'+p[2]+'/'+(p[3]+1))}</div>
+  <div class="vs">${vo?`${vo.m} › ${vo.s} · `:''}MSB ${p[1]} LSB ${p[2]} PC ${p[3]+1}</div>
+  <div class="sl"><label>Vol <input type="range" data-f="14" min="0" max="127" value="${p[14]}"></label><label>Pan <input type="range" data-f="15" min="1" max="127" value="${p[15]}"></label>
+  <label>Rev <input type="range" data-f="18" min="0" max="127" value="${p[18]}"></label><label>Cho <input type="range" data-f="19" min="0" max="127" value="${p[19]}"></label>
+  <label>Note ≥ <input type="number" data-f="8" min="0" max="127" value="${p[8]}" title="${NOTE(p[8])}"></label><label>≤ <input type="number" data-f="9" min="0" max="127" value="${p[9]}" title="${NOTE(p[9])}"></label>
+  <label>Shift <input type="number" data-f="22" min="40" max="88" value="${p[22]}" title="64 = 0"></label><label>Ch <input type="number" data-f="4" min="0" max="15" value="${p[4]}" title="0-based receive channel"></label></div></div>
+  <div style="display:flex;gap:6px;flex-direction:column"><button class="edv">Edit voice</button><button class="chg">Change voice</button><button class="rm dng">Remove</button></div></div>`});
+ v+='</div>';body.innerHTML=v;
+ document.querySelectorAll('.part').forEach(el=>{const k=+el.dataset.k;
+  el.querySelectorAll('[data-f]').forEach(inp=>inp.oninput=()=>{P.parts[k][+inp.dataset.f]=+inp.value;touch(i)});
+  el.querySelector('.rm').onclick=()=>{C.removeVoice(P,k);touch(i);renderDetail()};
+  el.querySelector('.chg').onclick=()=>pick(v=>{C.setVoice(P.parts[k],v);touch(i);renderDetail()});
+  el.querySelector('.edv').onclick=()=>{const vo=voiceOf(P.parts[k]);if(!vo)return alert('This voice is not in the Data List, so it cannot be loaded for editing.');
+   openVoiceEditor(vo,{part:k,onSaved:nv=>{C.setVoice(P.parts[k],nv);touch(i);renderDetail()}})}});
+ $('#add').onclick=()=>pick(v=>{const k=C.addVoice(P,v);if(k<0)return alert('All 16 parts are in use');
+  if(c[CO_MODE]===2&&act.length===1)P.parts[k][OFF.nlo]=c[0x42];touch(i);renderDetail()})}
+function pick(cb){const d=$('#dlg'),q=$('#vq'),cat=$('#vc'),L=$('#vl');
+ const draw=()=>{const s=q.value.toLowerCase(),m=cat.value;const r=DATA.voices.filter(v=>(!m||v.m===m)&&(!s||(v.n+' '+v.s+' '+v.m).toLowerCase().includes(s))).slice(0,300);
+  L.innerHTML=r.map(v=>`<div data-k="${v.b}:${v.l}:${v.p}"><span class="c">${v.m} › ${esc(v.s)}</span><b>${esc(v.n)}</b><span style="margin-left:auto;color:var(--mute)">${v.b}/${v.l}/${v.p}</span><button class="ed" title="${out?'Open in the voice editor':'Connect MIDI to edit voices'}" ${(out||(v.b===63&&v.l===8&&vcache[v.p-1]))&&C.voiceAddr(v)?'':'disabled'}>Edit…</button></div>`).join('')||'<div>No matches</div>';
+  L.querySelectorAll('div[data-k]').forEach(e=>{e.onclick=()=>{d.close();cb(vByKey.get(e.dataset.k))};
+   e.querySelector('.ed').onclick=ev=>{ev.stopPropagation();d.close();openVoiceEditor(vByKey.get(e.dataset.k),{onSaved:cb})}})};
+ const cur=cat.value;cat.innerHTML='<option value="">All categories</option>'+[...new Set(DATA.voices.map(v=>v.m))].map(m=>`<option>${m}</option>`).join('');cat.value=cur;
+ const vu=$('#vu');vu.disabled=!out;vu.onclick=async()=>{await readUserNames(vu);cat.value='USER';draw()};
+ q.oninput=draw;cat.onchange=draw;$('#vx').onclick=()=>d.close();draw();d.showModal();q.focus()}
+// ---------- User voice slot chooser ----------
+function pickUserSlot(newName,cb){const d=h('dialog',{style:'width:min(560px,95vw)'});let sel=null;
+ const q=h('input',{placeholder:'Filter…',style:'flex:1'}),ref=h('button',{},'Refresh names'),x=h('button',{},'Cancel'),list=h('div',{class:'dl'}),info=h('div',{class:'hint',style:'padding:8px 12px'}),go1=h('button',{class:'pri',disabled:true},'Save here');
+ const draw=()=>{const f=q.value.toLowerCase(),known=userVoices();list.innerHTML='';
+  for(let nn=0;nn<128;nn++){const name=known[nn];const t=String(nn+1).padStart(3,'0')+' '+(name??'');if(f&&!t.toLowerCase().includes(f))continue;
+   const r=h('div',{style:(sel===nn?'background:var(--panel2);outline:1px solid var(--acc);':'')},h('span',{class:'c',style:'width:44px'},String(nn+1).padStart(3,'0')),h('b',{style:name===undefined?'color:var(--mute);font-weight:400':''},name===undefined?'(name not read yet)':name||'(blank)'));
+   r.onclick=()=>{sel=nn;go1.disabled=false;info.textContent=`"${newName}" will overwrite user voice ${nn+1}${name?' ("'+name+'")':''} on the keyboard.`;draw()};list.append(r)}};
+ ref.disabled=!out;ref.onclick=async()=>{await readUserNames(ref);ref.textContent='Refresh names';draw()};
+ x.onclick=()=>{d.close();d.remove()};go1.onclick=()=>{if(sel==null)return;if(!confirm('Overwrite user voice '+(sel+1)+' on the keyboard?'))return;const s2=sel;d.close();d.remove();cb(s2)};
+ q.oninput=draw;d.append(h('div',{class:'dh'},h('b',{style:'align-self:center'},'Save as user voice'),q,ref,x),info,list,h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},go1));
+ document.body.append(d);info.textContent='Choose which user voice slot to overwrite.';draw();d.showModal()}
+// ---------- Voice editor ----------
+const GROUPS={eosc:n=>/^(AEG|Level|Half Damper|Element Level)/.test(n)?'Amplitude':/^(PEG|Pitch|Coarse|Fine|Random Pitch)/.test(n)?'Pitch':'Oscillator and key range',
+ eflt:n=>/^FEG/.test(n)?'Filter envelope':/LFO/.test(n)?'Element LFO':'Filter',
+ ctl:n=>/^Controller Set/.test(n)?'Controllers':/^User Wave/.test(n)?'User wave':'LFO',common:()=>'General',insA:()=>'Effect'};
+let vcache={},vdirty=new Set(),vsaveT=null;
+const b64=u=>{let t='';u.forEach(x=>t+=String.fromCharCode(x));return btoa(t)},unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+function saveVoices(){clearTimeout(vsaveT);vsaveT=setTimeout(()=>{try{localStorage.setItem('mxvoices',JSON.stringify({d:[...vdirty],v:Object.fromEntries(Object.entries(vcache).map(([nn,V])=>[nn,Object.fromEntries(Object.entries(V.blocks).map(([k,b])=>[k,b64(b)]))]))}))}catch(e){}},400)}
+function loadVoices(){try{const o=JSON.parse(localStorage.getItem('mxvoices')||'null');if(o){vdirty=new Set(o.d);for(const nn in o.v)vcache[nn]={hdr:[0x0a,+nn],blocks:Object.fromEntries(Object.entries(o.v[nn]).map(([k,t])=>[k,unb64(t)]))}}}catch(e){}}
+function cacheVoice(nn,V,dirty){vcache[nn]={hdr:[0x0a,nn],blocks:V.blocks};dirty?vdirty.add(nn):vdirty.delete(nn);saveVoices()}
+function ensureUserSlots(){for(let nn=0;nn<128;nn++){const key='63:8:'+(nn+1);if(!vByKey.has(key)){const v={m:'USER',s:'User',n:'User '+String(nn+1).padStart(3,'0'),b:63,l:8,p:nn+1,y:'?'};DATA.voices.push(v);vByKey.set(key,v)}}}
+async function readUserNames(btn){let ok=0;for(let nn=0;nn<128;nn++){btn.textContent=`Reading user voices ${nn+1}/128…`;
+  try{const V=await requestVoice([0x0e,0x0a,nn]);if(!vdirty.has(nn)){cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}ok++}catch(e){if(!ok&&nn>=2){btn.textContent='No response — check connection';return}}}
+ btn.textContent=`Read ${ok}/128 — read again`}
+function userVoices(){try{return JSON.parse(localStorage.getItem('mxuser')||'{}')}catch(e){return{}}}
+function registerUser(nn,name){const u=userVoices();u[nn]=name;try{localStorage.setItem('mxuser',JSON.stringify(u))}catch(e){}
+ const key='63:8:'+(nn+1);let v=vByKey.get(key);if(!v){v={m:'USER',s:'User',n:name,b:63,l:8,p:nn+1,y:'?'};DATA.voices.push(v);vByKey.set(key,v)}else v.n=name;return v}
+async function openVoiceEditor(vo,ctx){
+ const dlg=$('#ved'),addr=C.voiceAddr(vo);
+ if(!addr){alert('Drum kits can\'t be edited here yet — only normal voices.');return}
+ dlg.innerHTML='<div class="dh"><b>Loading '+esc(vo.n)+' from the keyboard…</b></div>';dlg.showModal();
+ const slotNN=vo.b===63&&vo.l===8?vo.p-1:-1;let V;
+ if(slotNN>=0&&vcache[slotNN]&&(vdirty.has(slotNN)||!out))V=C.cloneVoice(vcache[slotNN]);
+ else try{V=await requestVoice(addr)}catch(e){if(slotNN>=0&&vcache[slotNN])V=C.cloneVoice(vcache[slotNN]);else{dlg.close();alert('The keyboard did not send the voice ('+e.message+'). Check the connection, Dev#, and that the MX is in performance or voice mode.');return}}
+ if(!V.blocks[C.vkey(0x41,0)]){dlg.close();alert('Unexpected voice data received (is this a drum voice?).');return}
+ const W=C.cloneVoice(V);let tab='common',dirty=false;const t=()=>{dirty=true};
+ const nm=h('input',{maxlength:10,value:C.voiceName(W),style:'width:130px'});nm.oninput=()=>{C.setVoiceName(W,nm.value);t()};
+ const tabsEl=h('div',{class:'tabs',style:'margin:0 12px'}),bodyEl=h('div',{class:'body'});
+ const names=[['common','General'],['ctl','Controllers / LFO'],['ins','Insertion effect']].concat([...Array(8).keys()].map(e=>['e'+e,'Element '+(e+1)]));
+ const elOn=e=>W.blocks[C.vkey(0x41,e)]&&W.blocks[C.vkey(0x41,e)][0]===1;
+ const drawTabs=()=>{tabsEl.innerHTML='';names.forEach(([k,n])=>{const b=h('button',{class:(tab===k?'on ':'')+(k[0]==='e'&&!elOn(+k.slice(1))?'off':'')},n);b.onclick=()=>{tab=k;drawTabs();drawBody()};tabsEl.append(b)})};
+ const groupRows=(key,blk,specs)=>{const m=new Map();specs.forEach(sp=>{const g=(GROUPS[key]||(()=>'Parameters'))(sp.n);if(!m.has(g))m.set(g,[]);m.get(g).push(specRow(blk,sp,t))});
+  return [...m].map(([g,r],k)=>sec(g,simpleGrid(r),k<2))};
+ const drawBody=()=>{bodyEl.innerHTML='';
+  if(tab==='common'){const b=W.blocks[C.vkey(0x40,0)];bodyEl.append(...groupRows('common',b,VSPEC.common),h('div',{class:'hint',style:'padding:0'},'Elements are the building blocks of a voice: each has its own wave, envelopes and filter. Disabled elements are dimmed in the tab bar.'))}
+  else if(tab==='ctl'){const b=W.blocks[C.vkey(0x40,6)];bodyEl.append(...groupRows('ctl',b,VSPEC.ctl))}
+  else if(tab==='ins'){const b=W.blocks[C.vkey(0x40,3)];bodyEl.append(sec('Insertion effect A',h('div',{},fxPanel(b,'ins',t)),true),h('div',{class:'hint',style:'padding:0'},'Each element chooses whether it goes through this effect (Insertion Effect switch on the element).'))}
+  else{const e=+tab.slice(1),a=W.blocks[C.vkey(0x41,e)],f=W.blocks[C.vkey(0x42,e)];
+   if(!a||!f){bodyEl.append(h('div',{class:'empty'},'This element was not included in the dump.'));return}
+   const g1=groupRows('eosc',a,VSPEC.eosc),g2=groupRows('eflt',f,VSPEC.eflt);bodyEl.append(...g1,...g2)}};
+ const msgEl=h('span',{class:'hint',style:'padding:0 12px'},'');
+ const tryBtn=h('button',{},ctx.part!=null?`Try on part ${ctx.part+1}`:'Try (voice edit buffer)');
+ tryBtn.onclick=async()=>{try{const tgt=ctx.part!=null?[0x0e,0x30,ctx.part]:[0x0e,0x0f,0];for(const m of C.buildVoice(dev(),W,tgt)){send(m);await sleep(12)}
+   msgEl.textContent=ctx.part!=null?'Sent to part '+(ctx.part+1)+' of the current edit-buffer performance. Audition the performance first if you hear no change.':'Sent to the voice edit buffer. Switch the keyboard to voice mode to hear it.'}catch(e){msgEl.textContent=e.message}};
+ const saveBtn=h('button',{class:'pri'},'Save as user voice…');
+ saveBtn.onclick=()=>pickUserSlot(C.voiceName(W),async slot=>{try{for(const m of C.buildVoice(dev(),W,[0x0e,0x0a,slot]))send(m),await sleep(15)}catch(e){msgEl.textContent=e.message;return}
+  cacheVoice(slot,W,false);const nv=registerUser(slot,C.voiceName(W));dlg.close();if(ctx.onSaved)ctx.onSaved(nv);else status('Saved user voice '+(slot+1)+' "'+nv.n+'"')});
+ const closeBtn=h('button',{},'Close');closeBtn.onclick=()=>{if(!dirty||confirm('Discard your edits to this voice?'))dlg.close()};
+ dlg.innerHTML='';dlg.append(h('div',{class:'dh'},h('b',{style:'align-self:center'},vo.n+' › '),nm,h('span',{style:'flex:1'}),tryBtn,saveBtn,closeBtn),tabsEl,msgEl,bodyEl);
+ drawTabs();drawBody()}
+
+$('#bulk').onchange=e=>{const i=+e.target.value;if(i<0||!out)return;bulkIdx=i;try{send([0xf0,0x43,0x10|dev(),0x7f,0x17,0,0,0x1f,i,0xf7]);status('Bulk interval set to '+BULK[i]+' ms')}catch(err){status(err.message)}};fillBulk(false);
+const VERSION='0.0.1';
+$('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);padding:0'});const a=(u,t)=>h('a',{href:u,target:'_blank',rel:'noopener noreferrer',style:'color:var(--acc2)'},t);
+ const x=h('button',{class:'pri'},'Close');x.onclick=()=>{d.close();d.remove()};d.onclose=()=>d.remove();
+ d.append(h('div',{class:'dh'},h('b',{style:'font-size:16px;align-self:center'},'MX Performance Editor'),h('span',{class:'tag',style:'align-self:center'},'Version '+VERSION)),
+  h('div',{style:'padding:14px 16px;display:grid;gap:12px;font-size:13px;line-height:1.5'},
+   h('p',{style:'margin:0'},'A browser-based editor for performances, voices and effects on Yamaha MX49, MX61 and MX88 keyboards, using Web MIDI.'),
+   h('p',{style:'margin:0'},h('b',{},'License. '),'This software is free software released under the ',a('https://www.gnu.org/licenses/gpl-3.0.html','GNU General Public License, version 3 (GPL-3.0)'),'. You may use, study, share and modify it under the terms of that license. It comes with no warranty.'),
+   h('p',{style:'margin:0'},h('b',{},'Source code. '),a('https://github.com/YamMXEditor/yammxeditor','github.com/YamMXEditor/yammxeditor')),
+   h('p',{style:'margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)'},h('b',{},'Not affiliated with Yamaha. '),'This editor is an independent project. It is not associated with, authorized by, or endorsed by Yamaha Corporation or Yamaha Inc. Yamaha, MX49, MX61 and MX88 are trademarks of their respective owners, used here only to describe compatibility.'),
+   h('p',{style:'margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)'},h('b',{},'Use at your own risk. '),'This software sends system exclusive data that can overwrite performances and user voices on your keyboard. It is provided "as is", without warranty of any kind. You use it entirely at your own risk, and the authors are not liable for lost data or damage. Back up your keyboard (Export everything) before writing to it.')),
+  h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},x));
+ document.body.append(d);d.showModal()};
+$('#conn').onclick=connect;$('#mi').onchange=$('#mo').onchange=()=>access&&bindPorts();
+loadLib();loadVoices();ensureUserSlots();Object.entries(userVoices()).forEach(([k,n])=>registerUser(+k,n));render();
+if(location.protocol==='http:'&&!/localhost|127\.0\.0\.1/.test(location.hostname))status('Web MIDI needs https or localhost');
+</script></body></html>
