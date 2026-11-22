@@ -8,6 +8,10 @@ A browser-based editor for the performances, voices and effects of Yamaha MX49, 
 
 > **Use at your own risk.** This software sends system exclusive (SysEx) data that can overwrite performances and user voices on your keyboard. It is provided "as is", without warranty of any kind. You use it entirely at your own risk, and the authors are not liable for lost data or damage. Back up your keyboard (**Export everything**) before writing to it.
 
+> **Experimental software.** This editor is experimental. Before you use it, back up your keyboard's data (use **Export everything**) and copy the backup file to a USB drive or other safe storage. No guarantee of correctness or suitability for any purpose is expressed or implied.
+
+> **Bug reports and contributions.** Bug reports are welcome, but there is no guarantee, expressed or implied, that any fix will be made or will be forthcoming. You are encouraged to clone the repository and use Claude or another AI tool to improve and extend the software as you see fit, as long as you follow the terms of the GPL-3.0 license.
+
 ## What it does
 
 An MX keyboard stores 128 user performances. Each performance is a stored setup of up to 16 parts. Each part plays a voice, and the performance adds a keyboard mode (single, layer or split), reverb, chorus, a master EQ and arpeggio settings. The keyboard's own front panel makes this slow to edit. This editor gives you a full-screen view of all of it.
