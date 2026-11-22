@@ -14,6 +14,7 @@
 :root{--bg:#14161a;--panel:#1d2026;--panel2:#252932;--line:#323845;--fg:#e8eaee;--mute:#8b93a3;--acc:#ff6a3d;--acc2:#3dd6ff;--ok:#4cd694;--bad:#ff5468;color-scheme:dark}
 @media(prefers-color-scheme:light){:root:not(.dark){--bg:#f3f4f7;--panel:#fff;--panel2:#eef0f4;--line:#d5d9e2;--fg:#1b1e25;--mute:#667085;--acc:#e24a1b;--acc2:#0a7ea8;color-scheme:light}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
+.stick{position:sticky;top:var(--hh,52px);z-index:4;background:var(--bg);padding-bottom:8px}
 header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 h1{font-size:16px;margin:0 8px 0 0;letter-spacing:.5px}h1 b{color:var(--acc)}
 select,input,button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
@@ -73,12 +74,12 @@ dialog.big{width:min(1000px,96vw);max-height:92vh}.big .body{padding:12px;overfl
  <label style="font-size:12px;color:var(--mute);display:flex;gap:4px;align-items:center" title="When on, selecting a performance here also switches the keyboard to it"><input id="follow" type="checkbox" checked style="width:auto"> Follow</label>
  <label style="font-size:12px;color:var(--mute)">Ch <input id="fch" type="number" min="1" max="16" value="1" style="width:52px" title="MIDI channel the keyboard receives program changes on"></label>
  <label style="font-size:12px;color:var(--mute)" title="How long the keyboard pauses between the SysEx messages it sends. Lower is much faster. Stored in the keyboard (Utility: Bulk Dump Interval)">Bulk interval <select id="bulk" disabled style="padding:4px 6px"></select></label>
- <button id="conn" class="pri">Connect MIDI</button><button id="about" title="About this editor">About</button>
+ <button id="conn" class="pri">Connect MIDI</button><a id="guide" href="MX%20Performance%20Editor%20Guide.html" target="_blank" rel="noopener" style="color:var(--acc2);text-decoration:none;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)">Guide</a><button id="about" title="About this editor">About</button>
  <span id="status">Not connected</span>
 </header>
 <main id="app"></main>
 <script>/*CORE*/</script>
-<script>const DATA=/*DATA*/;const FX=/*FX*/;const VSPEC=/*VSPEC*/;</script>
+<script>const DATA=/*DATA*/;const FX=/*FX*/;const VSPEC=/*VSPEC*/;const ARPD=/*ARP*/;</script>
 <script>
 'use strict';
 const C=MXCore,$=s=>document.querySelector(s),OFF=C.OFF;
@@ -158,7 +159,7 @@ function modLabel(l){return l.dirty?'<span class="tag mod">modified</span>':l.sr
 function vnames(P){return P.parts.map((p,i)=>C.active(p)?(voiceOf(p)?.n||`${p.slice(1,4).join('/')}`):null).filter(Boolean)}
 function renderList(){const q=(view.q||'').toLowerCase();
  let h=`<div class="bar"><input id="q" placeholder="Search name or voice…" value="${view.q||''}" style="flex:1;min-width:200px">
- <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="rst" class="dng">Reset library</button><a id="guide" href="MX%20Performance%20Editor%20Guide.html" target="_blank" rel="noopener" style="color:var(--acc2);text-decoration:none;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)">Guide</a></div>
+ <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="rst" class="dng">Reset library</button></div>
  <div class="warn" ${out?'hidden':''}>Not connected. You can browse and edit the factory list offline; connect to read, audition and write your real performances.</div>
  <table><thead><tr><th>Slot</th><th>Name</th><th>Mode</th><th>Voices</th><th>#</th><th>Source</th></tr></thead><tbody>`;
  lib.forEach((l,i)=>{const names=vnames(l.P);const nm=C.getName(l.P.common);
@@ -270,25 +271,26 @@ function fxTab(i){const P=lib[i].P,t=()=>touch(i),out=h('div');
 // ---------- Detail ----------
 function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.tab||'voices';
  const act=P.parts.map((p,k)=>C.active(p)?k:-1).filter(k=>k>=0);
- let h0=`<div class="crumb"><a id="back">All performances</a> › ${slotName(i)} ${modLabel(l)}</div>
+ let h0=`<div class="stick"><div class="crumb"><a id="back">All performances</a> › ${slotName(i)} ${modLabel(l)}</div>
  <div class="bar"><button id="pr" ${i>0?'':'disabled'}>◀</button><button id="nx" ${i<127?'':'disabled'}>▶</button>
  <button id="aud" class="pri" ${out?'':'disabled'}>Audition (send to edit buffer)</button><button id="wr" ${out?'':'disabled'}>Write to ${slotName(i)}</button>
  <button id="rd" ${out?'':'disabled'}>Re-read from keyboard</button><button id="tn" ${out?'':'disabled'}>Test note</button>
  <button id="exp">Export .syx</button><button id="dup">Copy to…</button><button id="clr" class="dng">Clear performance</button></div>
- <div class="card"><div class="grid2">
+ <div class="card" style="margin-bottom:0"><div class="grid2">
  <label>Name<input id="nm" maxlength="10" value="${esc(C.getName(c))}"></label>
  <label>Keyboard mode<select id="md">${MODES.map((m,k)=>`<option value="${k}" ${c[CO_MODE]==k?'selected':''}>${m}</option>`).join('')}</select></label>
  <label>Split point (note ${NOTE(c[0x42])})<input id="sp" type="number" min="1" max="127" value="${c[0x42]}"></label>
  <label>Performance volume <b id="pvv" style="color:var(--fg)">${c[0x38]}</b><input id="pv" type="range" min="0" max="127" value="${c[0x38]}"></label>
  <label>Arpeggio<select id="ar"><option value="0" ${P.arpc[4]?'':'selected'}>off</option><option value="1" ${P.arpc[4]?'selected':''}>on</option></select></label>
  <label>Tempo<input id="tp" type="number" min="5" max="300" value="${(P.arpc[2]<<7)|P.arpc[3]}"></label></div></div>
- <div class="tabs"><button id="t-voices" class="${tab==='voices'?'on':''}">Voices (${act.length}/16)</button><button id="t-fx" class="${tab==='fx'?'on':''}">Effects &amp; EQ</button></div>
+ </div>
+ <div class="tabs"><button id="t-voices" class="${tab==='voices'?'on':''}">Voices (${act.length}/16)</button><button id="t-fx" class="${tab==='fx'?'on':''}">Effects &amp; EQ</button><button id="t-arp" class="${tab==='arp'?'on':''}">Arpeggio</button><button id="t-pat" class="${tab==='pat'?'on':''}">Rhythm pattern</button></div>
  <div id="tabbody"></div><pre id="log"></pre>
  <dialog id="dlg"><div class="dh"><input id="vq" placeholder="Search voices…" style="flex:1"><select id="vc"><option value="">All categories</option>${[...new Set(DATA.voices.map(v=>v.m))].map(m=>`<option>${m}</option>`).join('')}</select><button id="vu" title="Reads the names of the 128 user voices from the keyboard">Read user voices</button><button id="vx">Close</button></div><div class="dl" id="vl"></div></dialog>
  <dialog id="ved" class="big"></dialog><input type="file" id="file" accept=".syx" hidden>`;
  $('#app').innerHTML=h0;
  $('#back').onclick=()=>go({type:'list'});$('#pr').onclick=()=>go({type:'detail',i:i-1,tab:view.tab});$('#nx').onclick=()=>go({type:'detail',i:i+1,tab:view.tab});
- $('#t-voices').onclick=()=>{view.tab='voices';renderDetail()};$('#t-fx').onclick=()=>{view.tab='fx';renderDetail()};
+ $('#t-voices').onclick=()=>{view.tab='voices';renderDetail()};$('#t-fx').onclick=()=>{view.tab='fx';renderDetail()};$('#t-arp').onclick=()=>{view.tab='arp';renderDetail()};$('#t-pat').onclick=()=>{view.tab='pat';renderDetail()};
  $('#nm').oninput=e=>{C.setName(c,e.target.value);touch(i)};
  $('#md').onchange=e=>{c[CO_MODE]=+e.target.value;touch(i)};$('#sp').oninput=e=>{c[0x42]=Math.max(1,Math.min(127,+e.target.value||1));touch(i)};
  $('#pv').oninput=e=>{c[0x38]=+e.target.value;$('#pvv').textContent=e.target.value;touch(i)};$('#ar').onchange=e=>{P.arpc[4]=+e.target.value;touch(i)};
@@ -301,6 +303,8 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  $('#clr').onclick=()=>{if(confirm('Remove all voices and reset this performance?')){const old=P;lib[i]={P:C.newPerformance('Init Perf',old),src:'dev',dirty:true};save();renderDetail()}};
  const body=$('#tabbody');
  if(tab==='fx'){body.append(fxTab(i));return}
+ if(tab==='arp'){body.append(arpTab(i));return}
+ if(tab==='pat'){body.append(patTab(i));return}
  let v='<div class="bar"><button id="add" class="pri" '+(act.length>=16?'disabled':'')+'>＋ Add voice</button></div><div class="parts">';
  if(!act.length)v+='<div class="empty">No voices in this performance. Add one.</div>';
  act.forEach(k=>{const p=P.parts[k],vo=voiceOf(p);
@@ -339,6 +343,108 @@ function pickUserSlot(newName,cb){const d=h('dialog',{style:'width:min(560px,95v
  x.onclick=()=>{d.close();d.remove()};go1.onclick=()=>{if(sel==null)return;if(!confirm('Overwrite user voice '+(sel+1)+' on the keyboard?'))return;const s2=sel;d.close();d.remove();cb(s2)};
  q.oninput=draw;d.append(h('div',{class:'dh'},h('b',{style:'align-self:center'},'Save as user voice'),q,ref,x),info,list,h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},go1));
  document.body.append(d);info.textContent='Choose which user voice slot to overwrite.';draw();d.showModal()}
+
+// ---------- Arpeggio and rhythm pattern ----------
+const ARPS=ARPD.arps,PATS=ARPD.pats,arpBy=new Map(ARPS.map(a=>[a[0],a]));
+const OO={0:'off',1:'on'},SYNQ={0:'off',1:'32nd',2:'16th triplet',3:'16th',4:'8th triplet',5:'8th',6:'4th triplet',7:'4th'};
+const CH16=Object.fromEntries([...Array(16).keys()].map(k=>[k,String(k+1)]));
+const off200=(o,n,g)=>({o,s:2,n,lo:28,hi:228,k:'lin',a:-100,b:100,u:'',g});
+const ASPEC={
+ common:[{o:0,s:1,n:'SF select (active arpeggio slot)',lo:0,hi:5,lab:{0:'SF1',1:'SF2',2:'SF3',3:'SF4',4:'SF5',5:'SF6'}},{o:4,s:1,n:'Arpeggio common switch',lo:0,hi:1,lab:OO},{o:5,s:1,n:'Synchro quantize',lo:0,hi:7,lab:SYNQ},
+  off200(6,'Quantize strength offset'),off200(8,'Gate time rate offset'),off200(0x0a,'Velocity rate offset'),{o:0x0c,s:2,n:'Swing offset',lo:8,hi:248,k:'lin',a:-120,b:120,u:''}],
+ part:[
+  {o:0,s:1,n:'Arpeggio switch',lo:0,hi:1,lab:OO,g:'Playback'},{o:1,s:1,n:'MIDI out switch',lo:0,hi:1,lab:OO,g:'Playback'},{o:2,s:1,n:'Transmit channel',lo:0,hi:15,lab:CH16,g:'Playback'},{o:3,s:1,n:'Play only (arpeggio notes only)',lo:0,hi:1,lab:OO,g:'Playback'},
+  {o:6,s:1,n:'Loop',lo:0,hi:1,lab:OO,g:'Playback'},{o:7,s:1,n:'Hold',lo:0,hi:2,lab:{0:'sync-off',1:'off',2:'on'},g:'Playback'},{o:0x20,s:1,n:'Trigger mode',lo:0,hi:1,lab:{0:'gate',1:'toggle'},g:'Playback'},{o:0x0f,s:1,n:'Change timing',lo:0,hi:1,lab:{0:'realtime',1:'measure'},g:'Playback'},
+  {o:8,s:1,n:'Unit multiply',lo:0,hi:6,lab:{0:'50%',1:'66%',2:'75%',3:'100%',4:'133%',5:'150%',6:'200%'},g:'Playback'},
+  {o:9,s:1,n:'Note limit low',lo:0,hi:127,k:'note',g:'Range'},{o:0x0a,s:1,n:'Note limit high',lo:0,hi:127,k:'note',g:'Range'},{o:0x0b,s:1,n:'Velocity limit low',lo:1,hi:127,g:'Range'},{o:0x0c,s:1,n:'Velocity limit high',lo:1,hi:127,g:'Range'},
+  {o:0x0d,s:1,n:'Key mode',lo:0,hi:4,lab:{0:'sort',1:'thru',2:'direct',3:'sort+direct',4:'thru+direct'},g:'Range'},{o:0x0e,s:1,n:'Velocity mode',lo:0,hi:1,lab:{0:'original',1:'thru'},g:'Range'},
+  {o:0x1e,s:1,n:'Octave range',lo:61,hi:67,k:'lin',a:-3,b:3,u:'',g:'Range'},{o:0x1f,s:1,n:'Output octave shift',lo:54,hi:74,k:'lin',a:-10,b:10,u:'',g:'Range'},
+  {o:0x10,s:1,n:'Quantize value',lo:1,hi:7,lab:{1:'32nd',2:'16th triplet',3:'16th',4:'8th triplet',5:'8th',6:'4th triplet',7:'4th'},g:'Timing'},{o:0x11,s:1,n:'Quantize strength',lo:0,hi:100,k:'lin',a:0,b:100,u:'%',g:'Timing'},
+  {o:0x12,s:2,n:'Velocity rate',lo:0,hi:200,k:'lin',a:0,b:200,u:'%',g:'Timing'},{o:0x14,s:2,n:'Gate time rate',lo:0,hi:200,k:'lin',a:0,b:200,u:'%',g:'Timing'},{o:0x1a,s:2,n:'Swing',lo:8,hi:248,k:'lin',a:-120,b:120,u:'',g:'Timing'},
+  {o:0x1c,s:1,n:'Accent velocity threshold (0 = off)',lo:0,hi:127,g:'Timing'},{o:0x1d,s:1,n:'Accent start quantize',lo:0,hi:1,lab:OO,g:'Timing'},
+  {o:0x21,s:1,n:'Random SFX',lo:0,hi:1,lab:OO,g:'Random SFX'},{o:0x22,s:1,n:'Random SFX key on control',lo:0,hi:1,lab:OO,g:'Random SFX'},{o:0x23,s:1,n:'Random SFX velocity offset',lo:0,hi:127,k:'lin',a:-64,b:63,u:'',g:'Random SFX'}]
+  .concat([...Array(6).keys()].flatMap(k=>[off200(0x24+4*k,'SF'+(k+1)+' velocity rate offset','SF offsets'),off200(0x26+4*k,'SF'+(k+1)+' gate time offset','SF offsets')]))};
+function arpName(n){if(!n)return 'off';const a=arpBy.get(n);return a?a[2]:'#'+n}
+function pickArp(cur,cb){const d=h('dialog',{style:'width:min(640px,96vw);padding:0'});
+ const q=h('input',{placeholder:'Search arpeggio types…',style:'flex:1'}),cat=h('select',{},h('option',{value:''},'All categories'),[...new Set(ARPS.map(a=>a[1]))].map(c=>h('option',{},c))),x=h('button',{},'Cancel'),list=h('div',{class:'dl'}),
+  tc=h('label',{class:'hint',style:'display:flex;gap:6px;align-items:center;padding:8px 12px'},h('input',{type:'checkbox',style:'width:auto'}),'Also set the performance tempo to the type\'s original tempo');
+ const draw=()=>{const f=q.value.toLowerCase(),c=cat.value;list.innerHTML='';
+  const off=h('div',{style:cur===0?'background:var(--panel2)':''},h('span',{class:'c',style:'width:70px'},'—'),h('b',{},'Off (no arpeggio)'));off.onclick=()=>{d.close();d.remove();cb(0,tc.firstChild.checked)};list.append(off);
+  ARPS.filter(a=>(!c||a[1]===c)&&(!f||(a[2]+' '+a[1]+' '+a[0]).toLowerCase().includes(f))).slice(0,300).forEach(a=>{
+   const r=h('div',{style:a[0]===cur?'background:var(--panel2);outline:1px solid var(--acc)':''},h('span',{class:'c',style:'width:70px'},a[1]),h('b',{},a[2]),h('span',{style:'margin-left:auto;color:var(--mute)'},`#${a[0]} · ${a[3]} · ${a[4]}×${a[5]} bpm`));
+   r.onclick=()=>{d.close();d.remove();cb(a[0],tc.firstChild.checked,a[5])};list.append(r)})};
+ q.oninput=draw;cat.onchange=draw;x.onclick=()=>{d.close();d.remove()};
+ d.append(h('div',{class:'dh'},q,cat,x),tc,list);document.body.append(d);draw();d.showModal();q.focus()}
+function arpTab(i){const P=lib[i].P,t=()=>touch(i),box=h('div');
+ const rows=(blk,specs)=>specs.map(sp=>specRow(blk,sp,t));
+ box.append(sec('Common arpeggio settings',simpleGrid(rows(P.arpc,ASPEC.common)),true),h('div',{class:'hint',style:'padding:0 0 10px'},'Tempo and the main on/off switch are also at the top of the page. Offsets are added to each part\'s own settings.'));
+ const act=P.parts.map((p,k)=>C.active(p)?k:-1).filter(k=>k>=0);
+ if(!act.length)box.append(h('div',{class:'empty'},'No voices in this performance. Add a voice first, then give it an arpeggio.'));
+ act.forEach((k,idx)=>{const a=P.arps[k],p=P.parts[k],vo=voiceOf(p);
+  const slots=h('div',{style:'display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 12px;padding:6px 12px'});
+  for(let j=0;j<6;j++){const sp={o:0x3c+2*j,s:2,lo:0,hi:999};const b=h('button',{style:'width:100%;text-align:left'});
+   const upd=()=>{b.textContent='SF'+(j+1)+': '+arpName(C.pget(a,sp))};upd();
+   b.onclick=()=>pickArp(C.pget(a,sp),(n,setTempo,tp)=>{C.pset(a,sp,n);if(setTempo&&tp){P.arpc[2]=tp>>7;P.arpc[3]=tp&127}t();renderDetail()});slots.append(b)}
+  const groups=new Map();ASPEC.part.forEach(sp=>{if(!groups.has(sp.g))groups.set(sp.g,[]);groups.get(sp.g).push(specRow(a,sp,t))});
+  const det=[...groups].map(([g,r])=>sec(g,simpleGrid(r),g==='Playback'));
+  const body=h('div',{},h('div',{class:'hint',style:'padding:6px 12px 0'},'Arpeggio types for the six Sound Feature (SF) slots. Click one to choose:'),slots,...det);
+  box.append(sec(`Part ${k+1} — ${vo?vo.n:'voice '+p[1]+'/'+p[2]+'/'+(p[3]+1)}  ·  arpeggio ${a[0]?'on':'off'}`,body,idx===0))});
+ return box}
+function patTab(i){const P=lib[i].P,c=P.common,t=()=>touch(i),box=h('div');
+ const idx=()=>(c[0x47]<<7)|c[0x48],cur=h('b',{}),q=h('input',{placeholder:'Search patterns…',style:'flex:1;min-width:160px'}),cat=h('select',{},h('option',{value:''},'All categories'),['Rock','R&B','Elect','Jazz','World','Orch'].map(x=>h('option',{},x))),list=h('div',{class:'dl',style:'max-height:55vh;overflow:auto;border:1px solid var(--line);border-radius:8px'});
+ const showCur=()=>{const p=PATS[Math.min(idx(),PATS.length-1)];cur.textContent=p?`${p[0]}  ${p[2]}  (${p[1]})`:'—'};
+ const draw=()=>{const f=q.value.toLowerCase(),cc=cat.value;list.innerHTML='';PATS.filter(p=>(!cc||p[1]===cc)&&(!f||(p[2]+' '+p[1]+' '+p[0]).toLowerCase().includes(f))).forEach(p=>{
+   const on=p[0]-1===idx();const r=h('div',{style:on?'background:var(--panel2);outline:1px solid var(--acc)':''},h('span',{class:'c',style:'width:60px'},p[1]),h('b',{},p[2]),h('span',{style:'margin-left:auto;color:var(--mute)'},'#'+p[0]));
+   r.onclick=()=>{c[0x47]=(p[0]-1)>>7;c[0x48]=(p[0]-1)&127;t();showCur();draw()};list.append(r)})};
+ const aks=h('select',{},h('option',{value:0},'off'),h('option',{value:1},'on'));aks.value=c[0x49];aks.onchange=()=>{c[0x49]=+aks.value;t()};
+ q.oninput=draw;cat.onchange=draw;showCur();
+ box.append(h('div',{class:'card'},h('div',{style:'display:flex;gap:16px;align-items:center;flex-wrap:wrap'},h('span',{},'Current rhythm pattern: ',cur),h('label',{style:'display:flex;gap:6px;align-items:center'},'Auto key-on start',aks))),
+  h('div',{class:'bar'},q,cat),list,h('div',{class:'hint',style:'padding:8px 0'},'The rhythm pattern is the drum/accompaniment pattern stored with the performance (208 patterns). Click a pattern to select it, then Audition or Write the performance.'));
+ draw();return box}
+// ---------- Drum kit editor ----------
+async function openDrumEditor(vo,ctx,addr){
+ const dlg=$('#ved');dlg.innerHTML='<div class="dh"><b>Loading '+esc(vo.n)+' from the keyboard…</b></div>';dlg.showModal();
+ let V;try{V=await requestVoice(addr)}catch(e){dlg.close();alert('The keyboard did not send the drum kit ('+e.message+'). Check the connection and Dev#.');return}
+ if(!C.isDrum(V)){dlg.close();alert('Unexpected data received (is this a normal voice?).');return}
+ const W=C.cloneVoice(V);let tab='common',key=0,dirty=false;const t=()=>{dirty=true};
+ const KEYS=73,kb=k=>W.blocks[C.vkey(0x47,k)],kon=k=>kb(k)&&kb(k)[0]===1,kn=k=>C.noteName(k+24);
+ const nm=h('input',{maxlength:10,value:C.voiceName(W),style:'width:130px'});nm.oninput=()=>{C.setVoiceName(W,nm.value);t()};
+ const tabsEl=h('div',{class:'tabs',style:'margin:0 12px'}),bodyEl=h('div',{class:'body'});
+ const names=[['common','General'],['ctl','Controllers'],['ins','Insertion effect'],['keys','Keys (drum pads)']];
+ const drawTabs=()=>{tabsEl.innerHTML='';names.forEach(([k,n])=>{const b=h('button',{class:tab===k?'on':''},n);b.onclick=()=>{tab=k;drawTabs();drawBody()};tabsEl.append(b)})};
+ const rows=(blk,specs)=>specs.map(sp=>specRow(blk,sp,t));
+ const drawBody=()=>{bodyEl.innerHTML='';
+  if(tab==='common')bodyEl.append(sec('General',simpleGrid(rows(W.blocks[C.vkey(0x46,0)],DSPEC.common)),true),h('div',{class:'hint',style:'padding:0'},'A drum kit assigns one drum or percussion element to each key from C0 to C6. Use the Keys tab to edit them.'));
+  else if(tab==='ctl')bodyEl.append(sec('Controllers',simpleGrid(rows(W.blocks[C.vkey(0x46,8)],VSPEC.ctl.filter(sp=>sp.o<24))),true));
+  else if(tab==='ins')bodyEl.append(sec('Insertion effect A',h('div',{},fxPanel(W.blocks[C.vkey(0x46,3)],'ins',t)),true),h('div',{class:'hint',style:'padding:0'},'Each key chooses whether it goes through this effect (Insertion effect: thru / ins).'));
+  else{const sel=h('select',{},[...Array(KEYS).keys()].map(k=>h('option',{value:k},(kon(k)?'● ':'○ ')+kn(k)+'  (note '+(k+24)+')')));sel.value=key;
+   const mv=d=>{key=Math.max(0,Math.min(KEYS-1,key+d));drawBody()};sel.onchange=()=>{key=+sel.value;drawBody()};
+   const pv=h('button',{},'Play key'),pr=h('button',{},'◀'),nx=h('button',{},'▶'),cp=h('button',{},'Copy settings to key…');
+   pr.onclick=()=>mv(-1);nx.onclick=()=>mv(1);
+   pv.disabled=!out;pv.onclick=()=>{if(!out)return;const n=key+24;out.send([0x90,n,100]);setTimeout(()=>out.send([0x80,n,0]),400)};
+   cp.onclick=()=>{const tk=prompt('Copy key '+kn(key)+' settings to which note name or number (e.g. D1 or 38)?');if(!tk)return;let n=/^\d+$/.test(tk.trim())?+tk:null;if(n==null)for(let k=0;k<KEYS;k++)if(kn(k).toLowerCase()===tk.trim().toLowerCase())n=k+24;
+    if(n==null||n<24||n>96)return alert('Not a key between C0 (24) and C6 (96)');const d=n-24;const src=kb(key),dst=kb(d);for(let i=0;i<src.length;i++)if(i!==2&&i!==3)dst[i]=src[i];t();key=d;drawBody()};
+   bodyEl.append(h('div',{class:'bar',style:'margin-bottom:8px'},pr,sel,nx,pv,cp,h('span',{class:'hint'},'● = key has a drum sound assigned')));
+   const b=kb(key);if(!b){bodyEl.append(h('div',{class:'empty'},'This key was not included in the dump.'));return}
+   const by=new Map(DSPEC.elem.map(sp=>[sp.n,sp]));let k0=0;
+   Object.entries(DSPEC.groups).forEach(([g,ns])=>bodyEl.append(sec(g+' — '+kn(key),simpleGrid(ns.map(n=>specRow(b,by.get(n),()=>{t();})))  ,k0++<3)))}};
+ const msgEl=h('span',{class:'hint',style:'padding:0 12px'},'');
+ const tryBtn=h('button',{},ctx.part!=null?`Try on part ${ctx.part+1}`:'Try (voice edit buffer)');
+ tryBtn.onclick=async()=>{try{const tgt=ctx.part!=null?[0x0e,0x30,ctx.part]:[0x0e,0x2f,0];for(const m of C.buildVoice(dev(),W,tgt)){send(m);await sleep(12)}
+   msgEl.textContent=ctx.part!=null?'Sent to part '+(ctx.part+1)+' of the edit-buffer performance. Audition the performance first if you hear no change.':'Sent to the drum voice edit buffer.'}catch(e){msgEl.textContent=e.message}};
+ const saveBtn=h('button',{class:'pri'},'Save as user drum kit…');
+ saveBtn.onclick=()=>pickKit(C.voiceName(W),async slot=>{try{for(const m of C.buildVoice(dev(),W,[0x0e,0x28,slot]))send(m),await sleep(15)}catch(e){msgEl.textContent=e.message;return}
+  const nv=registerKit(slot,C.voiceName(W));dlg.close();if(ctx.onSaved)ctx.onSaved(nv);else status('Saved user drum kit '+(slot+1)+' "'+nv.n+'"')});
+ const closeBtn=h('button',{},'Close');closeBtn.onclick=()=>{if(!dirty||confirm('Discard your edits to this drum kit?'))dlg.close()};
+ dlg.innerHTML='';dlg.append(h('div',{class:'dh'},h('b',{style:'align-self:center'},vo.n+' › '),nm,h('span',{style:'flex:1'}),tryBtn,saveBtn,closeBtn),tabsEl,msgEl,bodyEl);
+ drawTabs();drawBody()}
+function pickKit(newName,cb){const d=h('dialog',{style:'width:min(420px,95vw)'}),u=userKits();let sel=0;
+ const list=h('div',{class:'dl'}),info=h('div',{class:'hint',style:'padding:8px 12px'}),ok=h('button',{class:'pri'},'Save here'),x=h('button',{},'Cancel');
+ const draw=()=>{list.innerHTML='';for(let nn=0;nn<8;nn++){const r=h('div',{style:sel===nn?'background:var(--panel2);outline:1px solid var(--acc)':''},h('span',{class:'c',style:'width:30px'},String(nn+1)),h('b',{},u[nn]||'User Kit '+(nn+1)));r.onclick=()=>{sel=nn;draw()};list.append(r)}
+  info.textContent=`"${newName}" will overwrite user drum kit ${sel+1} on the keyboard.`};
+ x.onclick=()=>{d.close();d.remove()};ok.onclick=()=>{if(!confirm('Overwrite user drum kit '+(sel+1)+' on the keyboard?'))return;const s2=sel;d.close();d.remove();cb(s2)};
+ d.append(h('div',{class:'dh'},h('b',{style:'align-self:center;flex:1'},'Save as user drum kit'),x),info,list,h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},ok));
+ document.body.append(d);draw();d.showModal()}
 // ---------- Voice editor ----------
 const GROUPS={eosc:n=>/^(AEG|Level|Half Damper|Element Level)/.test(n)?'Amplitude':/^(PEG|Pitch|Coarse|Fine|Random Pitch)/.test(n)?'Pitch':'Oscillator and key range',
  eflt:n=>/^FEG/.test(n)?'Filter envelope':/LFO/.test(n)?'Element LFO':'Filter',
@@ -348,7 +454,20 @@ const b64=u=>{let t='';u.forEach(x=>t+=String.fromCharCode(x));return btoa(t)},u
 function saveVoices(){clearTimeout(vsaveT);vsaveT=setTimeout(()=>{try{localStorage.setItem('mxvoices',JSON.stringify({d:[...vdirty],v:Object.fromEntries(Object.entries(vcache).map(([nn,V])=>[nn,Object.fromEntries(Object.entries(V.blocks).map(([k,b])=>[k,b64(b)]))]))}))}catch(e){}},400)}
 function loadVoices(){try{const o=JSON.parse(localStorage.getItem('mxvoices')||'null');if(o){vdirty=new Set(o.d);for(const nn in o.v)vcache[nn]={hdr:[0x0a,+nn],blocks:Object.fromEntries(Object.entries(o.v[nn]).map(([k,t])=>[k,unb64(t)]))}}}catch(e){}}
 function cacheVoice(nn,V,dirty){vcache[nn]={hdr:[0x0a,nn],blocks:V.blocks};dirty?vdirty.add(nn):vdirty.delete(nn);saveVoices()}
-function ensureUserSlots(){for(let nn=0;nn<128;nn++){const key='63:8:'+(nn+1);if(!vByKey.has(key)){const v={m:'USER',s:'User',n:'User '+String(nn+1).padStart(3,'0'),b:63,l:8,p:nn+1,y:'?'};DATA.voices.push(v);vByKey.set(key,v)}}}
+const DSPEC={
+ common:[{o:0x3f,s:1,n:'Volume',lo:0,hi:127},{o:0x46,s:1,n:'Insertion effect reverb send',lo:0,hi:127},{o:0x47,s:1,n:'Insertion effect chorus send',lo:0,hi:127}],
+ elem:[{o:0,s:1,n:'Element switch',lo:0,hi:1,lab:{0:'off',1:'on'}},{o:2,s:2,n:'Wave number',lo:0,hi:1565,k:'wave'},{o:4,s:1,n:'Receive note off',lo:0,hi:1,lab:{0:'off',1:'on'}},{o:5,s:1,n:'Key assign mode',lo:0,hi:1,lab:{0:'single',1:'multi'}},{o:6,s:1,n:'Alternate group',lo:0,hi:127,k:'lin',a:0,b:127,u:''},
+  {o:0x0e,s:1,n:'Element level',lo:0,hi:127},{o:0x0f,s:1,n:'Level velocity sensitivity',lo:0,hi:127,k:'lin',a:-64,b:63,u:''},
+  {o:7,s:1,n:'Pan',lo:1,hi:127,k:'pan'},{o:8,s:1,n:'Random pan depth',lo:0,hi:127},{o:9,s:1,n:'Alternate pan depth',lo:0,hi:127,k:'lin',a:-64,b:63,u:''},
+  {o:0x0a,s:1,n:'Reverb send',lo:0,hi:127},{o:0x0b,s:1,n:'Chorus send',lo:0,hi:127},{o:0x0c,s:1,n:'Insertion effect',lo:0,hi:1,lab:{0:'thru',1:'ins'}},
+  {o:0x11,s:1,n:'AEG attack time',lo:0,hi:127},{o:0x12,s:1,n:'AEG decay 1 time',lo:0,hi:127},{o:0x13,s:1,n:'AEG decay 2 time (127 = hold)',lo:0,hi:127},{o:0x17,s:1,n:'AEG decay 1 level',lo:0,hi:127},
+  {o:0x1a,s:1,n:'Coarse tune',lo:16,hi:112,k:'lin',a:-48,b:48,u:''},{o:0x1b,s:1,n:'Fine tune',lo:0,hi:127,k:'lin',a:-64,b:63,u:''},{o:0x1c,s:1,n:'Pitch velocity sensitivity',lo:0,hi:127,k:'lin',a:-64,b:63,u:''},
+  {o:0x1e,s:2,n:'LPF cutoff frequency',lo:0,hi:255},{o:0x20,s:1,n:'LPF cutoff velocity sensitivity',lo:0,hi:127,k:'lin',a:-64,b:63,u:''},{o:0x21,s:1,n:'LPF resonance',lo:8,hi:71}],
+ groups:{'Oscillator':['Element switch','Wave number','Receive note off','Key assign mode','Alternate group'],'Level and pan':['Element level','Level velocity sensitivity','Pan','Random pan depth','Alternate pan depth','Reverb send','Chorus send','Insertion effect'],'Amplitude envelope':['AEG attack time','AEG decay 1 time','AEG decay 2 time (127 = hold)','AEG decay 1 level'],'Pitch':['Coarse tune','Fine tune','Pitch velocity sensitivity'],'Filter':['LPF cutoff frequency','LPF cutoff velocity sensitivity','LPF resonance']}};
+function userKits(){try{return JSON.parse(localStorage.getItem('mxdkit')||'{}')}catch(e){return{}}}
+function registerKit(nn,name){const u=userKits();u[nn]=name;try{localStorage.setItem('mxdkit',JSON.stringify(u))}catch(e){}
+ const key='63:40:'+(nn+1);let v=vByKey.get(key);if(!v){v={m:'DR',s:'User',n:name,b:63,l:40,p:nn+1,y:'-'};DATA.voices.push(v);vByKey.set(key,v)}else v.n=name;return v}
+function ensureUserSlots(){for(let nn=0;nn<8;nn++)registerKit(nn,userKits()[nn]||'User Kit '+(nn+1));for(let nn=0;nn<128;nn++){const key='63:8:'+(nn+1);if(!vByKey.has(key)){const v={m:'USER',s:'User',n:'User '+String(nn+1).padStart(3,'0'),b:63,l:8,p:nn+1,y:'?'};DATA.voices.push(v);vByKey.set(key,v)}}}
 async function readUserNames(btn){let ok=0;for(let nn=0;nn<128;nn++){btn.textContent=`Reading user voices ${nn+1}/128…`;
   try{const V=await requestVoice([0x0e,0x0a,nn]);if(!vdirty.has(nn)){cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}ok++}catch(e){if(!ok&&nn>=2){btn.textContent='No response — check connection';return}}}
  btn.textContent=`Read ${ok}/128 — read again`}
@@ -357,7 +476,8 @@ function registerUser(nn,name){const u=userVoices();u[nn]=name;try{localStorage.
  const key='63:8:'+(nn+1);let v=vByKey.get(key);if(!v){v={m:'USER',s:'User',n:name,b:63,l:8,p:nn+1,y:'?'};DATA.voices.push(v);vByKey.set(key,v)}else v.n=name;return v}
 async function openVoiceEditor(vo,ctx){
  const dlg=$('#ved'),addr=C.voiceAddr(vo);
- if(!addr){alert('Drum kits can\'t be edited here yet — only normal voices.');return}
+ if(!addr){alert('This voice cannot be edited here.');return}
+ if(addr[1]>=0x20)return openDrumEditor(vo,ctx,addr);
  dlg.innerHTML='<div class="dh"><b>Loading '+esc(vo.n)+' from the keyboard…</b></div>';dlg.showModal();
  const slotNN=vo.b===63&&vo.l===8?vo.p-1:-1;let V;
  if(slotNN>=0&&vcache[slotNN]&&(vdirty.has(slotNN)||!out))V=C.cloneVoice(vcache[slotNN]);
@@ -402,6 +522,7 @@ $('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);paddin
    h('p',{style:'margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)'},h('b',{},'Use at your own risk. '),'This software sends system exclusive data that can overwrite performances and user voices on your keyboard. It is provided "as is", without warranty of any kind. You use it entirely at your own risk, and the authors are not liable for lost data or damage. Back up your keyboard (Export everything) before writing to it.')),
   h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},x));
  document.body.append(d);d.showModal()};
+const setHH=()=>document.documentElement.style.setProperty('--hh',$('header').offsetHeight+'px');addEventListener('resize',setHH);setHH();new ResizeObserver(setHH).observe($('header'));
 $('#conn').onclick=connect;$('#mi').onchange=$('#mo').onchange=()=>access&&bindPorts();
 loadLib();loadVoices();ensureUserSlots();Object.entries(userVoices()).forEach(([k,n])=>registerUser(+k,n));render();
 if(location.protocol==='http:'&&!/localhost|127\.0\.0\.1/.test(location.hostname))status('Web MIDI needs https or localhost');

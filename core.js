@@ -121,7 +121,7 @@
       else if (buf[i] === 0xf7 && s >= 0) {
         const m = buf.slice(s, i + 1); s = -1;
         const P = A.feed(m); if (P) res.perfs.push({ slot: P._hdr[0] === 0x50 ? P._hdr[1] : -1, P });
-        const V = VA.feed(m); if (V) { if (V.hdr[0] === 0x0a) res.voices.push({ slot: V.hdr[1], V }); else res.skipped++; }
+        const V = VA.feed(m); if (V) { if (V.hdr[0] === 0x0a || V.hdr[0] === 0x28) res.voices.push({ slot: V.hdr[1], V, drum: V.hdr[0] === 0x28 }); else res.skipped++; }
       }
     }
     return res;
@@ -168,7 +168,10 @@
     if (b === 63 && l <= 7) return [0x0e, l, p];
     if (b === 63 && l === 8) return [0x0e, 0x0a, p];
     if (b === 0) return [0x0e, 0x09, p];
-    return null; // drum kits and others: not editable
+    if (b === 63 && l === 32) return [0x0e, 0x20, p]; // drum kit preset
+    if (b === 63 && l === 40) return [0x0e, 0x28, p]; // drum kit user (p = 0..7)
+    if (b === 127) return [0x0e, 0x21, 0]; // GM drum kit
+    return null;
   }
   const VOICE_BLOCKS = [[0x40, 0, 0, 80], [0x40, 3, 0, 36], [0x40, 6, 0, 60], [0x40, 0x30, 0, 86]]
     .concat([...Array(8).keys()].map(e => [0x41, e, 0, 88]), [...Array(8).keys()].map(e => [0x42, e, 0, 74]));
@@ -180,24 +183,27 @@
       const [h, mi, l] = m.addr;
       if (h === 0x0e) { V = { hdr: [mi, l], blocks: {} }; return null; }
       if (!V) return null;
-      if (h === 0x0f) { const r = V; V = null; return r.blocks[vkey(0x40, 0)] ? r : null; }
+      if (h === 0x0f) { const r = V; V = null; return (r.blocks[vkey(0x40, 0)] || r.blocks[vkey(0x46, 0)]) ? r : null; }
       V.blocks[vkey(h, mi)] = Uint8Array.from(m.data); return null;
     };
   }
-  function buildVoice(dev, V, target) { // target: [0x0e, mid, nn]
+  function buildVoice(dev, V, target) { // target: [0x0e, mid, nn]; sends every block held, in address order
     const out = [msg(dev, target, [])];
-    for (const [h, m, l] of VOICE_BLOCKS) { const d = V.blocks[vkey(h, m)]; if (d) out.push(msg(dev, [h, m, l], d)); }
+    Object.keys(V.blocks).map(k => k.split(':').map(Number)).sort((x, y) => x[0] - y[0] || x[1] - y[1])
+      .forEach(([h, m]) => out.push(msg(dev, [h, m, 0], V.blocks[vkey(h, m)])));
     out.push(msg(dev, [0x0f, target[1], target[2]], []));
     return out;
   }
-  const voiceName = V => { let s = ''; const c = V.blocks[vkey(0x40, 0)]; for (let i = 0; i < 10; i++) s += String.fromCharCode(c[i] >= 32 && c[i] < 127 ? c[i] : 32); return s.replace(/\s+$/, ''); };
-  const setVoiceName = (V, name) => { const c = V.blocks[vkey(0x40, 0)], n = String(name).replace(/[^\x20-\x7e]/g, '?').padEnd(10, ' '); for (let i = 0; i < 10; i++) c[i] = n.charCodeAt(i); };
+  const isDrum = V => !!V.blocks[vkey(0x46, 0)];
+  const commonOf = V => V.blocks[vkey(0x40, 0)] || V.blocks[vkey(0x46, 0)];
+  const voiceName = V => { let s = ''; const c = commonOf(V); for (let i = 0; i < 10; i++) s += String.fromCharCode(c[i] >= 32 && c[i] < 127 ? c[i] : 32); return s.replace(/\s+$/, ''); };
+  const setVoiceName = (V, name) => { const c = commonOf(V), n = String(name).replace(/[^\x20-\x7e]/g, '?').padEnd(10, ' '); for (let i = 0; i < 10; i++) c[i] = n.charCodeAt(i); };
   const cloneVoice = V => ({ hdr: V.hdr.slice(), blocks: Object.fromEntries(Object.entries(V.blocks).map(([k, v]) => [k, v.slice()])) });
   // Generic spec-driven parameter access: spec {o,s,lo,hi}
   const pget = (b, sp) => sp.s === 2 ? (b[sp.o] << 7) | b[sp.o + 1] : b[sp.o];
   const pset = (b, sp, v) => { v = Math.max(sp.lo, Math.min(sp.hi, v | 0)); if (sp.s === 2) { b[sp.o] = v >> 7; b[sp.o + 1] = v & 127; } else b[sp.o] = v; };
 
-  root.MXCore = {fxGet, fxSet, fxType, fxDefaults, setFxType, voiceAddr, VoiceAssembler, buildVoice, voiceName, setVoiceName, cloneVoice, vkey, pget, pset, VOICE_BLOCKS, SIZES, OFF, CO, checksum, msg, requestMsg, requestFor, parse, build, Assembler, parseSyx, parseSyxAll, newPerformance, clonePerf, newPart, newArp,
+  root.MXCore = {fxGet, fxSet, fxType, fxDefaults, setFxType, voiceAddr, VoiceAssembler, buildVoice, isDrum, commonOf, voiceName, setVoiceName, cloneVoice, vkey, pget, pset, VOICE_BLOCKS, SIZES, OFF, CO, checksum, msg, requestMsg, requestFor, parse, build, Assembler, parseSyx, parseSyxAll, newPerformance, clonePerf, newPart, newArp,
     setName, getName, active, setVoice, getVoiceKey, noteName, addVoice, removeVoice };
   if (typeof module !== 'undefined') module.exports = root.MXCore;
 })(typeof window !== 'undefined' ? window : globalThis);

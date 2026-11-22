@@ -1,0 +1,27 @@
+const {chromium}=require('playwright');const C=require('../core.js');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:600}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+const V={hdr:[0x20,0],blocks:{}};V.blocks[C.vkey(0x46,0)]=new Uint8Array(72);V.blocks[C.vkey(0x46,3)]=new Uint8Array(36);V.blocks[C.vkey(0x46,8)]=new Uint8Array(24);
+for(let k=0;k<73;k++){const e=new Uint8Array(46);e[0]=k%2?0:1;e[0x0e]=127;V.blocks[C.vkey(0x47,k)]=e}
+C.setVoiceName(V,'TestKit');const dump=C.buildVoice(1,V,[0x0e,0x20,0]).map(m=>Array.from(m));
+await pg.addInitScript(`const D=${JSON.stringify(dump)};const inp={id:'i1',name:'MX61',onmidimessage:null};window.__sent=[];const o={id:'o1',name:'MX61',send(d){const a=Array.from(d);window.__sent.push(a);
+ if(a[0]===0xf0&&(a[2]&0xf0)===0x30&&a[7]===0x1f)setTimeout(()=>inp.onmidimessage({data:[0xf0,0x43,0x10,0x7f,0x17,0,0,0x1f,0,0xf7]}),3);
+ if(a[0]===0xf0&&(a[2]&0xf0)===0x20&&a[5]===0x0e&&a[6]===0x20)D.forEach((m,i)=>setTimeout(()=>inp.onmidimessage({data:m}),5+i))}};
+navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',o]]),onstatechange:null});`);
+await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg.click('#conn');await pg.waitForTimeout(300);
+const order=await pg.evaluate(()=>[...document.querySelectorAll('header button,header a')].map(e=>e.textContent.trim()).filter(t=>/Connect|Guide|About/.test(t)));console.log('header order',order);
+console.log('guide in list toolbar',await pg.locator('#app a#guide').count());
+await pg.click('#app tbody tr,#app .row,#app [data-i]');await pg.waitForTimeout(200);
+await pg.evaluate(()=>scrollTo(0,400));await pg.waitForTimeout(100);
+const bx=await pg.evaluate(()=>{const c=document.querySelector('.stick').getBoundingClientRect(),h=document.querySelector('header').getBoundingClientRect();return{cardTop:Math.round(c.top),hdrBottom:Math.round(h.bottom)}});console.log('sticky',bx);
+await pg.evaluate(()=>scrollTo(0,0));
+await pg.click('#add');await pg.fill('#vq','PwrStdKit1');await pg.click('#vl .ed');await pg.waitForSelector('#ved .tabs');
+console.log('drum title',await pg.locator('#ved .dh b').first().textContent(),await pg.locator('#ved input').first().inputValue());
+await pg.click('#ved .tabs button:has-text("Keys")');await pg.waitForTimeout(100);
+await pg.selectOption('#ved select >> nth=0','1');
+const sl=pg.locator('#ved input[type=range]').first();await pg.waitForTimeout(100);
+console.log('sections',await pg.locator('#ved summary').allTextContents());
+await pg.screenshot({path:require('os').tmpdir()+'/mx-drum.png'});
+await pg.click('#ved button:has-text("Try")');await pg.waitForTimeout(400);
+const s=(await pg.evaluate(()=>window.__sent)).filter(m=>m[0]===0xf0&&(m[2]&0xf0)===0x00);console.log('sent blocks',s.length,'first addr',s[0].slice(5,8),'last',s[s.length-1].slice(5,8));
+console.log(errs);await b.close()})();

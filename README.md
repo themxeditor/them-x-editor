@@ -13,10 +13,13 @@ A browser-based editor for the performances, voices and effects of Yamaha MX49, 
 An MX keyboard stores 128 user performances. Each performance is a stored setup of up to 16 parts. Each part plays a voice, and the performance adds a keyboard mode (single, layer or split), reverb, chorus, a master EQ and arpeggio settings. The keyboard's own front panel makes this slow to edit. This editor gives you a full-screen view of all of it.
 
 - **Performance list.** The first screen lists all 128 performances (A01 to H16) with their mode and voices. Search by name, slot or voice.
-- **Drill down.** Open a performance to see its parts. Add, change or delete voices from a searchable list of about 1,100 voices. Set each part's volume, pan, reverb and chorus send, note range, transpose and receive channel.
+- **Drill down.** Open a performance to see its parts. The performance's name, mode, split, volume and arpeggio stay pinned under the top bar while you scroll. Add, change or delete voices from a searchable list of about 1,100 voices. Set each part's volume, pan, reverb and chorus send, note range, transpose and receive channel.
 - **Split and layer setup.** Choose the keyboard mode and split point, and limit each part to a note range.
+- **Arpeggio editor.** An Arpeggio tab per performance: common settings, and for every part the six arpeggio type slots (chosen from all 999 types, searchable by name and category, with the option to adopt a type's original tempo) plus playback, range, timing, random and offset settings.
+- **Rhythm pattern chooser.** A Rhythm pattern tab to pick the performance's pattern from the 208 patterns by category or search, and set Auto key-on start.
 - **Effects and EQ.** Choose the performance's reverb and chorus types and edit every parameter of each, with values shown in real units. Edit the five-band master EQ.
 - **Voice editor.** Open any normal voice from a part or from the voice picker. Edit its general settings, controllers and LFO, insertion effect, and all eight elements (wave, key range, amplitude and pitch envelopes, filter, filter envelope, LFO). Try it on a part, or save it as a user voice.
+- **Drum kit editor.** Open a drum kit the same way. Edit its general settings, controllers and insertion effect, and every key from C0 to C6 (wave, level, pan, sends, envelope, pitch, filter). Play a key, copy one key's settings to another, and save as a user drum kit.
 - **User voices.** All 128 user voice slots are listed by name. When you save a voice, a slot chooser shows every slot and its current name before you overwrite anything.
 - **Follow.** Selecting a performance in the editor switches the keyboard to it. Unsaved edits go to the keyboard's edit buffer so you hear them immediately.
 - **Read and write.** Read one or all performances from the keyboard, audition edits in the edit buffer, and write them back to a slot.
@@ -52,6 +55,7 @@ Read the full guide for step-by-step help with each feature.
 | Follow | When ticked, the keyboard switches to whichever performance you open. |
 | Ch | The MIDI channel the keyboard receives program changes on (used by Follow). |
 | Bulk interval | The pause the keyboard leaves between SysEx messages it sends, 0 to 900 ms. Read from the keyboard on connect. |
+| Guide | Opens the guide in a new tab (the guide file must sit next to the editor). |
 | About | Version, license and disclaimers. |
 
 ## Backing up
@@ -65,7 +69,7 @@ Read the full guide for step-by-step help with each feature.
 
 - **Untested on hardware at this version.** The SysEx handling follows the Yamaha MX49/MX61/MX88 Data List and passes automated tests against a simulated keyboard, but it has not been verified on every model and firmware. Expect rough edges.
 - New effect types start from neutral parameter values, because the factory effect presets are not in the Data List.
-- Only normal voices can be edited. Drum kits cannot yet.
+- Preset drum kits and the GM kit cannot be overwritten. Edits are saved as a user drum kit. The user drum kit bank (63 / 40, kits 1 to 8) and sending a drum kit to a part's edit buffer follow the Data List but are untested on hardware.
 - Preset voices cannot be overwritten. Edits to a preset voice are saved as a user voice.
 - User voices are assumed to be at bank 63 / LSB 8, as given in the Data List.
 - A part counts as "in use" when its receive channel is not off.
@@ -85,8 +89,8 @@ The MX uses Yamaha's SysEx bulk dump protocol (model ID `7F 17`). A performance 
 | `data.json` | Voice list and factory performance list. |
 | `fxdata.json` | Effect types, their parameters and value tables. |
 | `vspec.json` | Voice parameter definitions. |
+| `arpdata.json` | Arpeggio type list (999) and rhythm pattern list (208). |
 | `test.js` | Node tests for the SysEx round trip and the data. |
-| `tests/` | Browser tests (Playwright) that drive the built editor against a simulated MIDI keyboard. |
 
 The data files were derived from the *Yamaha MX49/MX61/MX88 Data List* so that the editor shows the same voice names, effect parameters and ranges as the keyboard.
 
@@ -98,17 +102,6 @@ node test.js      # runs the Node tests
 ```
 
 Only Node.js is needed. The built HTML file has no external dependencies.
-
-### Browser tests
-
-The scripts in `tests/` open the built `mx-performance-editor.html` in headless Chromium with a simulated MIDI keyboard, and exercise editing, effects, the voice editor, user voices, following the selected performance, import and export, and the bulk interval. They print what they observed and any page errors (the last line should be an empty list). They need [Playwright](https://playwright.dev/) (`npm install playwright`, then `npx playwright install chromium`):
-
-```sh
-node build.js
-node tests/01-basic-editing.js
-```
-
-Test 06 writes a full set of 256 items to the simulated keyboard and takes a couple of minutes.
 
 ## Contributing
 

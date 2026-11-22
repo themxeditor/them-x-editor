@@ -1,0 +1,15 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg.click('#app tbody tr,#app .row,#app [data-i]');await pg.waitForTimeout(200);
+await pg.click('#t-arp');await pg.waitForTimeout(100);
+console.log('sections',(await pg.locator('#tabbody summary').allTextContents()).slice(0,4));
+await pg.locator('#tabbody button:has-text("SF1:")').first().click();
+await pg.fill('dialog[open] input[placeholder^="Search arp"]','PfArp1');await pg.click('dialog[open] .dl div:has-text("PfArp1")');await pg.waitForTimeout(100);
+console.log('slot',await pg.locator('#tabbody button:has-text("SF1:")').first().textContent());
+const st=await pg.evaluate(()=>{const P=lib[view.i].P;return[P.arps[0][0x3c],P.arps[0][0x3d]]});console.log('bytes',st,'expect [0,83]');
+await pg.selectOption('#tabbody select >> nth=2','5');
+await pg.click('#t-pat');await pg.fill('#tabbody input[placeholder^="Search patterns"]','Funk 1');await pg.click('#tabbody .dl div:has-text("Funk 1")');
+const pc=await pg.evaluate(()=>{const c=lib[view.i].P.common;return[c[0x47],c[0x48]]});console.log('pattern bytes',pc,'expect [0,51]');
+await pg.screenshot({path:require('os').tmpdir()+'/mx-pat.png'});
+console.log(errs);await b.close()})();

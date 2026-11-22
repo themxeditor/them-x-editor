@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>MX Performance Editor Guide</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
@@ -37,7 +36,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 
 <div class="wrap">
 <nav aria-label="Guide sections"><b>On this page</b>
-<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#voiceed">7. Voice editor</a><a href="#send">8. Try and save</a><a href="#backup">9. Back up</a><a href="#about">About</a><a href="#fix">Troubleshooting</a></nav>
+<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#voiceed">7. Voice editor</a><a href="#arp">Arpeggio</a><a href="#send">8. Try and save</a><a href="#backup">9. Back up</a><a href="#about">About</a><a href="#fix">Troubleshooting</a></nav>
 
 <main>
 <h1>Edit <span>performances</span> on your MX</h1>
@@ -87,6 +86,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <div class="col"><h3>Change a voice</h3><p>Click <span class="btn">Change voice</span> on a part and pick another. Its volume, pan and range settings stay as they were.</p></div>
 <div class="col"><h3>Delete a voice</h3><p>Click <span class="btn">Remove</span>. The part is switched off by setting its receive channel to off. The count shows how many of the 16 parts are in use.</p></div>
 </div>
+<p class="hint">The performance name, mode, split point, volume, arpeggio and tempo stay pinned under the top bar as you scroll through the parts.</p>
 <h3>Part settings</h3>
 <div class="tbl"><table><thead><tr><th>Control</th><th>What it does</th></tr></thead><tbody>
 <tr><td>Vol, Pan</td><td>Part level (0 to 127) and position (64 is centre).</td></tr>
@@ -131,9 +131,15 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <li><b>Try on part</b> sends the edited voice to that part of the performance currently in the keyboard's edit buffer. Audition the performance first so it is loaded there.</li>
 <li><b>Save as user voice…</b> opens a list of all 128 user voice slots with their names. Filter it, press <b>Refresh names</b> if some show "name not read yet", click the slot to overwrite, and confirm with <b>Save here</b>. A line above the list tells you which voice you are about to replace. The voice is written there and the part is pointed at it. Preset voices can't be overwritten, so edits always become a user voice.</li>
 </ul>
-<p>You still need to <b>Write</b> the performance afterwards so that it keeps pointing at the new user voice. Drum kits can't be edited yet.</p>
+<p>You still need to <b>Write</b> the performance afterwards so that it keeps pointing at the new user voice.</p>
+<h3>Drum kits</h3>
+<p>Drum kits open in their own editor from <b>Edit voice</b> or <b>Edit…</b> in the voice picker. It has four tabs: <b>General</b> (name, volume), <b>Controllers</b>, <b>Insertion effect</b>, and <b>Keys (drum pads)</b>. In Keys, choose a key from C0 to C6 (a filled dot means a drum sound is assigned) and edit its wave, level, pan, reverb and chorus sends, amplitude envelope, pitch and filter. <b>Play key</b> sounds the key, and <b>Copy settings to key…</b> copies one key's settings to another. <b>Try</b> sends the kit to the keyboard, and <b>Save as user drum kit…</b> writes to one of the 8 user kit slots. Preset and GM kits can't be overwritten. The user kit slot and sending a kit to a part are untested on hardware.</p>
 </section>
 
+<section id="arp"><h2>Arpeggio and rhythm pattern</h2>
+<p>On a performance, the <b>Arpeggio</b> tab has the common arpeggio settings and one card per voice in use. Each card has six slots (SF1 to SF6). Click a slot to choose one of the 999 arpeggio types, searching by name or filtering by category. Tick <i>Also set the performance tempo</i> to adopt the type's original tempo. Below the slots are the part's playback, range, timing, random and offset settings. Turn the part's <b>Arpeggio switch</b> on to use it.</p>
+<p>The <b>Rhythm pattern</b> tab lists the 208 patterns by category. Click one to select it, and set <b>Auto key-on start</b> if you want it. Audition or Write the performance to hear it.</p>
+</section>
 <section id="send"><h2>8. Try it, then save it</h2>
 <ol class="steps">
 <li><div><span class="btn pri">Audition</span> sends the performance to the keyboard's edit buffer. Play the keyboard in performance mode to hear it. Nothing is stored yet, and selecting another performance on the keyboard discards it.</div></li>
@@ -179,5 +185,3 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 </section>
 </main>
 </div>
-
-</body></html>

@@ -31,4 +31,10 @@ const m=msgs[1];let s=0;for(let i=5;i<m.length-1;i++)s+=m[i];assert.equal(s&127,
  const all=[...C.build(0,P,7),...C.build(0,P2,12),...C.buildVoice(0,V,[0x0e,0x0a,3]),...C.buildVoice(0,V,[0x0e,0x03,5])];
  const r=C.parseSyxAll(new Uint8Array(Buffer.concat(all.map(m=>Buffer.from(m)))));
  assert.equal(r.perfs.length,2);assert.deepEqual(r.perfs.map(x=>x.slot),[7,12]);assert.equal(r.voices.length,1);assert.equal(r.voices[0].slot,3);assert.equal(r.skipped,1);assert.equal(C.voiceName(r.voices[0].V),'UserOne');assert.equal(C.getName(r.perfs[1].P.common),'Second');}
+// drum kit round trip
+{const V={hdr:[0x28,2],blocks:{}};V.blocks[C.vkey(0x46,0)]=new Uint8Array(72);V.blocks[C.vkey(0x46,3)]=new Uint8Array(36);V.blocks[C.vkey(0x46,8)]=new Uint8Array(24);
+ for(let k=0;k<73;k++){const b=new Uint8Array(46);b[2]=k>>7;b[3]=k&127;V.blocks[C.vkey(0x47,k)]=b}
+ C.setVoiceName(V,'MyKit');const ms=C.buildVoice(0,V,[0x0e,0x28,2]);assert.equal(ms.length,2+3+73);
+ const r=C.parseSyxAll(new Uint8Array(Buffer.concat(ms.map(m=>Buffer.from(m)))));assert.equal(r.voices.length,1);assert(r.voices[0].drum);assert.equal(C.voiceName(r.voices[0].V),'MyKit');assert(C.isDrum(r.voices[0].V));assert.equal(r.voices[0].V.blocks[C.vkey(0x47,72)][3],72);
+ assert.deepEqual(C.voiceAddr({b:63,l:32,p:5}),[0x0e,0x20,4]);assert.deepEqual(C.voiceAddr({b:63,l:40,p:3}),[0x0e,0x28,2]);}
 console.log('all tests passed; voices',D.voices.length,'perfs',D.perfs.length);
