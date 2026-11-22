@@ -37,7 +37,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 
 <div class="wrap">
 <nav aria-label="Guide sections"><b>On this page</b>
-<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#voiceed">7. Voice editor</a><a href="#send">8. Try and save</a><a href="#backup">9. Back up</a><a href="#fix">Troubleshooting</a></nav>
+<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#voiceed">7. Voice editor</a><a href="#send">8. Try and save</a><a href="#backup">9. Back up</a><a href="#about">About</a><a href="#fix">Troubleshooting</a></nav>
 
 <main>
 <h1>Edit <span>performances</span> on your MX</h1>
@@ -63,6 +63,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <ul>
 <li><b>Follow</b> (on by default) makes the keyboard switch to whichever performance you open here. Untick it to browse without touching the keyboard.</li>
 <li><b>Ch</b> is the MIDI channel the keyboard receives program changes on (default 1). It only matters for Follow.</li>
+<li><b>Bulk interval</b> is the pause the keyboard leaves between the SysEx messages it sends, from 0 to 900 ms. The editor reads the current value when you connect. Lower values make reading performances and voices much faster, so try <b>0 ms</b> first. If data goes missing at 0, step up to 10 or 20 ms. The setting is stored in the keyboard.</li>
 </ul>
 <p>Right after connecting, the editor reads the names of the 128 user voices in the background so they show by name everywhere. Names are remembered in the browser, so this is quick next time.</p>
 <p>You can skip all of this and browse offline. Editing works without a keyboard, but reading, trying and writing need the connection.</p>
@@ -144,9 +145,21 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 
 <section id="backup"><h2>9. Back up and share</h2>
 <ul>
-<li><b>Export .syx</b> on a performance saves that one. <b>Export all .syx</b> on the list saves all 128. Do this before a big round of overwrites.</li>
-<li><b>Import .syx</b> loads performances from a file into consecutive slots starting at the number you enter. Imported ones are marked modified until you write them.</li>
+<li><b>Export .syx</b> on a performance saves that one.</li>
+<li><b>Export everything (.syx)</b> on the list saves all 128 performances and every user voice the editor has read, in one file. Do this before a big round of overwrites. Performances you haven't read from the keyboard are factory-list approximations, and the editor asks whether to include them. <b>Export performances only</b> leaves the voices out.</li>
+<li><b>Import .syx</b> accepts one or several files containing performances, user voices or both. A file with many items goes into the slots named inside it. A file with a single performance or voice asks which slot to use. Preset and edit-buffer voice dumps are skipped because they can't be stored.</li>
+<li>Imported items are marked <i>modified</i> and exist only in the editor until you press <b>Write all modified to keyboard</b> (or write a single performance). Writing a full set takes a few minutes. The keyboard needs Bulk Protect off.</li>
+<li>Edit or pick an imported user voice without a keyboard connected: the editor uses its stored copy.</li>
 <li><b>Reset library</b> discards all local edits and goes back to the factory list. It doesn't touch the keyboard.</li>
+</ul>
+</section>
+
+<section id="about"><h2>About, license and disclaimers</h2>
+<p>The <span class="btn">About</span> button in the top bar shows the version (0.0.1) and the notices below.</p>
+<ul>
+<li><b>License:</b> the editor is free software under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GNU General Public License, version 3</a>. The source code is at <a href="https://github.com/YamMXEditor/yammxeditor" target="_blank" rel="noopener noreferrer">github.com/YamMXEditor/yammxeditor</a>.</li>
+<li><b>Not affiliated with Yamaha:</b> this is an independent project, not associated with or endorsed by Yamaha Inc.</li>
+<li><b>Use at your own risk:</b> the editor can overwrite performances and user voices on your keyboard, and it comes with no warranty. Export everything before you write.</li>
 </ul>
 </section>
 
@@ -155,6 +168,8 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <tr><td>Status says Web MIDI isn't supported</td><td>Use Chrome or Edge.</td></tr>
 <tr><td>No MX in the port lists</td><td>Check the USB cable and power, close other MIDI programs, then reload the page and connect again.</td></tr>
 <tr><td>Reading times out</td><td>Confirm both ports are chosen and Dev# matches the keyboard.</td></tr>
+<tr><td>Reading is very slow</td><td>Lower the Bulk interval in the top bar. At 900 ms the keyboard waits almost a second between messages.</td></tr>
+<tr><td>The Bulk interval box is greyed out</td><td>It is only active while connected. Connect to the keyboard first.</td></tr>
 <tr><td>Writes do nothing</td><td>Turn Bulk Protect off on the keyboard.</td></tr>
 <tr><td>Audition makes no sound change</td><td>Put the keyboard in performance mode and make sure Local Control and the volume are up.</td></tr>
 <tr><td>The keyboard doesn't follow the performance I select</td><td>Check that Follow is ticked, the keyboard is in performance mode, and Ch matches the channel it receives program changes on.</td></tr>
