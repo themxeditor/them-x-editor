@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage();const errs=[];
+pg.on('pageerror',e=>errs.push(e.message));pg.on('console',m=>m.type()==='error'&&errs.push(m.text()));
+await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+console.log('rows',await pg.locator('tr.row').count());
+await pg.locator('tr.row').first().click();
+console.log('parts',await pg.locator('.part').count());
+await pg.click('#add');await pg.fill('#vq','piano');await pg.locator('#vl div[data-k]').first().click();
+console.log('parts after add',await pg.locator('.part').count());
+await pg.locator('.rm').first().click();
+console.log('parts after rm',await pg.locator('.part').count());
+await pg.screenshot({path:require('os').tmpdir()+'/mx-detail.png'});
+await pg.click('#back');await pg.screenshot({path:require('os').tmpdir()+'/mx-list.png'});
+console.log('errors',errs);await b.close()})();

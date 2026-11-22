@@ -86,6 +86,7 @@ The MX uses Yamaha's SysEx bulk dump protocol (model ID `7F 17`). A performance 
 | `fxdata.json` | Effect types, their parameters and value tables. |
 | `vspec.json` | Voice parameter definitions. |
 | `test.js` | Node tests for the SysEx round trip and the data. |
+| `tests/` | Browser tests (Playwright) that drive the built editor against a simulated MIDI keyboard. |
 
 The data files were derived from the *Yamaha MX49/MX61/MX88 Data List* so that the editor shows the same voice names, effect parameters and ranges as the keyboard.
 
@@ -97,6 +98,17 @@ node test.js      # runs the Node tests
 ```
 
 Only Node.js is needed. The built HTML file has no external dependencies.
+
+### Browser tests
+
+The scripts in `tests/` open the built `mx-performance-editor.html` in headless Chromium with a simulated MIDI keyboard, and exercise editing, effects, the voice editor, user voices, following the selected performance, import and export, and the bulk interval. They print what they observed and any page errors (the last line should be an empty list). They need [Playwright](https://playwright.dev/) (`npm install playwright`, then `npx playwright install chromium`):
+
+```sh
+node build.js
+node tests/01-basic-editing.js
+```
+
+Test 06 writes a full set of 256 items to the simulated keyboard and takes a couple of minutes.
 
 ## Contributing
 

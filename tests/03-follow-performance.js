@@ -1,0 +1,12 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage();const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.addInitScript(`window.__sent=[];const inp={id:'i1',name:'MX61',onmidimessage:null},o={id:'o1',name:'MX61',send(d){window.__sent.push(Array.from(d))}};
+navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',o]]),onstatechange:null});`);
+await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg.click('#conn');await pg.waitForFunction(()=>document.querySelector('#dot').classList.contains('on'));
+await pg.locator('tr.row').nth(4).click();
+const pc=()=>pg.evaluate(()=>window.__sent.filter(m=>m[0]===0xb0||m[0]===0xc0));
+console.log(JSON.stringify(await pc()));
+await pg.click('#nx');console.log(JSON.stringify((await pc()).slice(3)));
+await pg.click('#t-fx');console.log('after tab switch msgs',(await pc()).length);
+console.log(errs);await b.close()})();
