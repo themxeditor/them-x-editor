@@ -361,7 +361,7 @@ function modLabel(l){return l.dirty?'<span class="tag mod">modified</span>':l.sr
 function vnames(P){return P.parts.map((p,i)=>C.active(p)?(voiceOf(p)?.n||`${p.slice(1,4).join('/')}`):null).filter(Boolean)}
 function renderList(){const q=(view.q||'').toLowerCase();
  let h=`<div class="bar"><input id="q" placeholder="Search name or voice…" value="${view.q||''}" style="flex:1;min-width:200px">
- <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="rst" class="dng">Reset library</button></div>
+ <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="rst" class="dng">Reset library</button><a id="guide" href="MX%20Performance%20Editor%20Guide.html" target="_blank" rel="noopener" style="color:var(--acc2);text-decoration:none;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)">Guide</a></div>
  <div class="warn" ${out?'hidden':''}>Not connected. You can browse and edit the factory list offline; connect to read, audition and write your real performances.</div>
  <table><thead><tr><th>Slot</th><th>Name</th><th>Mode</th><th>Voices</th><th>#</th><th>Source</th></tr></thead><tbody>`;
  lib.forEach((l,i)=>{const names=vnames(l.P);const nm=C.getName(l.P.common);
