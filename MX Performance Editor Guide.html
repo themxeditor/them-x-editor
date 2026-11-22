@@ -37,7 +37,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 
 <div class="wrap">
 <nav aria-label="Guide sections"><b>On this page</b>
-<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#send">6. Try and save</a><a href="#backup">7. Back up</a><a href="#fix">Troubleshooting</a></nav>
+<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#voiceed">7. Voice editor</a><a href="#send">8. Try and save</a><a href="#backup">9. Back up</a><a href="#fix">Troubleshooting</a></nav>
 
 <main>
 <h1>Edit <span>performances</span> on your MX</h1>
@@ -59,6 +59,12 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <li><div>Choose the MX in both drop-downs. It is picked automatically when its name contains "MX". The dot turns green when both ports are set.</div></li>
 <li><div>Check <b>Dev#</b>. It must match the device number set on the keyboard (default 1).</div></li>
 </ol>
+<p>Two more settings sit next to the ports:</p>
+<ul>
+<li><b>Follow</b> (on by default) makes the keyboard switch to whichever performance you open here. Untick it to browse without touching the keyboard.</li>
+<li><b>Ch</b> is the MIDI channel the keyboard receives program changes on (default 1). It only matters for Follow.</li>
+</ul>
+<p>Right after connecting, the editor reads the names of the 128 user voices in the background so they show by name everywhere. Names are remembered in the browser, so this is quick next time.</p>
 <p>You can skip all of this and browse offline. Editing works without a keyboard, but reading, trying and writing need the connection.</p>
 </section>
 
@@ -72,7 +78,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 </section>
 
 <section id="edit"><h2>4. Add, change and remove voices</h2>
-<p>Click any row to open it. The screen shows the name, keyboard mode, split point, volume, arpeggio switch and tempo at the top, then one card per active part.</p>
+<p>Click any row to open it. With <b>Follow</b> on, the keyboard switches to that performance too: it recalls the stored slot, or receives your unsaved edits in its edit buffer if you have changed it here. The ◀ ▶ buttons step through slots the same way. The screen shows the name, keyboard mode, split point, volume, arpeggio switch and tempo at the top, then one card per active part.</p>
 <div class="mock" aria-label="Example of a part list"><div class="r h"><span>Part</span><span>Category</span><span>Voice</span></div>
 <div class="r"><b>1</b><span>AP</span><span>CncrtGrand</span></div><div class="r"><b>2</b><span>STR</span><span>Amb Pizza</span></div><div class="r"><b>10</b><span>DR</span><span>Break Kit</span></div></div>
 <div class="cols">
@@ -100,7 +106,34 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <div class="note"><b>Effects on new performances.</b> The editor can't read the keyboard's exact default reverb and chorus values, so a cleared performance keeps those of the performance it replaced. Starting from a copy of one you like is safer than starting empty.</div>
 </section>
 
-<section id="send"><h2>6. Try it, then save it</h2>
+<section id="fx"><h2>6. Effects and EQ</h2>
+<p>Open a performance and choose the <b>Effects &amp; EQ</b> tab. It has three panels that apply to the whole performance.</p>
+<div class="cols">
+<div class="col"><h3>Reverb</h3><p>Pick one of the reverb types, then adjust its parameters (reverb time, delay, filters and so on). Return level and pan set how loud the reverb is in the mix.</p></div>
+<div class="col"><h3>Chorus</h3><p>Choose a chorus, delay, flanger, phaser or tempo-synced type. It has its own return, pan and a send into the reverb.</p></div>
+<div class="col"><h3>Master EQ</h3><p>Five bands (low, low-mid, mid, high-mid, high) with gain, frequency and Q. The low and high bands can be shelving or peaking.</p></div></div>
+<p>Values show in real units (seconds, milliseconds, Hz, dB) taken from the Data List's tables. Each part's own <b>Rev</b> and <b>Cho</b> sliders on the Voices tab set how much of that part goes to these effects.</p>
+<div class="note"><b>New effect types start from neutral values.</b> The Data List doesn't give the factory preset values, so after switching type, adjust the sound by ear. Re-reading a performance from the keyboard brings back its stored settings.</div>
+</section>
+
+<section id="voiceed"><h2>7. Voice editor</h2>
+<p>Each part card has an <span class="btn">Edit voice</span> button. In the voice picker, every voice has an <span class="btn">Edit…</span> button as well, so you can open a voice before choosing it. The editor loads the voice's real data from the keyboard, so you must be connected.</p>
+<ul>
+<li><b>General</b>: volume, key assign mode, micro tuning, portamento time mode and legato slope.</li>
+<li><b>Controllers / LFO</b>: the six controller assignments (source, destination, depth) and the common LFO.</li>
+<li><b>Insertion effect</b>: the voice's own effect with all its parameters.</li>
+<li><b>Element 1 to 8</b>: each element's wave, key range, amplitude and pitch envelopes, filter, filter envelope and LFO. Dimmed tabs are elements that are switched off.</li>
+</ul>
+<p>The voice picker also has a <b>USER</b> category with all 128 user voices. They are listed as "User 001" and so on until their names are read; <span class="btn">Read user voices</span> in the picker re-reads them from the keyboard.</p>
+<p>Two buttons at the top finish the job:</p>
+<ul>
+<li><b>Try on part</b> sends the edited voice to that part of the performance currently in the keyboard's edit buffer. Audition the performance first so it is loaded there.</li>
+<li><b>Save as user voice…</b> opens a list of all 128 user voice slots with their names. Filter it, press <b>Refresh names</b> if some show "name not read yet", click the slot to overwrite, and confirm with <b>Save here</b>. A line above the list tells you which voice you are about to replace. The voice is written there and the part is pointed at it. Preset voices can't be overwritten, so edits always become a user voice.</li>
+</ul>
+<p>You still need to <b>Write</b> the performance afterwards so that it keeps pointing at the new user voice. Drum kits can't be edited yet.</p>
+</section>
+
+<section id="send"><h2>8. Try it, then save it</h2>
 <ol class="steps">
 <li><div><span class="btn pri">Audition</span> sends the performance to the keyboard's edit buffer. Play the keyboard in performance mode to hear it. Nothing is stored yet, and selecting another performance on the keyboard discards it.</div></li>
 <li><div><span class="btn">Test note</span> plays middle C on channel 1 if you want to hear it without touching the keys.</div></li>
@@ -109,7 +142,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <p><span class="btn">Re-read from keyboard</span> throws away your edits to that performance and loads what is stored.</p>
 </section>
 
-<section id="backup"><h2>7. Back up and share</h2>
+<section id="backup"><h2>9. Back up and share</h2>
 <ul>
 <li><b>Export .syx</b> on a performance saves that one. <b>Export all .syx</b> on the list saves all 128. Do this before a big round of overwrites.</li>
 <li><b>Import .syx</b> loads performances from a file into consecutive slots starting at the number you enter. Imported ones are marked modified until you write them.</li>
@@ -124,6 +157,8 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <tr><td>Reading times out</td><td>Confirm both ports are chosen and Dev# matches the keyboard.</td></tr>
 <tr><td>Writes do nothing</td><td>Turn Bulk Protect off on the keyboard.</td></tr>
 <tr><td>Audition makes no sound change</td><td>Put the keyboard in performance mode and make sure Local Control and the volume are up.</td></tr>
+<tr><td>The keyboard doesn't follow the performance I select</td><td>Check that Follow is ticked, the keyboard is in performance mode, and Ch matches the channel it receives program changes on.</td></tr>
+<tr><td>User voices show as "User 001"</td><td>Their names haven't been read yet. Connect, wait for the status bar to say the names were read, or use Read user voices in the picker.</td></tr>
 <tr><td>A voice shows as "Unknown voice"</td><td>Its bank and program numbers aren't in the Data List. It still plays and can be kept or replaced.</td></tr>
 </tbody></table></div>
 </section>
