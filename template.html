@@ -14,6 +14,7 @@
 :root{--bg:#14161a;--panel:#1d2026;--panel2:#252932;--line:#323845;--fg:#e8eaee;--mute:#8b93a3;--acc:#ff6a3d;--acc2:#3dd6ff;--ok:#4cd694;--bad:#ff5468;color-scheme:dark}
 @media(prefers-color-scheme:light){:root:not(.dark){--bg:#f3f4f7;--panel:#fff;--panel2:#eef0f4;--line:#d5d9e2;--fg:#1b1e25;--mute:#667085;--acc:#e24a1b;--acc2:#0a7ea8;color-scheme:light}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
+a.plink,a.pmore{color:var(--acc2);text-decoration:none}a.plink:hover,a.pmore:hover{text-decoration:underline}
 .stick{position:sticky;top:var(--hh,52px);z-index:4;background:var(--bg);padding-bottom:8px}
 header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 h1{font-size:16px;margin:0 8px 0 0;letter-spacing:.5px}h1 b{color:var(--acc)}
@@ -346,6 +347,12 @@ function pickUserSlot(newName,pre,cb){const d=h('dialog',{style:'width:min(560px
 
 
 // ---------- User voice manager ----------
+
+function usedByKeyMap(){const m={};lib.forEach((l,i)=>l.P.parts.forEach(p=>{if(!C.active(p))return;const k=C.getVoiceKey(p);(m[k]=m[k]||new Set()).add(i)}));return m}
+function usedLinks(set,id){if(!set||!set.size)return '<span style="color:var(--mute)">—</span>';const all=[...set].sort((a,b)=>a-b),open=view.exp&&view.exp.has(id),list=open?all:all.slice(0,4);
+ return list.map(i=>`<a href="#" class="plink" data-i="${i}" title="Open ${esc(C.getName(lib[i].P.common))||slotName(i)}">${slotName(i)}</a>`).join(', ')+(all.length>4?` <a href="#" class="pmore" data-id="${id}">${open?'less':'+'+(all.length-4)+' more'}</a>`:'')}
+function wireLinks(root){root.querySelectorAll('a.plink').forEach(a=>a.onclick=e=>{e.preventDefault();e.stopPropagation();go({type:'detail',i:+a.dataset.i})});
+ root.querySelectorAll('a.pmore').forEach(a=>a.onclick=e=>{e.preventDefault();e.stopPropagation();const x=view.exp||(view.exp=new Set());x.has(a.dataset.id)?x.delete(a.dataset.id):x.add(a.dataset.id);render()})}
 function usedByMap(){const m={};lib.forEach((l,i)=>l.P.parts.forEach(p=>{if(C.active(p)&&p[1]===63&&p[2]===8)(m[p[3]]=m[p[3]]||new Set()).add(i)}));return m}
 function uvState(nn){return vdirty.has(nn)?'mod':vcache[nn]?'stored':userVoices()[nn]!==undefined?'name':'unread'}
 const UVLAB={mod:'<span class="tag mod">modified, not on keyboard</span>',stored:'<span class="tag dev">on keyboard</span>',name:'<span class="tag">name only</span>',unread:'<span class="tag">not read</span>'};
@@ -384,7 +391,7 @@ function renderUV(){const q=(view.q||'').toLowerCase(),f=view.f||'all',known=use
   const ul=u?[...u].map(slotName):[];
   s+=`<tr data-n="${nn}" ${view.flash===nn?'style="outline:1px solid var(--acc)"':''}><td><input type="checkbox" class="uvsel" ${sel.has(nn)?'checked':''}></td><td>${String(nn+1).padStart(3,'0')}</td>
   <td><b class="uvname" style="cursor:pointer;${name===undefined?'color:var(--mute);font-weight:400':''}" title="Click to rename">${name===undefined?'(not read)':esc(name)||'(blank)'}</b></td>
-  <td title="${esc(ul.join(', '))}">${u?ul.slice(0,3).join(', ')+(ul.length>3?' +'+(ul.length-3):''):'<span style="color:var(--mute)">—</span>'}</td><td>${UVLAB[st]}</td>
+  <td>${usedLinks(u,'u'+nn)}</td><td>${UVLAB[st]}</td>
   <td style="white-space:nowrap"><button class="uvedit" style="font-size:12px;padding:2px 8px">Edit</button> <select class="uvmore" style="font-size:12px"><option value="">More…</option><option value="rename">Rename</option><option value="copy">Copy to…</option><option value="swap">Swap with…</option><option value="export">Export .syx</option><option value="write">Write to keyboard</option><option value="reread">Re-read from keyboard</option></select></td></tr>`}
  s+=`</tbody></table>${shown.length?'':'<div class="empty">No user voices match.</div>'}<pre id="log"></pre><input type="file" id="file" accept=".syx" multiple hidden>`;
  $('#app').innerHTML=s;view.flash=null;
@@ -396,6 +403,7 @@ function renderUV(){const q=(view.q||'').toLowerCase(),f=view.f||'all',known=use
  $('#uvexp').onclick=async()=>{const list=sel.size?[...sel].sort((a,b)=>a-b):Object.keys(vcache).map(Number).sort((a,b)=>a-b);if(!list.length)return status('No user voices to export yet. Press Read from keyboard first.');
   const msgs=[];for(const nn of list){if(vcache[nn])msgs.push(...C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn]))}download(sel.size?'mx-user-voices-selected.syx':'mx-user-voices.syx',msgs)};
  $('#uvall').onchange=e=>{shown.forEach(n=>e.target.checked?sel.add(n):sel.delete(n));renderUV()};
+ wireLinks($('#app'));
  document.querySelectorAll('#app tr[data-n]').forEach(r=>{const nn=+r.dataset.n;
   r.querySelector('.uvsel').onchange=e=>{e.target.checked?sel.add(nn):sel.delete(nn);renderUV()};
   r.querySelector('.uvname').onclick=()=>uvAction(nn,'rename');r.querySelector('.uvedit').onclick=()=>uvAction(nn,'edit');
@@ -417,17 +425,18 @@ function pickSlotDlg(title,okLabel,from){return new Promise(res=>{const d=h('dia
  d.append(h('div',{class:'dh'},h('b',{style:'align-self:center'},title),q,x),info,list,h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},ok));
  document.body.append(d);info.textContent='Choose a user voice slot.';draw();d.showModal()})}
 // ---------- All voices screen ----------
-function renderAV(){const q=(view.q||'').toLowerCase(),m=view.m||'',cats=[...new Set(DATA.voices.map(v=>v.m))];
+function renderAV(){const um=usedByKeyMap(),q=(view.q||'').toLowerCase(),m=view.m||'',cats=[...new Set(DATA.voices.map(v=>v.m))];
  const r=DATA.voices.filter(v=>(!m||v.m===m)&&(!q||(v.n+' '+v.s+' '+v.m).toLowerCase().includes(q))),shown=r.slice(0,300);
  let s=`<div class="bar"><button id="avback">← Performances</button><input id="q" placeholder="Search voices…" value="${esc(view.q||'')}" style="flex:1;min-width:160px"><select id="avm"><option value="">All categories</option>${cats.map(c=>`<option ${c===m?'selected':''}>${c}</option>`).join('')}</select>
  <button id="avread" ${out?'':'disabled'}>Read user voices</button><button id="uvgo">User voices…</button></div>
  <div class="hint" style="padding:0 0 10px">Every voice in the Data List (${DATA.voices.length}). <b>Edit…</b> opens the voice editor; to keep changes, save them as a user voice. <b>Copy to user slot…</b> copies a normal voice into a user slot here, staged until you write it to the keyboard. Showing ${shown.length} of ${r.length}.</div><div class="warn" ${out?'hidden':''}>Not connected. Voice data is read from the keyboard, so Edit… and Copy need a connection (Connect MIDI). Only user voices you have already read can be used offline.</div><div class="dl" style="max-height:none;background:var(--panel);border-radius:8px">`;
  shown.forEach(v=>{const normal=C.voiceAddr(v)&&C.voiceAddr(v)[1]<0x20;
-  s+=`<div data-k="${v.b}:${v.l}:${v.p}"><span class="c">${v.m} › ${esc(v.s)}</span><b>${esc(v.n)}</b><span style="margin-left:auto;color:var(--mute)">${v.b}/${v.l}/${v.p}</span><button class="avedit" ${C.voiceAddr(v)?'':'disabled'} style="font-size:12px;padding:2px 8px">Edit…</button><button class="avcopy" ${normal?'':'disabled'} style="font-size:12px;padding:2px 8px">Copy to user slot…</button></div>`});
+  s+=`<div data-k="${v.b}:${v.l}:${v.p}"><span class="c">${v.m} › ${esc(v.s)}</span><b>${esc(v.n)}</b><span style="margin-left:auto;color:var(--mute)">${v.b}/${v.l}/${v.p}</span><span class="avused" style="min-width:150px;font-size:12px">Used by: ${usedLinks(um[v.b+':'+v.l+':'+v.p],'v'+v.b+':'+v.l+':'+v.p)}</span><button class="avedit" ${C.voiceAddr(v)?'':'disabled'} style="font-size:12px;padding:2px 8px">Edit…</button><button class="avcopy" ${normal?'':'disabled'} style="font-size:12px;padding:2px 8px">Copy to user slot…</button></div>`});
  s+='</div><pre id="log"></pre>';$('#app').innerHTML=s;
  const qi=$('#q');qi.oninput=()=>{view.q=qi.value;const p=qi.selectionStart;renderAV();$('#q').focus();$('#q').setSelectionRange(p,p)};
  $('#avback').onclick=()=>go({type:'list'});$('#uvgo').onclick=()=>go({type:'uv'});$('#avm').onchange=e=>{view.m=e.target.value;renderAV()};
  $('#avread').onclick=async e=>{await readUserNames(e.target);renderAV()};
+ wireLinks($('#app'));
  document.querySelectorAll('#app .dl div[data-k]').forEach(e=>{const vo=vByKey.get(e.dataset.k);
   e.querySelector('.avedit').onclick=()=>!(out||(vo.b===63&&vo.l===8&&vcache[vo.p-1]))?alert('Connect MIDI first: the voice is read from the keyboard so it can be edited.'):openVoiceEditor(vo,{onSaved:()=>{$('#ved').close();renderAV()}});
   e.querySelector('.avcopy').onclick=async()=>{if(!(out||(vo.b===63&&vo.l===8&&vcache[vo.p-1])))return alert('Connect MIDI first: the voice is read from the keyboard so it can be copied.');try{const addr=C.voiceAddr(vo);const V=vo.b===63&&vo.l===8?await uvGet(vo.p-1):await requestVoice(addr);
