@@ -8,10 +8,6 @@ A browser-based editor for the performances, voices and effects of Yamaha MX49, 
 
 > **Use at your own risk.** This software sends system exclusive (SysEx) data that can overwrite performances and user voices on your keyboard. It is provided "as is", without warranty of any kind. You use it entirely at your own risk, and the authors are not liable for lost data or damage. Back up your keyboard (**Export everything**) before writing to it.
 
-> **Experimental software.** This editor is experimental. Before you use it, back up your keyboard's data (use **Export everything**) and copy the backup file to a USB drive or other safe storage. No guarantee of correctness or suitability for any purpose is expressed or implied.
-
-> **Bug reports and contributions.** Bug reports are welcome, but there is no guarantee, expressed or implied, that any fix will be made or will be forthcoming. You are encouraged to clone the repository and use Claude or another AI tool to improve and extend the software as you see fit, as long as you follow the terms of the GPL-3.0 license.
-
 ## What it does
 
 An MX keyboard stores 128 user performances. Each performance is a stored setup of up to 16 parts. Each part plays a voice, and the performance adds a keyboard mode (single, layer or split), reverb, chorus, a master EQ and arpeggio settings. The keyboard's own front panel makes this slow to edit. This editor gives you a full-screen view of all of it.
@@ -24,7 +20,8 @@ An MX keyboard stores 128 user performances. Each performance is a stored setup 
 - **Effects and EQ.** Choose the performance's reverb and chorus types and edit every parameter of each, with values shown in real units. Edit the five-band master EQ.
 - **Voice editor.** Open any normal voice from a part or from the voice picker. Edit its general settings, controllers and LFO, insertion effect, and all eight elements (wave, key range, amplitude and pitch envelopes, filter, filter envelope, LFO). Try it on a part, or save it as a user voice.
 - **Drum kit editor.** Open a drum kit the same way. Edit its general settings, controllers and insertion effect, and every key from C0 to C6 (wave, level, pan, sends, envelope, pitch, filter). Play a key, copy one key's settings to another, and save as a user drum kit.
-- **User voices.** All 128 user voice slots are listed by name. When you save a voice, a slot chooser shows every slot and its current name before you overwrite anything.
+- **Voices screen.** A Voices screen lists every voice in the Data List with search and category filter. Edit a voice, or copy a normal voice into a user slot.
+- **User voice manager.** A User voices screen lists all 128 slots with name, status and which performances use each voice. Rename, copy and swap (choosing the target slot from a list that shows names, status and the performances that use it), edit, export (one or several) and import voices there. Changes are staged and marked modified until you write them to the keyboard, one slot or all at once.
 - **Follow.** Selecting a performance in the editor switches the keyboard to it. Unsaved edits go to the keyboard's edit buffer so you hear them immediately.
 - **Read and write.** Read one or all performances from the keyboard, audition edits in the edit buffer, and write them back to a slot.
 - **Backup and sharing.** Export and import `.syx` files. Export everything (all performances and all user voices) in a single file, and import it again later.

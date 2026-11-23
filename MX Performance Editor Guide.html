@@ -36,7 +36,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 
 <div class="wrap">
 <nav aria-label="Guide sections"><b>On this page</b>
-<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#voiceed">7. Voice editor</a><a href="#arp">Arpeggio</a><a href="#send">8. Try and save</a><a href="#backup">9. Back up</a><a href="#about">About</a><a href="#fix">Troubleshooting</a></nav>
+<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Browse</a><a href="#edit">4. Edit voices</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#voiceed">7. Voice editor</a><a href="#uvm">User voices</a><a href="#arp">Arpeggio</a><a href="#send">8. Try and save</a><a href="#backup">9. Back up</a><a href="#about">About</a><a href="#fix">Troubleshooting</a></nav>
 
 <main>
 <h1>Edit <span>performances</span> on your MX</h1>
@@ -136,6 +136,18 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <p>Drum kits open in their own editor from <b>Edit voice</b> or <b>Edit…</b> in the voice picker. It has four tabs: <b>General</b> (name, volume), <b>Controllers</b>, <b>Insertion effect</b>, and <b>Keys (drum pads)</b>. In Keys, choose a key from C0 to C6 (a filled dot means a drum sound is assigned) and edit its wave, level, pan, reverb and chorus sends, amplitude envelope, pitch and filter. <b>Play key</b> sounds the key, and <b>Copy settings to key…</b> copies one key's settings to another. <b>Try</b> sends the kit to the keyboard, and <b>Save as user drum kit…</b> writes to one of the 8 user kit slots. Preset and GM kits can't be overwritten. The user kit slot and sending a kit to a part are untested on hardware.</p>
 </section>
 
+<section id="uvm"><h2>Managing user voices</h2>
+<p>Press <b>User voices…</b> on the performance list. The table shows all 128 user voice slots with their name, a status (<i>on keyboard</i>, <i>modified</i>, <i>name only</i> or <i>not read</i>) and the performances that use each voice. Use <b>Read from keyboard</b> to fill it in.</p>
+<ul>
+<li><b>Copy to…</b> and <b>Swap with…</b> open a slot list showing each slot's name, status and which performances use it. Pick one and confirm.</li>
+<li>Click a name to rename it. <b>Edit</b> opens the voice editor, and saving offers the same slot first.</li>
+<li><b>More…</b> has Rename, Copy to…, Swap with…, Export .syx, Write to keyboard and Re-read from keyboard.</li>
+<li>Tick rows to export or write just those voices. With nothing ticked, <b>Write modified</b> writes every voice you changed.</li>
+<li>Copies, swaps, renames and imports stay in the editor, marked <i>modified</i>, until you write them. Overwriting a voice that performances use asks you to confirm and lists them.</li>
+<li>Filters show only modified voices, voices used by performances, or voices not read yet.</li>
+</ul>
+<p>The <b>Voices…</b> button opens a screen listing every voice (presets, GM, drum kits and user voices) with search and a category filter. <b>Edit…</b> opens the voice editor. <b>Copy to user slot…</b> copies a normal voice into a user slot of your choice, staged until you write it.</p>
+</section>
 <section id="arp"><h2>Arpeggio and rhythm pattern</h2>
 <p>On a performance, the <b>Arpeggio</b> tab has the common arpeggio settings and one card per voice in use. Each card has six slots (SF1 to SF6). Click a slot to choose one of the 999 arpeggio types, searching by name or filtering by category. Tick <i>Also set the performance tempo</i> to adopt the type's original tempo. Below the slots are the part's playback, range, timing, random and offset settings. Turn the part's <b>Arpeggio switch</b> on to use it.</p>
 <p>The <b>Rhythm pattern</b> tab lists the 208 patterns by category. Click one to select it, and set <b>Auto key-on start</b> if you want it. Audition or Write the performance to hear it.</p>
