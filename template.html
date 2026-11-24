@@ -26,7 +26,7 @@ a.pri{text-decoration:none;border:1px solid var(--acc);border-radius:6px;padding
 button.dng:hover{border-color:var(--bad);color:var(--bad)}button:disabled{opacity:.4;cursor:default}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--bad);display:inline-block}.dot.on{background:var(--ok)}
 main{max-width:1100px;margin:0 auto;padding:16px}
-#status{color:var(--mute);font-size:12px;margin-left:auto}
+#status{color:var(--mute);font-size:12px;flex:1 0 100%;text-align:center;margin-top:-2px}.brand{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.brand h1{margin:0}.links{display:flex;gap:8px;align-items:center}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:8px;overflow:hidden}
 th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
@@ -71,14 +71,13 @@ dialog.big{width:min(1000px,96vw);max-height:92vh}.big .body{padding:12px;overfl
 .warn{background:#ff54681a;border:1px solid var(--bad);padding:8px 12px;border-radius:8px;margin-bottom:12px}
 </style></head><body>
 <header>
- <h1>THEM-X <b>Performance</b> Editor</h1>
+ <div class="brand"><h1>THEM-X <b>Performance</b> Editor</h1><div class="links"><a id="guide" class="pri" href="THEM-X%20Performance%20Editor%20Guide.html" target="_blank" rel="noopener">Guide</a><button id="about" class="pri" title="About this editor">About</button><select id="theme" title="Colour theme"><option value="dark">Dark</option><option value="light">Light</option><option value="blue">Blue</option></select></div></div>
  <button id="conn" class="pri">Connect MIDI</button>
  <span class="dot" id="dot"></span>
  <select id="mi" title="MIDI input"></select><select id="mo" title="MIDI output"></select>
  <label style="font-size:12px;color:var(--mute)">Dev# <input id="dev" type="number" min="1" max="16" value="1" style="width:56px"></label>
  <label style="font-size:12px;color:var(--mute)">Ch <input id="fch" type="number" min="1" max="16" value="1" style="width:52px" title="MIDI channel the keyboard receives program changes on"></label>
  <label style="font-size:12px;color:var(--mute)" title="How long the keyboard pauses between the SysEx messages it sends. Lower is much faster. Stored in the keyboard (Utility: Bulk Dump Interval)">Bulk interval <select id="bulk" disabled style="padding:4px 6px"></select></label>
- <a id="guide" class="pri" href="THEM-X%20Performance%20Editor%20Guide.html" target="_blank" rel="noopener">Guide</a><button id="about" class="pri" title="About this editor">About</button><select id="theme" title="Colour theme"><option value="dark">Dark</option><option value="light">Light</option><option value="blue">Blue</option></select>
  <span id="status">Not connected</span>
 </header>
 <main id="app"></main>
@@ -213,8 +212,11 @@ async function writeSlot(i){if(!out)return alert('Connect MIDI first.');
  else if(!confirm(`Overwrite performance ${slotName(i)} on the keyboard?\n(Bulk Protect must be OFF on the instrument.)`))return;
  try{if(withVoices)await writeUserVoicesFirst(pf.dirtyUV,status);
   const r=await writeVerified(i,i,t=>status(slotName(i)+': '+t));
-  if(r.ok){lib[i].dirty=false;lib[i].src='dev';save()}
-  status(resultMsg(slotName(i),r));if(!r.ok||r.unverified)alert(resultMsg(slotName(i),r));render()}
+  let shown=false;
+  if(r.ok){lib[i].dirty=false;lib[i].src='dev';save();
+   // Writing a stored slot does not refresh what the keyboard is currently showing/playing (its edit buffer), so send the same data there too.
+   if(followOn){try{status(slotName(i)+': updating the keyboard display…');await sendPerf(lib[i].P,'edit');shown=true}catch(e){log('edit buffer refresh failed: '+e.message)}}}
+  status(resultMsg(slotName(i),r)+(shown?' The keyboard now shows the new version.':r.ok?' If the keyboard still shows the old version, select another performance and come back.':''));if(!r.ok||r.unverified)alert(resultMsg(slotName(i),r));render()}
  catch(e){status('Write failed: '+e.message);alert('Write failed: '+e.message+'\nThe keyboard may hold a partly written performance. Reconnect and write it again.')}}
 async function audition(i){if(!out)return alert('Connect MIDI first.');const pf=preflight(i);
  if(pf.errors.length&&!await problemDlg({title:'Send to the edit buffer?',errors:pf.errors,warns:pf.warns,okLabel:'Send anyway'}))return;
