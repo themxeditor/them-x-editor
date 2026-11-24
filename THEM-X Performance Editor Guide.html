@@ -1,0 +1,228 @@
+<title>THEM-X Performance Editor Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: narrow reading column with a sticky step index on wide screens. Palette: graphite panel greys, one orange accent, one cyan for MIDI/keyboard terms. */
+:root{--bg:#f4f5f7;--panel:#ffffff;--panel2:#eef0f4;--line:#d5d9e2;--fg:#1a1d24;--mute:#5d6676;--acc:#e24a1b;--acc2:#0b7499;--warn:#fff1ed;--warnline:#e9a592;--code:#e7eaf0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--panel:#1d2026;--panel2:#252932;--line:#323845;--fg:#e8eaee;--mute:#9aa2b1;--acc:#ff6a3d;--acc2:#4cc9f0;--warn:#2b1c18;--warnline:#7a3b2a;--code:#262a33;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14161a;--panel:#1d2026;--panel2:#252932;--line:#323845;--fg:#e8eaee;--mute:#9aa2b1;--acc:#ff6a3d;--acc2:#4cc9f0;--warn:#2b1c18;--warnline:#7a3b2a;--code:#262a33;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 Inter,system-ui,sans-serif;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:1020px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:40px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;padding-top:8px;font-size:13px}
+nav b{display:block;font:700 11px/1 'Space Grotesk',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+nav a{display:block;padding:5px 0;color:var(--mute);text-decoration:none}nav a:hover{color:var(--acc)}
+h1{font:700 34px/1.1 'Space Grotesk',sans-serif;margin:0 0 10px;text-wrap:balance}h1 span{color:var(--acc)}
+.lede{color:var(--mute);font-size:17px;max-width:60ch;margin:0 0 28px}
+section{margin-bottom:40px;scroll-margin-top:16px}
+h2{font:700 22px/1.2 'Space Grotesk',sans-serif;margin:0 0 12px;text-wrap:balance}
+h3{font:600 15px/1.3 Inter,sans-serif;margin:20px 0 6px}
+p{margin:0 0 12px;max-width:68ch}ul,ol{margin:0 0 12px;padding-left:22px;max-width:68ch}li{margin-bottom:6px}
+code,kbd{font:13px ui-monospace,Menlo,monospace;background:var(--code);padding:1px 6px;border-radius:4px}
+.btn{font:inherit;font-size:14px;line-height:1.4;font-weight:400;color:var(--fg);display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 9px;margin:1px 0;white-space:nowrap}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.note{background:var(--warn);border:1px solid var(--warnline);border-radius:8px;padding:12px 14px;margin:14px 0;max-width:68ch}
+.note b{color:var(--acc)}
+.tbl{overflow-x:auto;margin:10px 0 14px}table{border-collapse:collapse;min-width:520px;width:100%;background:var(--panel);border:1px solid var(--line)}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}th{background:var(--panel2);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.steps{counter-reset:s;list-style:none;padding:0}.steps li{counter-increment:s;display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;margin-bottom:12px}
+.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;font:700 14px/28px 'Space Grotesk',sans-serif;text-align:center}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:12px 0}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}.col h3{margin-top:0;color:var(--acc2)}.col p{font-size:14px;margin:0}
+.mock{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:12px 0;overflow:hidden;font-size:13px;max-width:560px}
+.mock .r{display:grid;grid-template-columns:44px 90px minmax(0,1fr);gap:10px;padding:7px 12px;border-bottom:1px solid var(--line)}.mock .r:last-child{border:0}
+.mock .h{background:var(--panel2);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+@media(max-width:760px){.wrap{grid-template-columns:minmax(0,1fr)}nav{position:static;display:flex;flex-wrap:wrap;gap:4px 14px}nav b{width:100%}h1{font-size:28px}}
+</style>
+
+<div class="wrap">
+<nav aria-label="Guide sections"><b>On this page</b>
+<a href="#setup">1. Set up</a><a href="#connect">2. Connect</a><a href="#browse">3. Performance list</a><a href="#perf">4. Performance page</a><a href="#create">5. Create new</a><a href="#fx">6. Effects and EQ</a><a href="#arp">7. Arpeggio and rhythm</a><a href="#voiceed">8. Voice editor</a><a href="#voices">9. Managing voices</a><a href="#send">10. Try and save</a><a href="#backup">11. Back up and share</a><a href="#about">About</a><a href="#fix">Troubleshooting</a></nav>
+
+<main>
+<h1>THEM-X <span>Performance Editor</span></h1>
+<p class="lede">A performance is a stored setup of up to 16 voices with split, layer, effects, arpeggio and mix settings. This guide covers reading performances from your Yamaha MX49, MX61 or MX88, editing them and their voices, and writing them back.</p>
+<div class="note"><b>Experimental software.</b> Back up your keyboard first (section 11) and keep the backup on a USB drive or other safe storage. Nothing here has been verified on every keyboard and firmware. See <a href="#about">About</a>.</div>
+
+<section id="setup"><h2>1. Set up</h2>
+<ol>
+<li>Use <b>Chrome or Edge</b> on a computer. Firefox and Safari don't support the MIDI access the editor needs.</li>
+<li>Connect the keyboard to the computer with its <b>USB TO HOST</b> cable and switch it on.</li>
+<li>Open <code>them-x-performance-editor.html</code> from your computer (double-click it) or from a localhost server. Pages opened from a normal web address over plain <code>http</code> are blocked from MIDI. Keep this guide file in the same folder: the <span class="btn pri">Guide</span> button in the top bar opens it.</li>
+<li>On the keyboard, set <b>Bulk Protect to off</b> (in the Utility settings). While it is on, the keyboard ignores every write.</li>
+</ol>
+<div class="note"><b>Close other MIDI software first.</b> A DAW or another editor that has the keyboard's USB port open can stop the browser from receiving data.</div>
+</section>
+
+<section id="connect"><h2>2. Connect</h2>
+<ol class="steps">
+<li><div>Click <span class="btn pri">Connect MIDI</span> in the top bar and allow the browser's MIDI permission prompt. It must include system exclusive access.</div></li>
+<li><div>Choose the MX in both port drop-downs. It is picked automatically when its name contains "MX". The dot turns green when both ports are set.</div></li>
+<li><div>Check <b>Dev#</b>. It must match the device number set on the keyboard (default 1).</div></li>
+</ol>
+<div class="tbl"><table><thead><tr><th>Top bar</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Connect MIDI</td><td>Opens the MIDI connection. It sits next to the title; the dot beside it is green when connected.</td></tr>
+<tr><td>Port drop-downs</td><td>The MIDI input and output.</td></tr>
+<tr><td>Dev#</td><td>The keyboard's device number.</td></tr>
+<tr><td>Ch</td><td>The MIDI channel the keyboard receives program changes on (default 1). It only matters for Follow.</td></tr>
+<tr><td>Bulk interval</td><td>The pause the keyboard leaves between the SysEx messages it sends, 0 to 900 ms. Lower values make reading much faster, so try <b>0 ms</b> first. If data goes missing, step up to 10 or 20 ms. It is stored in the keyboard and only active while connected.</td></tr>
+<tr><td>Guide</td><td>Opens this guide in a new tab.</td></tr>
+<tr><td>About</td><td>Version, license, disclaimers. It opens by itself the first time you open the editor.</td></tr></tbody></table></div>
+<p>Right after connecting, the editor reads the names of the 128 user voices in the background so they show by name everywhere. Names are remembered in the browser.</p>
+<p>You can skip all of this and browse offline. Editing performances works without a keyboard, but reading, trying, writing and loading voice data need the connection.</p>
+</section>
+
+<section id="browse"><h2>3. Performance list</h2>
+<p>The first screen lists all 128 performances (slots A01 to H16). Search matches the name, slot or any voice name. The <b>Source</b> column shows where each one came from:</p>
+<div class="tbl"><table><thead><tr><th>Tag</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>factory list</td><td>Built from the Data List: name, mode, split point and the voices in parts 1, 2 and 10 only. An approximation, not what is stored in your keyboard.</td></tr>
+<tr><td>from keyboard</td><td>Read from your MX. Complete and accurate.</td></tr>
+<tr><td>modified</td><td>Changed here and not yet written to the keyboard.</td></tr></tbody></table></div>
+<p>Click <span class="btn">Read all from keyboard</span> once. It requests the 128 performances one at a time. Do this before editing so you start from your real data. Everything is saved in the browser, so you only need to read again after changing things on the keyboard itself.</p>
+<div class="tbl"><table><thead><tr><th>List buttons</th><th>What they do</th></tr></thead><tbody>
+<tr><td>Follow</td><td>The checkbox after the Reset library button. When ticked (the default), the keyboard switches to whichever performance you open here. Untick it to browse without touching the keyboard.</td></tr>
+<tr><td>Read all from keyboard</td><td>Loads all 128 performances.</td></tr>
+<tr><td>Write all modified to keyboard</td><td>Writes every performance and user voice you changed.</td></tr>
+<tr><td>Import .syx / Export everything / Export performances only</td><td>See section 11.</td></tr>
+<tr><td>Voices… / User voices…</td><td>The voice screens. See section 9.</td></tr>
+<tr><td>Reset library</td><td>Discards all local edits and goes back to the factory list. It doesn't touch the keyboard.</td></tr></tbody></table></div>
+</section>
+
+<section id="perf"><h2>4. The performance page</h2>
+<p>Click a row to open it. With <b>Follow</b> on, the keyboard switches to that performance too: it recalls the stored slot, or receives your unsaved edits in its edit buffer if you have changed it here. The whole top section stays pinned under the top bar as you scroll. It holds the breadcrumb and the buttons (◀ ▶ to step through slots, Audition, Write, Re-read, Test note, Export, Copy to…, Clear performance), then a card with the name, keyboard mode, split point, performance volume, arpeggio switch and tempo.</p>
+<p>Below that are four tabs: <b>Voices</b>, <b>Effects &amp; EQ</b>, <b>Arpeggio</b> and <b>Rhythm pattern</b>. The Voices tab has one card per active part.</p>
+<div class="mock" aria-label="Example of a part list"><div class="r h"><span>Part</span><span>Category</span><span>Voice</span></div>
+<div class="r"><b>1</b><span>AP</span><span>CncrtGrand</span></div><div class="r"><b>2</b><span>STR</span><span>Amb Pizza</span></div><div class="r"><b>10</b><span>DR</span><span>Break Kit</span></div></div>
+<div class="cols">
+<div class="col"><h3>Add a voice</h3><p>Click <span class="btn pri">＋ Add voice</span>, search by name or category (AP, KB, ORG, GTR, BAS, STR, BRS, WND, LD, PAD, CMP, CP, DR, SFX, MFX, ETH) and click the voice, then choose where it goes: the first free part, a specific free part, <i>before</i> or <i>after</i> an existing voice (the voices after it move down one part), or <i>replace</i> a voice. The button and the insertion-effect summary sit in the pinned panel under the name and tempo fields.</p><p>To move one voice, use the small ⌃ and ⌄ arrows above and below its number. To rearrange several, press <span class="btn">Reorder</span> (to the right of the insertion-effect summary). A panel lists the voices by number and name: drag them up or down, then press <span class="btn pri">OK</span>. The voices are renumbered 1, 2, 3… in the new order; each voice keeps its own channel and insertion-effect setting.</p></div>
+<div class="col"><h3>Change a voice</h3><p>Click <span class="btn">Change voice</span> on a part and pick another. Its volume, pan and range settings stay as they were.</p></div>
+<div class="col"><h3>Edit or remove</h3><p>Click the voice's name or <span class="btn">Edit voice</span> to open the voice editor (section 8). <span class="btn">Remove</span> switches the part off by setting its receive channel to off.</p></div>
+</div>
+<h3>Part settings</h3>
+<div class="tbl"><table><thead><tr><th>Control</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Vol, Pan</td><td>Part level (0 to 127) and position (64 is centre).</td></tr>
+<tr><td>Rev, Cho</td><td>How much of the part goes to the performance's reverb and chorus.</td></tr>
+<tr><td>Note ≥ and ≤</td><td>Lowest and highest MIDI note the part plays. Middle C is 60 on the MX, so C3 = 60 and C4 = 72. Hover a field to see the note name.</td></tr>
+<tr><td>Shift</td><td>Transpose in semitones. 64 means no shift, 76 is one octave up.</td></tr>
+<tr><td>Ch</td><td>The MIDI channel the part receives on, counted from 0 (0 is channel 1). Parts on the same channel play together when you press a key: that's how voices are layered.</td></tr>
+<tr><td>Voice insertion effect</td><td>Turns on the insertion effect that is part of that part's own voice. The keyboard allows only <b>4 parts at a time</b> to have it on, so the editor refuses a fifth and lists the four parts and voices that are using it. The name of the effect is shown in parentheses. It is read from the keyboard the first time (it says <i>reading…</i> or <i>connect to read</i> until then) and remembered. A performance read from the keyboard with more than 4 on shows a warning. The performance's reverb and chorus are system effects that every part can use.</td></tr></tbody></table></div>
+<h3>Making a split or a layer</h3>
+<p>For a split, set the keyboard mode to <b>split</b> and choose the split point (a note number, shown next to the field). Add a bass voice and a lead voice, then limit each with <b>Note ≥ / ≤</b>: for example bass 0 to 59 and lead 60 to 127. For a layer, set the mode to <b>layer</b>, leave the parts at the full range and keep them on the same channel.</p>
+</section>
+
+<section id="create"><h2>5. Create a new performance</h2>
+<ol class="steps">
+<li><div>Open the slot to use. <span class="btn">Copy to…</span> opens a list of the 128 slots with their names and whether each has been read or modified. Pick one and press <span class="btn pri">Copy here</span> (or double-click it). This is the quickest way to start from something close.</div></li>
+<li><div>Or click <span class="btn">Clear performance</span> to empty the slot. It keeps the reverb, chorus and EQ settings that were in it and removes every voice.</div></li>
+<li><div>Type a name (up to 10 characters), set the mode, then use <span class="btn pri">＋ Add voice</span> for each sound.</div></li>
+</ol>
+<div class="note"><b>Effects on new performances.</b> The editor can't read the keyboard's exact default reverb and chorus values, so a cleared performance keeps those of the performance it replaced. Starting from a copy of one you like is safer than starting empty.</div>
+</section>
+
+<section id="fx"><h2>6. Effects and EQ</h2>
+<p>Open a performance and choose the <b>Effects &amp; EQ</b> tab. It has three panels that apply to the whole performance.</p>
+<div class="cols">
+<div class="col"><h3>Reverb</h3><p>Pick one of the reverb types, then adjust its parameters (reverb time, delay, filters and so on). Return level and pan set how loud the reverb is in the mix.</p></div>
+<div class="col"><h3>Chorus</h3><p>Choose a chorus, delay, flanger, phaser or tempo-synced type. It has its own return, pan and a send into the reverb.</p></div>
+<div class="col"><h3>Master EQ</h3><p>Five bands (low, low-mid, mid, high-mid, high) with gain, frequency and Q. The low and high bands can be shelving or peaking.</p></div></div>
+<p>Values show in real units (seconds, milliseconds, Hz, dB) taken from the Data List's tables. Each part's own <b>Rev</b> and <b>Cho</b> sliders set how much of that part goes to these effects.</p>
+<div class="note"><b>New effect types start from neutral values.</b> The Data List doesn't give the factory preset values, so after switching type, adjust the sound by ear. Re-reading a performance from the keyboard brings back its stored settings.</div>
+</section>
+
+<section id="arp"><h2>7. Arpeggio and rhythm pattern</h2>
+<p>The <b>Arpeggio</b> tab has the common arpeggio settings (SF select, common switch, synchro quantize and offsets) and one card per voice in use. Each card has six slots (SF1 to SF6). Click a slot to open a list of the 999 arpeggio types, with search, a category filter and an <b>Off</b> choice. Tick <i>Also set the performance tempo</i> to adopt the type's original tempo. Below the slots are the part's playback, range, timing, random and offset settings. Turn the part's <b>Arpeggio switch</b> on to use it. The tempo and main arpeggio switch are also in the card at the top of the page.</p>
+<p>The <b>Rhythm pattern</b> tab lists the 208 patterns by category, with search. Click one to select it, and set <b>Auto key-on start</b> if you want it. Audition or write the performance to hear it.</p>
+</section>
+
+<section id="voiceed"><h2>8. Voice editor</h2>
+<p>Click a voice's name or <span class="btn">Edit voice</span> on a part. In the voice picker and on the Voices screen, every voice has an <span class="btn">Edit…</span> button too. The editor loads the voice's real data from the keyboard, so you must be connected. User voices you have already read can be edited offline.</p>
+<h3>Normal voices</h3>
+<ul>
+<li><b>General</b>: volume, key assign mode, micro tuning, portamento time mode and legato slope.</li>
+<li><b>Controllers / LFO</b>: the six controller assignments (source, destination, depth) and the common LFO.</li>
+<li><b>Insertion effect</b>: the voice's own effect with all its parameters.</li>
+<li><b>Element 1 to 8</b>: each element's wave, key range, amplitude and pitch envelopes, filter, filter envelope and LFO. Dimmed tabs are elements that are switched off.</li>
+</ul>
+<p>Two buttons at the top finish the job:</p>
+<ul>
+<li><span class="btn">Try on part</span> sends the edited voice to that part of the performance currently in the keyboard's edit buffer. Audition the performance first so it is loaded there.</li>
+<li><span class="btn pri">Save as user voice…</span> opens a list of all 128 user voice slots with their names. Filter it, click the slot to overwrite, and confirm with <span class="btn pri">Save here</span>. A line above the list tells you which voice you are about to replace. Preset voices can't be overwritten, so edits to them always become a user voice.</li>
+</ul>
+<p>You still need to <b>Write</b> the performance afterwards so that it keeps pointing at the new user voice.</p>
+<h3>Drum kits</h3>
+<p>Drum kits open in their own editor from the same buttons. It has four tabs: <b>General</b> (name, volume), <b>Controllers</b>, <b>Insertion effect</b> and <b>Keys (drum pads)</b>. In Keys, choose a key from C0 to C6 (a filled dot means a drum sound is assigned) and edit its wave, level, pan, reverb and chorus sends, amplitude envelope, pitch and filter. <span class="btn">Play key</span> sounds the key. <span class="btn">Copy settings to key…</span> opens a list of the keys to copy to (the target keeps its own wave number). <span class="btn">Try</span> sends the kit to the keyboard, and <span class="btn pri">Save as user drum kit…</span> opens a list of the 8 user kit slots. Preset and GM kits can't be overwritten. The user kit slots and sending a kit to a part follow the Data List but are untested on hardware.</p>
+</section>
+
+<section id="voices"><h2>9. Managing voices</h2>
+<h3>User voices…</h3>
+<p>Press <span class="btn">User voices…</span> on the performance list. The table shows all 128 user voice slots with their name, a status (<i>on keyboard</i>, <i>modified</i>, <i>name only</i> or <i>not read</i>) and the performances that use each voice. Each performance in the <b>Used by</b> column is a link that opens it. Use <span class="btn">Read from keyboard</span> to fill the table in.</p>
+<ul>
+<li><span class="btn">Edit…</span> opens the voice editor, and saving offers the same slot first. Click a name to rename it (a small dialog accepts up to 10 plain characters, since a name can't be a list).</li>
+<li><span class="btn">More…</span> has Rename, Copy to…, Swap with…, Export .syx, Write to keyboard and Re-read from keyboard. Copy and Swap open a list of slots showing each slot's name, status and which performances use it.</li>
+<li>Tick rows to export or write just those voices. With nothing ticked, <span class="btn">Write modified</span> writes every voice you changed.</li>
+<li>Copies, swaps, renames and imports stay in the editor, marked <i>modified</i>, until you write them. Overwriting a voice that performances use asks you to confirm and lists them.</li>
+<li>Filters show only modified voices, voices used by performances, or voices not read yet.</li>
+</ul>
+<h3>Voices…</h3>
+<p>The <span class="btn">Voices…</span> button lists every voice (presets, GM, drum kits and user voices) with search and a category filter. The list shows 300 voices at a time; use <span class="btn">⏮ First</span>, <span class="btn">◀ Prev</span>, <span class="btn">Next ▶</span> and <span class="btn">Last ⏭</span> above and below it to page through the rest. Each voice shows a <b>Used by</b> list of performances (as links). <span class="btn">Edit…</span> opens the voice editor. <span class="btn">Copy to user slot…</span> copies a normal voice into a user slot you choose from a list, staged until you write it. Both need a connection for voices that must be read from the keyboard.</p>
+<h3>The voice picker</h3>
+<p>Add voice and Change voice open a picker with all voices and a <b>USER</b> category. User voices are listed as "User 001" and so on until their names are read; <span class="btn">Read user voices</span> re-reads them from the keyboard.</p>
+</section>
+
+<section id="send"><h2>10. Try it, then save it</h2>
+<ol class="steps">
+<li><div><span class="btn pri">Audition</span> sends the performance to the keyboard's edit buffer. Play the keyboard in performance mode to hear it. Nothing is stored yet, and selecting another performance on the keyboard discards it.</div></li>
+<li><div><span class="btn">Test note</span> plays middle C on channel 1 if you want to hear it without touching the keys.</div></li>
+<li><div>Happy with it? Click <span class="btn">Write to A01</span> (the label shows the slot). Confirm the prompt. This overwrites that slot on the keyboard.</div></li>
+</ol>
+<h3>Checks the editor makes for you</h3>
+<ul>
+<li><b>Before sending</b> (Audition or Write), each part's voice is checked. You are warned about a part that points to an invalid bank, a user voice that is empty on the keyboard (the part would show "Initialize"), a user voice you changed here but have not written yet, a voice that isn't in the voice list, or more than 4 voice insertion effects. For a changed user voice the dialog offers to <b>write it first</b>, which is the usual cause of a part showing "Initialize".</li>
+<li><b>After sending</b>, the editor reads the performance back and compares its name and every part's voice. If the keyboard doesn't match it sends again, more slowly, up to 3 times, and tells you if it still differs. If the keyboard doesn't answer the check, it says the write could not be verified.</li>
+<li><b>When reading</b>, a performance with missing blocks (a dropped transfer) is not accepted. The editor retries, and reports the read as failed if it stays incomplete.</li>
+<li><b>Connection lost</b>: if the USB connection drops, the editor tells you, stops any transfer in progress, and reminds you after reconnecting that the keyboard may differ from the editor.</li>
+<li><span class="btn">Check keyboard</span> on a performance reads that slot back and lists any differences, so you can keep your copy or take the keyboard's.</li>
+</ul>
+<p><span class="btn">Re-read from keyboard</span> throws away your edits to that performance and loads what is stored.</p>
+</section>
+
+<section id="backup"><h2>11. Back up and share</h2>
+<ul>
+<li><span class="btn">Export .syx</span> on a performance saves that one.</li>
+<li><span class="btn">Export everything (.syx)</span> on the list saves all 128 performances and every user voice the editor has read, in one file. Do this before a big round of overwrites and keep a copy on a USB drive. Performances you haven't read from the keyboard are factory-list approximations, and the editor asks whether to include them. <span class="btn">Export performances only</span> leaves the voices out.</li>
+<li><span class="btn">Import .syx</span> accepts one or several files containing performances, user voices or both. A file with many items goes into the slots named inside it. A file with a single performance or voice opens a slot list to choose where it goes. Preset and edit-buffer voice dumps are skipped because they can't be stored.</li>
+<li>Imported items are marked <i>modified</i> and exist only in the editor until you press <span class="btn">Write all modified to keyboard</span> (or write a single performance). Writing a full set takes a few minutes. The keyboard needs Bulk Protect off.</li>
+</ul>
+</section>
+
+<section id="about"><h2>About, license and disclaimers</h2>
+<p>The theme menu beside <span class="btn pri">About</span> switches the editor between <b>Dark</b> (the default), <b>Light</b> and <b>Blue</b> (a blue palette inspired by the blue MX49). Your choice is remembered in this browser.</p>
+<p>The <span class="btn">About</span> button in the top bar shows the version (0.0.1) and the notices below. It opens automatically when you first open the editor. Untick <b>Show this popup on startup</b> beside the Close button to stop that; you can still open it from the top bar at any time.</p>
+<ul>
+<li><b>Experimental software:</b> back up your keyboard's data (<span class="btn">Export everything (.syx)</span>) and copy the backup to a USB drive or other safe storage before you use the editor. No guarantee of correctness or suitability for any purpose is expressed or implied.</li>
+<li><b>Bug reports and contributions:</b> bug reports are welcome, but there is no guarantee, expressed or implied, that any fix will be made or will be forthcoming. You are encouraged to clone the repository and use Claude or another AI tool to improve and extend the software as you see fit, as long as you follow the terms of the GPL-3.0 license.</li>
+<li><b>License:</b> the editor is free software under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GNU General Public License, version 3</a>. The source code is at <a href="https://github.com/YamMXEditor/yammxeditor" target="_blank" rel="noopener noreferrer">github.com/YamMXEditor/yammxeditor</a>.</li>
+<li><b>Not affiliated with Yamaha:</b> this is an independent project, not associated with or endorsed by Yamaha Inc.</li>
+<li><b>Use at your own risk:</b> the editor can overwrite performances and user voices on your keyboard, and it comes with no warranty. Export everything before you write.</li>
+</ul>
+</section>
+
+<section id="fix"><h2>Troubleshooting</h2>
+<div class="tbl"><table><thead><tr><th>Problem</th><th>Try</th></tr></thead><tbody>
+<tr><td>Status says Web MIDI isn't supported</td><td>Use Chrome or Edge.</td></tr>
+<tr><td>No MX in the port lists</td><td>Check the USB cable and power, close other MIDI programs, then reload the page and connect again.</td></tr>
+<tr><td>Reading times out</td><td>Confirm both ports are chosen and Dev# matches the keyboard.</td></tr>
+<tr><td>Reading is very slow</td><td>Lower the Bulk interval in the top bar. At 900 ms the keyboard waits almost a second between messages.</td></tr>
+<tr><td>The Bulk interval box is greyed out</td><td>It is only active while connected. Connect to the keyboard first.</td></tr>
+<tr><td>Writes do nothing</td><td>Turn Bulk Protect off on the keyboard.</td></tr>
+<tr><td>A part shows "Initialize" on the keyboard</td><td>It points to a user voice that is empty or was never written there. Write the user voice first (the Write dialog offers to), or pick another voice. Then press <span class="btn">Check keyboard</span> to confirm.</td></tr>
+<tr><td>The editor says a write could not be verified or still differs</td><td>Check Bulk Protect, the cable and the Bulk interval (try a higher value, for example 20 ms), then write again.</td></tr>
+<tr><td>Audition makes no sound change</td><td>Put the keyboard in performance mode and make sure Local Control and the volume are up.</td></tr>
+<tr><td>The keyboard doesn't follow the performance I select</td><td>Check that Follow (on the performance list, after Reset library) is ticked, the keyboard is in performance mode, and Ch matches the channel it receives program changes on.</td></tr>
+<tr><td>Edit… says to connect MIDI</td><td>Preset and GM voices are read from the keyboard, so connect first. Only user voices you have already read can be edited offline.</td></tr>
+<tr><td>The Guide button opens nothing useful</td><td>Keep the guide file in the same folder as the editor.</td></tr>
+<tr><td>User voices show as "User 001"</td><td>Their names haven't been read yet. Connect, wait for the status bar to say the names were read, or use Read user voices.</td></tr>
+<tr><td>A voice shows as "Unknown voice"</td><td>Its bank and program numbers aren't in the Data List. It still plays and can be kept or replaced.</td></tr>
+</tbody></table></div>
+</section>
+</main>
+</div>

@@ -4,14 +4,14 @@ const mock=`const inp={id:'i1',name:'MX61',onmidimessage:null};window.__sent=[];
 navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',o]]),onstatechange:null});`;
 (async()=>{const b=await chromium.launch();const errs=[];
 let pg=await b.newPage({acceptDownloads:true});pg.on('pageerror',e=>errs.push(e.message));pg.on('dialog',d=>d.accept());
-await pg.addInitScript(mock);await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg.addInitScript(mock);await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
 await pg.click('#conn');await pg.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Read 128'),null,{timeout:30000});
 await pg.waitForTimeout(700);
 const [dl]=await Promise.all([pg.waitForEvent('download'),pg.click('#expall')]);const p=require('os').tmpdir()+'/mx-all.syx';await dl.saveAs(p);
 const r=C.parseSyxAll(new Uint8Array(fs.readFileSync(p)));console.log('exported',r.perfs.length,'perfs',r.voices.length,'voices',fs.statSync(p).size,'bytes');
 // import into a fresh page (voices cache cleared)
 const pg2=await b.newPage();pg2.on('pageerror',e=>errs.push(e.message));pg2.on('dialog',d=>d.accept());await pg2.addInitScript(mock);
-await pg2.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg2.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");await pg2.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
 await pg2.setInputFiles('#file',p);await pg2.waitForTimeout(800);
 console.log('modified tags',await pg2.locator('.tag.mod').count(),await pg2.locator('tr.row').first().locator('td').nth(1).textContent());
 await pg2.click('#conn');await pg2.waitForFunction(()=>document.querySelector('#dot').classList.contains('on'));

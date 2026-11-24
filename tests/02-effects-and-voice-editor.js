@@ -16,7 +16,7 @@ navigator.requestMIDIAccess=async()=>({inputs,outputs,onstatechange:null});`;
 pg.on('pageerror',e=>errs.push(e.message));pg.on('console',m=>m.type()==='error'&&errs.push(m.text()));
 pg.on('dialog',d=>d.accept(d.type()==='prompt'?'5':undefined));
 await pg.addInitScript(mock);
-await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
 await pg.click('#conn');await pg.waitForFunction(()=>document.querySelector('#dot').classList.contains('on'));
 await pg.locator('tr.row').first().click();
 // effects tab

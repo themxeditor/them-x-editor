@@ -87,19 +87,40 @@
     return out;
   }
   function requestFor(dev, target) { return requestMsg(dev, target === 'edit' ? [0x0e, 0x5f, 0] : [0x0e, 0x50, target]); }
+  function expectedBlocks() { const k = ['54:0', '54:1', '54:2', '54:16', '54:48']; for (let i = 0; i < 16; i++) k.push('55:' + i); for (let i = 0; i < 16; i++) k.push('56:' + i); return k; }
+  const blockLabel = k => { const [h, m] = k.split(':').map(Number); return h === 54 ? ({ 0: 'common', 1: 'reverb', 2: 'chorus', 16: 'master EQ', 48: 'arpeggio common' }[m]) : (h === 55 ? 'part ' : 'arpeggio part ') + (m + 1); };
+  // Compare what matters for voice assignment between two performances: returns a list of differences
+  function perfDiff(A, B) {
+    const d = [];
+    if (getName(A.common) !== getName(B.common)) d.push('name');
+    for (let i = 0; i < 16; i++) {
+      const a = A.parts[i], b = B.parts[i];
+      if (active(a) !== active(b)) { d.push('part ' + (i + 1) + ' on/off'); continue; }
+      if (!active(a)) continue;
+      if (a[OFF.msb] !== b[OFF.msb] || a[OFF.lsb] !== b[OFF.lsb] || a[OFF.pc] !== b[OFF.pc]) d.push('part ' + (i + 1) + ' voice');
+    }
+    return d;
+  }
+  // Bytes that cannot go into a SysEx data field
+  function perfInvalid(P) {
+    const bad = [], chk = (a, n) => { for (let i = 0; i < a.length; i++) if (a[i] > 0x7f) { bad.push(n + ' byte ' + i); break; } };
+    chk(P.common, 'common'); chk(P.rev, 'reverb'); chk(P.cho, 'chorus'); chk(P.eq, 'master EQ'); chk(P.arpc, 'arpeggio common');
+    P.parts.forEach((p, i) => chk(p, 'part ' + (i + 1))); P.arps.forEach((a, i) => chk(a, 'arpeggio part ' + (i + 1)));
+    return bad;
+  }
   // Assemble messages into a performance (returns null until header..footer complete)
   function Assembler() {
     let P = null;
     this.feed = function (raw) {
       const m = parse(raw); if (!m) return null;
       const [h, mi, l] = m.addr;
-      if (h === 0x0e) { P = newPerformance('', null); P._hdr = [mi, l]; P._seen = 0; return null; }
+      if (h === 0x0e) { P = newPerformance('', null); P._hdr = [mi, l]; P._seen = 0; P._got = {}; return null; }
       if (!P) return null;
-      const set = (a, d) => { if (d.length === a.length) { a.set(d); P._seen++; } };
+      const set = (a, d) => { if (d.length === a.length) { a.set(d); P._seen++; P._got[h + ':' + mi] = 1; } };
       if (h === 0x36) { const k = { 0: 'common', 1: 'rev', 2: 'cho', 0x10: 'eq', 0x30: 'arpc' }[mi]; if (k) set(P[k], m.data); }
       else if (h === 0x37 && mi < 16) set(P.parts[mi], m.data);
       else if (h === 0x38 && mi < 16) set(P.arps[mi], m.data);
-      else if (h === 0x0f) { const r = P; P = null; return r._seen >= 5 ? r : null; }
+      else if (h === 0x0f) { const r = P; P = null; r._missing = expectedBlocks().filter(k => !r._got[k]); return r._seen >= 5 ? r : null; }
       return null;
     };
   }
@@ -135,9 +156,44 @@
   const noteName = n => noteNames[n % 12] + (Math.floor(n / 12) - 2);
   function addVoice(P, v) { // returns part index or -1 if all 16 used
     const i = P.parts.findIndex(p => !active(p)); if (i < 0) return -1;
-    const p = P.parts[i]; p.set(newPart(i)); setVoice(p, v); return i;
+    const p = P.parts[i]; p.set(newPart(i)); setVoice(p, v); insSet(P, i, 0); return i;
   }
-  function removeVoice(P, i) { P.parts[i][OFF.rch] = 0x7f; }
+  // Reorder parts: order[newIndex] = oldIndex (a permutation of 0..15). Voices keep their own settings
+  // (including channel); insertion-effect bits travel with their voices.
+  function reorderParts(P, order) {
+    const ins = P.parts.map((p, k) => insGet(P, k)), parts = P.parts.slice(), arps = P.arps.slice();
+    for (let k = 0; k < 16; k++) { P.parts[k] = parts[order[k]]; P.arps[k] = arps[order[k]]; }
+    for (let k = 0; k < 16; k++) insSet(P, k, ins[order[k]]);
+  }
+  // Put voice v at part position t (0-15). mode 'at': use slot t (replacing what is there);
+  // 'insert': new voice goes at position t and the voices from t onward shift down one part (using the nearest free part).
+  // Returns the part index used, or -1 when no free part exists for 'insert'.
+  function placeVoice(P, v, t, mode) {
+    if (mode !== 'insert' || (t < 16 && !active(P.parts[t]))) {
+      if (t < 0 || t > 15) return -1;
+      const p = P.parts[t]; p.set(newPart(t)); P.arps[t].set(newArp(t)); setVoice(p, v); insSet(P, t, 0); return t;
+    }
+    let j = -1;
+    for (let q = t; q < 16; q++) if (!active(P.parts[q])) { j = q; break; }
+    let at = t;
+    if (j < 0) { for (let q = t - 1; q >= 0; q--) if (!active(P.parts[q])) { j = q; break; } at = t - 1; }
+    if (j < 0) return -1;
+    const ins = P.parts.map((p, k) => insGet(P, k)); const parts = P.parts.slice(), arps = P.arps.slice();
+    parts.splice(j, 1); arps.splice(j, 1); ins.splice(j, 1);
+    // at is the position in the post-removal list when j>=t (items t..j-1 shift down); when j<t, position t-1 after removal
+    const np = newPart(at), na = newArp(at); setVoice(np, v);
+    parts.splice(at, 0, np); arps.splice(at, 0, na); ins.splice(at, 0, 0);
+    for (let k = 0; k < 16; k++) { P.parts[k] = parts[k]; P.arps[k] = arps[k]; insSet(P, k, ins[k]); }
+    return at;
+  }
+  // Insertion Part Sw (36 00 00 + 0x4C, 4 bytes): bit per part. Part 1-7 = byte 0x4F bits 0-6, 8-14 = byte 0x4E, 15-16 = byte 0x4D bits 0-1.
+  const insLoc = k => k < 7 ? [0x4f, k] : k < 14 ? [0x4e, k - 7] : [0x4d, k - 14];
+  const insGet = (P, k) => { const [o, b] = insLoc(k); return (P.common[o] >> b) & 1; };
+  const insSet = (P, k, on) => { const [o, b] = insLoc(k); P.common[o] = on ? P.common[o] | (1 << b) : P.common[o] & ~(1 << b); };
+  const insCount = P => P.parts.reduce((n, p, k) => n + (active(p) && insGet(P, k) ? 1 : 0), 0);
+  const INS_MAX = 4;
+  const insClean = P => { P.parts.forEach((p, k) => { if (!active(p) && insGet(P, k)) insSet(P, k, 0); }); };
+  function removeVoice(P, i) { P.parts[i][OFF.rch] = 0x7f; insSet(P, i, 0); }
 
 
   // ---------- Effects (reverb / chorus / insertion share the same param layout: type(2) preset(1) rsv(1) params 16x2 @4) ----------
@@ -204,6 +260,6 @@
   const pset = (b, sp, v) => { v = Math.max(sp.lo, Math.min(sp.hi, v | 0)); if (sp.s === 2) { b[sp.o] = v >> 7; b[sp.o + 1] = v & 127; } else b[sp.o] = v; };
 
   root.MXCore = {fxGet, fxSet, fxType, fxDefaults, setFxType, voiceAddr, VoiceAssembler, buildVoice, isDrum, commonOf, voiceName, setVoiceName, cloneVoice, vkey, pget, pset, VOICE_BLOCKS, SIZES, OFF, CO, checksum, msg, requestMsg, requestFor, parse, build, Assembler, parseSyx, parseSyxAll, newPerformance, clonePerf, newPart, newArp,
-    setName, getName, active, setVoice, getVoiceKey, noteName, addVoice, removeVoice };
+    setName, getName, active, setVoice, getVoiceKey, noteName, perfDiff, perfInvalid, blockLabel, addVoice, placeVoice, reorderParts, removeVoice, insGet, insSet, insCount, insClean, INS_MAX };
   if (typeof module !== 'undefined') module.exports = root.MXCore;
 })(typeof window !== 'undefined' ? window : globalThis);

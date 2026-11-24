@@ -1,0 +1,13 @@
+const {chromium}=require('playwright');const C=require('../core.js');const FX=require('../fxdata.json');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+const t=FX.types.find(x=>x[5]&&x[0]!=='THRU'&&x[0]!=='NO EFFECT');
+const V={hdr:[0,0],blocks:{}};C.VOICE_BLOCKS.forEach(([a,b2,c,n])=>V.blocks[C.vkey(a,b2)]=new Uint8Array(n));V.blocks[C.vkey(0x40,3)][0]=t[1];V.blocks[C.vkey(0x40,3)][1]=t[2];C.setVoiceName(V,'Mock');
+const dump=C.buildVoice(1,V,[0x0e,0x00,0]).map(m=>Array.from(m));
+await pg.addInitScript(`const D=${JSON.stringify(dump)};const inp={id:'i1',name:'MX61',onmidimessage:null};const o={id:'o1',name:'MX61',send(a){a=Array.from(a);
+ if(a[0]===0xf0&&(a[2]&0xf0)===0x30&&a[7]===0x1f)setTimeout(()=>inp.onmidimessage({data:[0xf0,0x43,0x10,0x7f,0x17,0,0,0x1f,0,0xf7]}),3);
+ if(a[0]===0xf0&&(a[2]&0xf0)===0x20&&a[5]===0x0e)D.forEach((m,i)=>setTimeout(()=>inp.onmidimessage({data:m}),5+i))}};
+navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',o]]),onstatechange:null});`);
+await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
+await pg.click('#app tbody tr');await pg.waitForTimeout(150);console.log('offline:',await pg.locator('.insl').first().innerText());
+await pg.click('#conn');await pg.waitForTimeout(300);await pg.click('#app .crumb a,#app a:has-text("All performances")').catch(()=>{});await pg.click('#app tbody tr');await pg.waitForTimeout(6000);
+console.log('connected:',await pg.locator('.insl').first().innerText(),'| expected',t[0]);console.log(errs);await b.close()})();

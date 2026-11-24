@@ -1,12 +1,12 @@
 const {chromium}=require('playwright');
-(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
-await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
 await pg.evaluate(()=>{for(const n of [2,5]){const V={hdr:[0x0a,n],blocks:{}};C.VOICE_BLOCKS.forEach(([a,b2,c,n])=>V.blocks[C.vkey(a,b2)]=new Uint8Array(n));C.setVoiceName(V,'Voice'+n);cacheVoice(n,V,false);registerUser(n,'Voice'+n)}});
 await pg.click('#uvb');await pg.waitForSelector('#app tr[data-n]');
 console.log('rows',await pg.locator('#app tr[data-n]').count());
 const act=async(n,a)=>{await pg.locator(`tr[data-n="${n}"] .uvmore`).selectOption(a);await pg.waitForTimeout(80)};
 pg.on('dialog',d=>{const m=d.message();d.accept(m.startsWith('New name')?'Renamed':undefined)});
-await act(2,'rename');
+await act(2,'rename');await pg.fill('dialog[open] input','Renamed');await pg.click('dialog[open] button:has-text("Rename")');await pg.waitForTimeout(80);
 await act(2,'copy');await pg.click('dialog[open] .dl div:has-text("010")');await pg.click('dialog[open] button:has-text("Copy here")');await pg.waitForTimeout(100);
 await act(5,'swap');await pg.click('dialog[open] .dl div:has-text("003")');await pg.click('dialog[open] button:has-text("Swap with this slot")');await pg.waitForTimeout(100);
 await pg.click('tr[data-n="5"] .uvedit');await pg.waitForSelector('#ved .tabs',{timeout:3000}).catch(()=>console.log('edit failed'));console.log('editor open',await pg.evaluate(()=>$('#ved').open));await pg.evaluate(()=>$('#ved').close());

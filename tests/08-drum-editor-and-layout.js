@@ -1,5 +1,5 @@
 const {chromium}=require('playwright');const C=require('../core.js');
-(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:600}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:600}});await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 const V={hdr:[0x20,0],blocks:{}};V.blocks[C.vkey(0x46,0)]=new Uint8Array(72);V.blocks[C.vkey(0x46,3)]=new Uint8Array(36);V.blocks[C.vkey(0x46,8)]=new Uint8Array(24);
 for(let k=0;k<73;k++){const e=new Uint8Array(46);e[0]=k%2?0:1;e[0x0e]=127;V.blocks[C.vkey(0x47,k)]=e}
 C.setVoiceName(V,'TestKit');const dump=C.buildVoice(1,V,[0x0e,0x20,0]).map(m=>Array.from(m));
@@ -7,7 +7,7 @@ await pg.addInitScript(`const D=${JSON.stringify(dump)};const inp={id:'i1',name:
  if(a[0]===0xf0&&(a[2]&0xf0)===0x30&&a[7]===0x1f)setTimeout(()=>inp.onmidimessage({data:[0xf0,0x43,0x10,0x7f,0x17,0,0,0x1f,0,0xf7]}),3);
  if(a[0]===0xf0&&(a[2]&0xf0)===0x20&&a[5]===0x0e&&a[6]===0x20)D.forEach((m,i)=>setTimeout(()=>inp.onmidimessage({data:m}),5+i))}};
 navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',o]]),onstatechange:null});`);
-await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
 await pg.click('#conn');await pg.waitForTimeout(300);
 const order=await pg.evaluate(()=>[...document.querySelectorAll('header button,header a')].map(e=>e.textContent.trim()).filter(t=>/Connect|Guide|About/.test(t)));console.log('header order',order);
 console.log('guide in list toolbar',await pg.locator('#app a#guide').count());

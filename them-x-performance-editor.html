@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
- MX Performance Editor v0.0.1
- Copyright (C) the MX Performance Editor contributors
+ THEM-X Performance Editor v0.0.1
+ Copyright (C) the THEM-X Performance Editor contributors
  This program is free software: you can redistribute it and/or modify it under the terms of the
  GNU General Public License version 3 as published by the Free Software Foundation.
  It is distributed WITHOUT ANY WARRANTY, without even the implied warranty of MERCHANTABILITY or
@@ -9,17 +9,20 @@
  Source: https://github.com/YamMXEditor/yammxeditor
 -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MX Performance Editor</title>
+<title>THEM-X Performance Editor</title>
 <style>
+.vname:hover{color:var(--acc2);text-decoration:underline}
 :root{--bg:#14161a;--panel:#1d2026;--panel2:#252932;--line:#323845;--fg:#e8eaee;--mute:#8b93a3;--acc:#ff6a3d;--acc2:#3dd6ff;--ok:#4cd694;--bad:#ff5468;color-scheme:dark}
-@media(prefers-color-scheme:light){:root:not(.dark){--bg:#f3f4f7;--panel:#fff;--panel2:#eef0f4;--line:#d5d9e2;--fg:#1b1e25;--mute:#667085;--acc:#e24a1b;--acc2:#0a7ea8;color-scheme:light}}
+:root[data-theme=light]{--bg:#f3f4f7;--panel:#fff;--panel2:#eef0f4;--line:#d5d9e2;--fg:#1b1e25;--mute:#667085;--acc:#e24a1b;--acc2:#0a7ea8;--ok:#1f9d63;--bad:#d6334a;color-scheme:light}
+:root[data-theme=blue]{--bg:#0a1b45;--panel:#10295f;--panel2:#183a80;--line:#2c4f9e;--fg:#eaf1ff;--mute:#9db6e8;--acc:#2f8cff;--acc2:#8fd8ff;--ok:#5be0a6;--bad:#ff6b81;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
 a.plink,a.pmore{color:var(--acc2);text-decoration:none}a.plink:hover,a.pmore:hover{text-decoration:underline}
 .stick{position:sticky;top:var(--hh,52px);z-index:4;background:var(--bg);padding-bottom:8px}
 header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 h1{font-size:16px;margin:0 8px 0 0;letter-spacing:.5px}h1 b{color:var(--acc)}
 select,input,button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
-button{cursor:pointer}button:hover{border-color:var(--acc)}button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button{cursor:pointer}button:hover{border-color:var(--acc)}button.pri,a.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+a.pri{text-decoration:none;border:1px solid var(--acc);border-radius:6px;padding:6px 9px;display:inline-block}a.pri:hover{filter:brightness(1.1)}
 button.dng:hover{border-color:var(--bad);color:var(--bad)}button:disabled{opacity:.4;cursor:default}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--bad);display:inline-block}.dot.on{background:var(--ok)}
 main{max-width:1100px;margin:0 auto;padding:16px}
@@ -33,8 +36,8 @@ tr.row{cursor:pointer}tr.row:hover td{background:var(--panel2)}
 .tag.dev{color:var(--ok);border-color:var(--ok)}.tag.mod{color:var(--acc);border-color:var(--acc)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
 .parts{display:grid;gap:10px}
-.part{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
-.part .n{font-weight:700;color:var(--acc2);font-size:18px;text-align:center}
+.part{scroll-margin-top:220px;display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
+.part .n .mv{display:block;margin:0 auto;padding:0 8px;line-height:1;font-size:15px;border-radius:4px;background:transparent;border-color:transparent;color:var(--mute);cursor:pointer}.part .n .mv:hover:not(:disabled){background:var(--panel2);border-color:var(--line);color:var(--acc)}.part .n .mv:disabled{opacity:.25;cursor:default}.part .n{font-weight:700;color:var(--acc2);font-size:18px;text-align:center}.ro{display:flex;align-items:center;gap:12px;padding:8px 12px;margin:4px 0;background:var(--panel);border:1px solid var(--line);border-radius:8px;cursor:grab;user-select:none}.ro b{width:28px;text-align:center;color:var(--acc2);font-size:18px}.ro.dragging{opacity:.4}.ro.dropb{box-shadow:0 -3px 0 var(--acc)}.ro.dropa{box-shadow:0 3px 0 var(--acc)}
 .part .vn{font-size:16px;font-weight:600}.part .vs{color:var(--mute);font-size:12px}
 .fd{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--mute)}
 .fd .fv{font-variant-numeric:tabular-nums;color:var(--fg);min-width:34px;text-align:center;font-weight:600}
@@ -68,18 +71,20 @@ dialog.big{width:min(1000px,96vw);max-height:92vh}.big .body{padding:12px;overfl
 .warn{background:#ff54681a;border:1px solid var(--bad);padding:8px 12px;border-radius:8px;margin-bottom:12px}
 </style></head><body>
 <header>
- <h1>MX <b>Performance</b> Editor</h1>
+ <h1>THEM-X <b>Performance</b> Editor</h1>
+ <button id="conn" class="pri">Connect MIDI</button>
  <span class="dot" id="dot"></span>
  <select id="mi" title="MIDI input"></select><select id="mo" title="MIDI output"></select>
  <label style="font-size:12px;color:var(--mute)">Dev# <input id="dev" type="number" min="1" max="16" value="1" style="width:56px"></label>
- <label style="font-size:12px;color:var(--mute);display:flex;gap:4px;align-items:center" title="When on, selecting a performance here also switches the keyboard to it"><input id="follow" type="checkbox" checked style="width:auto"> Follow</label>
  <label style="font-size:12px;color:var(--mute)">Ch <input id="fch" type="number" min="1" max="16" value="1" style="width:52px" title="MIDI channel the keyboard receives program changes on"></label>
  <label style="font-size:12px;color:var(--mute)" title="How long the keyboard pauses between the SysEx messages it sends. Lower is much faster. Stored in the keyboard (Utility: Bulk Dump Interval)">Bulk interval <select id="bulk" disabled style="padding:4px 6px"></select></label>
- <button id="conn" class="pri">Connect MIDI</button><a id="guide" href="MX%20Performance%20Editor%20Guide.html" target="_blank" rel="noopener" style="color:var(--acc2);text-decoration:none;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)">Guide</a><button id="about" title="About this editor">About</button>
+ <a id="guide" class="pri" href="THEM-X%20Performance%20Editor%20Guide.html" target="_blank" rel="noopener">Guide</a><button id="about" class="pri" title="About this editor">About</button><select id="theme" title="Colour theme"><option value="dark">Dark</option><option value="light">Light</option><option value="blue">Blue</option></select>
  <span id="status">Not connected</span>
 </header>
 <main id="app"></main>
-<script>/* MX performance SysEx core — works in browser (global MXCore) and Node (module.exports). */
+<script>
+(function(){let t='dark';try{t=localStorage.getItem('mxtheme')||'dark'}catch(e){}if(!['dark','light','blue'].includes(t))t='dark';document.documentElement.dataset.theme=t;window.__theme=t})();
+/* MX performance SysEx core — works in browser (global MXCore) and Node (module.exports). */
 (function (root) {
   'use strict';
   const HDR = [0x43, 0x00, 0x7f, 0x17]; // 0x43, 0n (patched), model id
@@ -168,19 +173,40 @@ dialog.big{width:min(1000px,96vw);max-height:92vh}.big .body{padding:12px;overfl
     return out;
   }
   function requestFor(dev, target) { return requestMsg(dev, target === 'edit' ? [0x0e, 0x5f, 0] : [0x0e, 0x50, target]); }
+  function expectedBlocks() { const k = ['54:0', '54:1', '54:2', '54:16', '54:48']; for (let i = 0; i < 16; i++) k.push('55:' + i); for (let i = 0; i < 16; i++) k.push('56:' + i); return k; }
+  const blockLabel = k => { const [h, m] = k.split(':').map(Number); return h === 54 ? ({ 0: 'common', 1: 'reverb', 2: 'chorus', 16: 'master EQ', 48: 'arpeggio common' }[m]) : (h === 55 ? 'part ' : 'arpeggio part ') + (m + 1); };
+  // Compare what matters for voice assignment between two performances: returns a list of differences
+  function perfDiff(A, B) {
+    const d = [];
+    if (getName(A.common) !== getName(B.common)) d.push('name');
+    for (let i = 0; i < 16; i++) {
+      const a = A.parts[i], b = B.parts[i];
+      if (active(a) !== active(b)) { d.push('part ' + (i + 1) + ' on/off'); continue; }
+      if (!active(a)) continue;
+      if (a[OFF.msb] !== b[OFF.msb] || a[OFF.lsb] !== b[OFF.lsb] || a[OFF.pc] !== b[OFF.pc]) d.push('part ' + (i + 1) + ' voice');
+    }
+    return d;
+  }
+  // Bytes that cannot go into a SysEx data field
+  function perfInvalid(P) {
+    const bad = [], chk = (a, n) => { for (let i = 0; i < a.length; i++) if (a[i] > 0x7f) { bad.push(n + ' byte ' + i); break; } };
+    chk(P.common, 'common'); chk(P.rev, 'reverb'); chk(P.cho, 'chorus'); chk(P.eq, 'master EQ'); chk(P.arpc, 'arpeggio common');
+    P.parts.forEach((p, i) => chk(p, 'part ' + (i + 1))); P.arps.forEach((a, i) => chk(a, 'arpeggio part ' + (i + 1)));
+    return bad;
+  }
   // Assemble messages into a performance (returns null until header..footer complete)
   function Assembler() {
     let P = null;
     this.feed = function (raw) {
       const m = parse(raw); if (!m) return null;
       const [h, mi, l] = m.addr;
-      if (h === 0x0e) { P = newPerformance('', null); P._hdr = [mi, l]; P._seen = 0; return null; }
+      if (h === 0x0e) { P = newPerformance('', null); P._hdr = [mi, l]; P._seen = 0; P._got = {}; return null; }
       if (!P) return null;
-      const set = (a, d) => { if (d.length === a.length) { a.set(d); P._seen++; } };
+      const set = (a, d) => { if (d.length === a.length) { a.set(d); P._seen++; P._got[h + ':' + mi] = 1; } };
       if (h === 0x36) { const k = { 0: 'common', 1: 'rev', 2: 'cho', 0x10: 'eq', 0x30: 'arpc' }[mi]; if (k) set(P[k], m.data); }
       else if (h === 0x37 && mi < 16) set(P.parts[mi], m.data);
       else if (h === 0x38 && mi < 16) set(P.arps[mi], m.data);
-      else if (h === 0x0f) { const r = P; P = null; return r._seen >= 5 ? r : null; }
+      else if (h === 0x0f) { const r = P; P = null; r._missing = expectedBlocks().filter(k => !r._got[k]); return r._seen >= 5 ? r : null; }
       return null;
     };
   }
@@ -216,9 +242,44 @@ dialog.big{width:min(1000px,96vw);max-height:92vh}.big .body{padding:12px;overfl
   const noteName = n => noteNames[n % 12] + (Math.floor(n / 12) - 2);
   function addVoice(P, v) { // returns part index or -1 if all 16 used
     const i = P.parts.findIndex(p => !active(p)); if (i < 0) return -1;
-    const p = P.parts[i]; p.set(newPart(i)); setVoice(p, v); return i;
+    const p = P.parts[i]; p.set(newPart(i)); setVoice(p, v); insSet(P, i, 0); return i;
   }
-  function removeVoice(P, i) { P.parts[i][OFF.rch] = 0x7f; }
+  // Reorder parts: order[newIndex] = oldIndex (a permutation of 0..15). Voices keep their own settings
+  // (including channel); insertion-effect bits travel with their voices.
+  function reorderParts(P, order) {
+    const ins = P.parts.map((p, k) => insGet(P, k)), parts = P.parts.slice(), arps = P.arps.slice();
+    for (let k = 0; k < 16; k++) { P.parts[k] = parts[order[k]]; P.arps[k] = arps[order[k]]; }
+    for (let k = 0; k < 16; k++) insSet(P, k, ins[order[k]]);
+  }
+  // Put voice v at part position t (0-15). mode 'at': use slot t (replacing what is there);
+  // 'insert': new voice goes at position t and the voices from t onward shift down one part (using the nearest free part).
+  // Returns the part index used, or -1 when no free part exists for 'insert'.
+  function placeVoice(P, v, t, mode) {
+    if (mode !== 'insert' || (t < 16 && !active(P.parts[t]))) {
+      if (t < 0 || t > 15) return -1;
+      const p = P.parts[t]; p.set(newPart(t)); P.arps[t].set(newArp(t)); setVoice(p, v); insSet(P, t, 0); return t;
+    }
+    let j = -1;
+    for (let q = t; q < 16; q++) if (!active(P.parts[q])) { j = q; break; }
+    let at = t;
+    if (j < 0) { for (let q = t - 1; q >= 0; q--) if (!active(P.parts[q])) { j = q; break; } at = t - 1; }
+    if (j < 0) return -1;
+    const ins = P.parts.map((p, k) => insGet(P, k)); const parts = P.parts.slice(), arps = P.arps.slice();
+    parts.splice(j, 1); arps.splice(j, 1); ins.splice(j, 1);
+    // at is the position in the post-removal list when j>=t (items t..j-1 shift down); when j<t, position t-1 after removal
+    const np = newPart(at), na = newArp(at); setVoice(np, v);
+    parts.splice(at, 0, np); arps.splice(at, 0, na); ins.splice(at, 0, 0);
+    for (let k = 0; k < 16; k++) { P.parts[k] = parts[k]; P.arps[k] = arps[k]; insSet(P, k, ins[k]); }
+    return at;
+  }
+  // Insertion Part Sw (36 00 00 + 0x4C, 4 bytes): bit per part. Part 1-7 = byte 0x4F bits 0-6, 8-14 = byte 0x4E, 15-16 = byte 0x4D bits 0-1.
+  const insLoc = k => k < 7 ? [0x4f, k] : k < 14 ? [0x4e, k - 7] : [0x4d, k - 14];
+  const insGet = (P, k) => { const [o, b] = insLoc(k); return (P.common[o] >> b) & 1; };
+  const insSet = (P, k, on) => { const [o, b] = insLoc(k); P.common[o] = on ? P.common[o] | (1 << b) : P.common[o] & ~(1 << b); };
+  const insCount = P => P.parts.reduce((n, p, k) => n + (active(p) && insGet(P, k) ? 1 : 0), 0);
+  const INS_MAX = 4;
+  const insClean = P => { P.parts.forEach((p, k) => { if (!active(p) && insGet(P, k)) insSet(P, k, 0); }); };
+  function removeVoice(P, i) { P.parts[i][OFF.rch] = 0x7f; insSet(P, i, 0); }
 
 
   // ---------- Effects (reverb / chorus / insertion share the same param layout: type(2) preset(1) rsv(1) params 16x2 @4) ----------
@@ -285,7 +346,7 @@ dialog.big{width:min(1000px,96vw);max-height:92vh}.big .body{padding:12px;overfl
   const pset = (b, sp, v) => { v = Math.max(sp.lo, Math.min(sp.hi, v | 0)); if (sp.s === 2) { b[sp.o] = v >> 7; b[sp.o + 1] = v & 127; } else b[sp.o] = v; };
 
   root.MXCore = {fxGet, fxSet, fxType, fxDefaults, setFxType, voiceAddr, VoiceAssembler, buildVoice, isDrum, commonOf, voiceName, setVoiceName, cloneVoice, vkey, pget, pset, VOICE_BLOCKS, SIZES, OFF, CO, checksum, msg, requestMsg, requestFor, parse, build, Assembler, parseSyx, parseSyxAll, newPerformance, clonePerf, newPart, newArp,
-    setName, getName, active, setVoice, getVoiceKey, noteName, addVoice, removeVoice };
+    setName, getName, active, setVoice, getVoiceKey, noteName, perfDiff, perfInvalid, blockLabel, addVoice, placeVoice, reorderParts, removeVoice, insGet, insSet, insCount, insClean, INS_MAX };
   if (typeof module !== 'undefined') module.exports = root.MXCore;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -312,7 +373,7 @@ const pack=P=>({common:[...P.common],rev:[...P.rev],cho:[...P.cho],eq:[...P.eq],
 const unpack=o=>({common:Uint8Array.from(o.common),rev:Uint8Array.from(o.rev),cho:Uint8Array.from(o.cho),eq:Uint8Array.from(o.eq),arpc:Uint8Array.from(o.arpc),parts:o.parts.map(x=>Uint8Array.from(x)),arps:o.arps.map(x=>Uint8Array.from(x))});
 function save(){try{localStorage.setItem('mxlib',JSON.stringify(lib.map(l=>({P:pack(l.P),src:l.src,dirty:l.dirty}))))}catch(e){}}
 // ---- MIDI
-let access=null,inp=null,out=null,asm=new C.Assembler(),waiter=null;
+let access=null,inp=null,out=null,asm=new C.Assembler(),waiter=null,hadLink=false,linkEpoch=0;
 const dev=()=>Math.max(0,Math.min(15,(+$('#dev').value||1)-1));
 function status(t){$('#status').textContent=t}
 function log(t){const l=$('#log');if(l){l.textContent+=t+'\n';l.scrollTop=1e9}}
@@ -327,7 +388,11 @@ function fillPorts(){
 function bindPorts(){
  if(inp)inp.onmidimessage=null;inp=access.inputs.get($('#mi').value)||null;out=access.outputs.get($('#mo').value)||null;
  if(inp){inp.onmidimessage=onMsg}
- $('#dot').classList.toggle('on',!!(inp&&out));status(inp&&out?`Connected: ${out.name}`:'Select MIDI in/out ports');render();
+ const linked=!!(inp&&out);$('#dot').classList.toggle('on',linked);
+ if(hadLink&&!linked){linkEpoch++;status('MIDI connection lost. What the keyboard holds may no longer match this editor: after reconnecting, use Check keyboard on a performance, or re-read it.');if(view.type==='detail')alert('The MIDI connection to the keyboard was lost. Anything in the middle of being sent may be incomplete. Reconnect, then use "Check keyboard" on the performance.')}
+ else if(!hadLink&&linked&&linkEpoch)status(`Reconnected: ${out.name}. The keyboard may differ from the editor now. Use Check keyboard on a performance to compare.`);
+ else status(linked?`Connected: ${out.name}`:'Select MIDI in/out ports');
+ hadLink=linked;render();
  fillBulk(false);if(inp&&out&&namesFor!==out.id){namesFor=out.id;readBulk().then(autoReadNames)}}
 let namesFor=null,namesBusy=false;
 async function autoReadNames(){if(namesBusy)return;namesBusy=true;const known=userVoices();let n=0;
@@ -343,25 +408,91 @@ let vasm=new C.VoiceAssembler(),vwaiter=null;
 function onMsg(e){const d=e.data;if(d[0]!==0xf0)return;
  if((d[2]&0xf0)===0x10&&d[5]===0&&d[6]===0&&d[7]===0x1f&&d[8]<BULK.length){bulkIdx=d[8];fillBulk(true);if(bulkWait)bulkWait();return}
 const r=asm.feed(d);if(r&&waiter)waiter(r);const v=vasm.feed(d);if(v&&vwaiter)vwaiter(v)}
-function requestVoice(addr,timeout=2500+22*bulkMs()){return new Promise((res,rej)=>{vasm=new C.VoiceAssembler();const t=setTimeout(()=>{vwaiter=null;rej(new Error('timeout'))},timeout);
+let vq=Promise.resolve();
+function requestVoice(addr,timeout){const run=()=>requestVoiceRaw(addr,timeout);const p=vq.then(run,run);vq=p.catch(()=>{});return p} // one voice request at a time
+function requestVoiceRaw(addr,timeout=2500+22*bulkMs()){return new Promise((res,rej)=>{vasm=new C.VoiceAssembler();const t=setTimeout(()=>{vwaiter=null;rej(new Error('timeout'))},timeout);
  vwaiter=r=>{clearTimeout(t);vwaiter=null;res(r)};send(C.requestMsg(dev(),addr))})}
-function send(m){if(!out)throw new Error('No MIDI output selected');out.send(m)}
+function send(m){if(!out)throw new Error('No MIDI output selected');if(out.state&&out.state!=='connected')throw new Error('MIDI output disconnected');try{out.send(m)}catch(e){throw new Error('MIDI send failed: '+e.message)}}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function request(target,timeout=2000+45*bulkMs()){return new Promise((res,rej)=>{asm=new C.Assembler();const t=setTimeout(()=>{waiter=null;rej(new Error('timeout'))},timeout);
  waiter=r=>{clearTimeout(t);waiter=null;res(r)};send(C.requestFor(dev(),target))})}
 async function sendPerf(P,target){const ms=C.build(dev(),P,target);for(const m of ms){send(m);await sleep(12)}}
-async function readSlot(i){const P=await request(i);lib[i]={P,src:'dev',dirty:false};save()}
+async function readPerfChecked(target,tries=3){let last;
+ for(let a=1;a<=tries;a++){try{const P=await request(target);if(P._missing&&P._missing.length){last=new Error('incomplete: missing '+P._missing.slice(0,4).map(C.blockLabel).join(', ')+(P._missing.length>4?'…':''));log('read attempt '+a+' '+last.message);await sleep(150*a);continue}return P}catch(e){last=e;if(/disconnected|No MIDI/.test(e.message))throw e;log('read attempt '+a+' failed: '+e.message);await sleep(150*a)}}
+ throw last}
+async function readSlot(i){const P=await readPerfChecked(i);lib[i]={P,src:'dev',dirty:false};save()}
 async function readAll(){let ok=0;for(let i=0;i<128;i++){try{status(`Reading ${slotName(i)} (${i+1}/128)…`);await readSlot(i);ok++;if(view.type==='list')renderList()}catch(e){log('read '+slotName(i)+' failed: '+e.message);if(!ok&&i>=2){status('No response from keyboard — check ports, Device# and that USB MIDI is on');return}}}
  status(`Read ${ok}/128 performances`);render()}
-async function writeSlot(i){if(!confirm(`Overwrite performance ${slotName(i)} on the keyboard?\n(Bulk Protect must be OFF on the instrument.)`))return;
- status('Writing '+slotName(i)+'…');await sendPerf(lib[i].P,i);lib[i].dirty=false;lib[i].src='dev';save();status('Wrote '+slotName(i));render()}
-async function audition(i){status('Sending to edit buffer…');await sendPerf(lib[i].P,'edit');status('Sent to the edit buffer — play the keyboard (performance mode)')}
+
+// ---------- Safe writing: checks before sending, verification and retry after ----------
+const VALID_BANKS=[[63,0],[63,1],[63,2],[63,3],[63,4],[63,5],[63,6],[63,7],[63,8],[63,32],[63,40],[0,0],[127,0]];
+function preflight(i){const P=lib[i].P,errors=[],warns=[],dirtyUV=new Set();
+ C.perfInvalid(P).forEach(b=>errors.push('Invalid data (a value above 127) in '+b+'. It would corrupt the transfer.'));
+ P.parts.forEach((p,k)=>{if(!C.active(p))return;const key=C.getVoiceKey(p),b=p[1],l=p[2],pc=p[3],lab='Part '+(k+1);
+  if(!VALID_BANKS.some(([x,y])=>x===b&&y===l)){errors.push(`${lab}: bank ${b}/${l} is not a valid voice bank, so the keyboard would show "Initialize" or the wrong voice.`);return}
+  if(pc>127){errors.push(`${lab}: program number ${pc+1} is out of range.`);return}
+  if(b===63&&l===8){const nn=pc,nm=userVoices()[nn];
+   if(vdirty.has(nn)){dirtyUV.add(nn);warns.push(`${lab}: user voice ${nn+1} ("${nm||''}") is changed here but not yet on the keyboard.`)}
+   else if(nm===undefined)warns.push(`${lab}: user voice ${nn+1} has not been read from the keyboard, so it can't be confirmed to exist.`);
+   else if(/^\s*init/i.test(nm))errors.push(`${lab}: user voice ${nn+1} on the keyboard is empty ("${nm.trim()}"). The part would show "Initialize".`)}
+  else if(b===63&&l===40){}
+  else if(!vByKey.get(key))warns.push(`${lab}: voice ${b}/${l}/${pc+1} is not in the voice list.`)});
+ const n=C.insCount(P);if(n>C.INS_MAX)warns.push(`${n} parts use a voice insertion effect. The keyboard allows ${C.INS_MAX}.`);
+ if(!P.parts.some(C.active))warns.push('No part is in use. The performance would be silent.');
+ return{errors,warns,dirtyUV:[...dirtyUV]}}
+function problemDlg({title,errors,warns,okLabel,extra}){return new Promise(res=>{const d=h('dialog',{style:'width:min(640px,96vw);padding:0'});let done=false;const fin=v=>{if(done)return;done=true;d.close();d.remove();res(v)};
+ const li=(a,c)=>a.map(t=>h('div',{style:`padding:5px 12px;border-left:3px solid ${c};margin:4px 12px;font-size:13px`},t));
+ const ok=h('button',{class:'pri'},okLabel),x=h('button',{},'Cancel');ok.onclick=()=>fin(true);x.onclick=()=>fin(false);d.addEventListener('close',()=>fin(false));
+ d.append(h('div',{class:'dh'},h('b',{style:'align-self:center;flex:1'},title)),
+  errors.length?h('div',{style:'padding:8px 12px 0;font-weight:600;color:var(--bad,#c0392b)'},'Problems that will likely break the performance on the keyboard:'):'',...li(errors,'var(--bad,#c0392b)'),
+  warns.length?h('div',{style:'padding:8px 12px 0;font-weight:600'},'Things to check:'):'',...li(warns,'#d9a400'),extra||'',
+  h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0;margin-top:10px'},x,ok));
+ document.body.append(d);d.showModal()})}
+// Send one performance, read it back and compare. Retries slower. Returns {ok, attempts, unverified, diffs}
+async function writeVerified(i,target,st){const P=lib[i].P;let diffs=[],unverified=false,epoch=linkEpoch;
+ for(let a=1;a<=3;a++){
+  if(linkEpoch!==epoch||!out)throw new Error('MIDI connection lost during the transfer');
+  const gap=[14,40,90][a-1],ms=C.build(dev(),P,target);
+  st&&st(a>1?`Retrying (${a}/3)…`:'Sending…');
+  for(let k=0;k<ms.length;k++){if(linkEpoch!==epoch)throw new Error('MIDI connection lost during the transfer');send(ms[k]);await sleep(k===0||k===1?gap*6:gap)}
+  await sleep(250+bulkMs());
+  st&&st('Verifying…');
+  let back=null;try{back=await readPerfChecked(target,2)}catch(e){unverified=true;log('verify read failed: '+e.message)}
+  if(back){unverified=false;diffs=C.perfDiff(P,back);if(!diffs.length)return{ok:true,attempts:a,unverified:false,diffs:[]}}
+  else if(a>=2)return{ok:true,attempts:a,unverified:true,diffs:[]}
+  log('verify mismatch (attempt '+a+'): '+diffs.join(', '))}
+ return{ok:false,attempts:3,unverified,diffs}}
+async function writeUserVoicesFirst(list,st){for(const nn of list){st&&st(`Writing user voice ${nn+1}…`);for(const m of C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn])){send(m);await sleep(14)}await sleep(200);vdirty.delete(nn)}saveVoices()}
+async function checkSync(i){if(!out)return alert('Connect MIDI first.');status('Reading '+slotName(i)+' from the keyboard…');
+ let back;try{back=await readPerfChecked(i)}catch(e){status('Could not read from the keyboard: '+e.message);return alert('Could not read '+slotName(i)+' from the keyboard ('+e.message+').')}
+ const d=C.perfDiff(lib[i].P,back);status('Checked '+slotName(i));
+ if(!d.length)return alert(`${slotName(i)} on the keyboard matches the editor (name and every part's voice).`);
+ if(confirm(`${slotName(i)} on the keyboard differs from the editor:\n\n  ${d.join('\n  ')}\n\nOK = replace the editor's copy with the keyboard's (your edits to it are lost).\nCancel = keep the editor's copy (write it to the keyboard to fix the keyboard).`)){lib[i]={P:back,src:'dev',dirty:false};save();render()}}
+function resultMsg(name,r){return r.ok?(r.unverified?`${name} was sent, but the keyboard did not answer the check, so it could not be verified.`:`${name} written and verified on the keyboard`+(r.attempts>1?` (after ${r.attempts} attempts)`:'')+'.'):`${name} was sent ${r.attempts} times but the keyboard still differs: ${r.diffs.join(', ')}. Check Bulk Protect, the cable and the bulk interval, then try again.`}
+async function writeSlot(i){if(!out)return alert('Connect MIDI first.');
+ const pf=preflight(i);let withVoices=false;
+ if(pf.errors.length||pf.warns.length||pf.dirtyUV.length){
+  const extra=pf.dirtyUV.length?h('label',{style:'display:flex;gap:6px;align-items:center;padding:8px 12px;font-size:13px'},h('input',{type:'checkbox',checked:true,style:'width:auto',id:'pfuv'}),`Also write the ${pf.dirtyUV.length} changed user voice(s) used here (${pf.dirtyUV.map(n=>n+1).join(', ')}) first`):null;
+  const ok=await problemDlg({title:`Write ${slotName(i)} to the keyboard?`,errors:pf.errors,warns:pf.warns,okLabel:pf.errors.length?'Write anyway':'Write',extra});
+  if(!ok)return;withVoices=!!(extra&&document.getElementById('pfuv')?.checked!==false)}
+ else if(!confirm(`Overwrite performance ${slotName(i)} on the keyboard?\n(Bulk Protect must be OFF on the instrument.)`))return;
+ try{if(withVoices)await writeUserVoicesFirst(pf.dirtyUV,status);
+  const r=await writeVerified(i,i,t=>status(slotName(i)+': '+t));
+  if(r.ok){lib[i].dirty=false;lib[i].src='dev';save()}
+  status(resultMsg(slotName(i),r));if(!r.ok||r.unverified)alert(resultMsg(slotName(i),r));render()}
+ catch(e){status('Write failed: '+e.message);alert('Write failed: '+e.message+'\nThe keyboard may hold a partly written performance. Reconnect and write it again.')}}
+async function audition(i){if(!out)return alert('Connect MIDI first.');const pf=preflight(i);
+ if(pf.errors.length&&!await problemDlg({title:'Send to the edit buffer?',errors:pf.errors,warns:pf.warns,okLabel:'Send anyway'}))return;
+ try{const r=await writeVerified(i,'edit',t=>status('Edit buffer: '+t));
+  status(r.ok?'Sent to the edit buffer'+(r.unverified?' (could not verify)':' and verified')+' — play the keyboard (performance mode)'+(pf.warns.length?'. Note: '+pf.warns[0]:''):resultMsg('Edit buffer',r));
+  if(!r.ok)alert(resultMsg('Edit buffer',r))}catch(e){status('Send failed: '+e.message);alert('Send failed: '+e.message)}}
 function note(on){if(!out)return;const ch=0;out.send(on?[0x90|ch,60,100]:[0x80|ch,60,0])}
 // ---- views
 let view={type:'list'};
 function go(v){const changed=v.type==='detail'&&(view.type!=='detail'||view.i!==v.i);view=v;render();scrollTo(0,0);if(changed)recall(v.i).catch(e=>status('Could not switch keyboard: '+e.message))}
 // Make the keyboard switch to the selected performance. Unsaved local edits go to the edit buffer; otherwise recall the stored slot.
-async function recall(i){if(!out||!$('#follow').checked)return;const ch=Math.max(0,Math.min(15,(+$('#fch').value||1)-1));
+let followOn=true;
+async function recall(i){if(!out||!followOn)return;const ch=Math.max(0,Math.min(15,(+$('#fch').value||1)-1));
  if(lib[i].dirty){await sendPerf(lib[i].P,'edit');status(`Sent ${slotName(i)} (with your edits) to the edit buffer`)}
  else{out.send([0xb0|ch,0,63]);out.send([0xb0|ch,32,80]);out.send([0xc0|ch,i]);status(`Keyboard switched to ${slotName(i)}`)}}
 function render(){view.type==='list'?renderList():view.type==='uv'?renderUV():view.type==='av'?renderAV():renderDetail()}
@@ -369,7 +500,7 @@ function modLabel(l){return l.dirty?'<span class="tag mod">modified</span>':l.sr
 function vnames(P){return P.parts.map((p,i)=>C.active(p)?(voiceOf(p)?.n||`${p.slice(1,4).join('/')}`):null).filter(Boolean)}
 function renderList(){const q=(view.q||'').toLowerCase();
  let h=`<div class="bar"><input id="q" placeholder="Search name or voice…" value="${view.q||''}" style="flex:1;min-width:200px">
- <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="avb">Voices…</button><button id="uvb">User voices…</button><button id="rst" class="dng">Reset library</button></div>
+ <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="avb">Voices…</button><button id="uvb">User voices…</button><button id="rst" class="dng">Reset library</button><label style="font-size:13px;color:var(--mute);display:flex;gap:5px;align-items:center;white-space:nowrap" title="When on, selecting a performance here also switches the keyboard to it"><input id="follow" type="checkbox" ${followOn?'checked':''} style="width:auto"> Follow</label></div>
  <div class="warn" ${out?'hidden':''}>Not connected. You can browse and edit the factory list offline; connect to read, audition and write your real performances.</div>
  <table><thead><tr><th>Slot</th><th>Name</th><th>Mode</th><th>Voices</th><th>#</th><th>Source</th></tr></thead><tbody>`;
  lib.forEach((l,i)=>{const names=vnames(l.P);const nm=C.getName(l.P.common);
@@ -379,13 +510,13 @@ function renderList(){const q=(view.q||'').toLowerCase();
  $('#app').innerHTML=h;const qi=$('#q');qi.oninput=()=>{view.q=qi.value;const p=qi.selectionStart;renderList();$('#q').focus();$('#q').setSelectionRange(p,p)};
  document.querySelectorAll('tr.row').forEach(r=>r.onclick=()=>go({type:'detail',i:+r.dataset.i}));
  $('#rall').onclick=readAll;$('#rst').onclick=()=>{if(confirm('Discard local edits and reload the factory list?')){localStorage.removeItem('mxlib');loadLib();render()}};
- $('#imp').onclick=()=>$('#file').click();$('#uvb').onclick=()=>go({type:'uv'});$('#avb').onclick=()=>go({type:'av'});
- $('#file').onchange=window.importHandler=async e=>{const files=[...e.target.files];e.target.value='';let perfs=[],voices=[],skipped=0;
-  for(const f of files){const r=C.parseSyxAll(new Uint8Array(await f.arrayBuffer()));perfs.push(...r.perfs);voices.push(...r.voices);skipped+=r.skipped}
+ $('#follow').onchange=e=>{followOn=e.target.checked};$('#imp').onclick=()=>$('#file').click();$('#uvb').onclick=()=>go({type:'uv'});$('#avb').onclick=()=>go({type:'av'});
+ $('#file').onchange=window.importHandler=async e=>{const files=[...e.target.files];e.target.value='';let perfs=[],voices=[],skipped=0,incomplete=0;
+  for(const f of files){const r=C.parseSyxAll(new Uint8Array(await f.arrayBuffer()));const ok=r.perfs.filter(x=>!(x.P._missing&&x.P._missing.length));incomplete+=r.perfs.length-ok.length;perfs.push(...ok);voices.push(...r.voices);skipped+=r.skipped}
+  if(incomplete)alert(`${incomplete} performance(s) in the file are incomplete (some blocks are missing, possibly from a dropped transfer) and were skipped.`);
   if(!perfs.length&&!voices.length){alert('No performances or user voices found in the selected file'+(files.length>1?'s':'')+'.'+(skipped?` (${skipped} preset/edit-buffer voice dump(s) can\'t be imported.)`:''));return}
-  const ask=(what,slot)=>{const t=+(prompt(`1 ${what} found. Import it into slot number (1-128):`,String(slot>=0?slot+1:1))||0);return t>=1&&t<=128?t-1:-1};
-  if(perfs.length===1)perfs[0].slot=ask('performance',perfs[0].slot);
-  if(voices.length===1)voices[0].slot=ask('user voice',voices[0].slot);
+  if(perfs.length===1)perfs[0].slot=await pickPerfSlot('Import this performance into which slot?','Import here',perfs[0].slot>=0?perfs[0].slot:null);
+  if(voices.length===1)voices[0].slot=await pickSlotDlg('Import this user voice into which slot?','Import here',-1,voices[0].slot>=0?voices[0].slot:null);
   const pOK=perfs.filter(x=>x.slot>=0),vOK=voices.filter(x=>x.slot>=0),lost=perfs.length-pOK.length+voices.length-vOK.length;
   if(!pOK.length&&!vOK.length)return;
   if(!confirm(`Import ${pOK.length} performance(s) and ${vOK.length} user voice(s)?\nThey replace the same slots in this editor and are marked "modified" until you write them to the keyboard.`+(lost||skipped?`\n\nSkipped: ${lost} without a usable slot, ${skipped} preset/edit-buffer voice dump(s).`:'')))return;
@@ -393,20 +524,23 @@ function renderList(){const q=(view.q||'').toLowerCase();
   vOK.forEach(x=>{cacheVoice(x.slot,x.V,true);registerUser(x.slot,C.voiceName(x.V)||'User '+String(x.slot+1).padStart(3,'0'))});
   save();status(`Imported ${pOK.length} performance(s), ${vOK.length} user voice(s)`);render()};
  $('#wall').onclick=()=>writeModified().catch(e=>status(e.message));
- $('#expperf').onclick=()=>download('mx-performances.syx',lib.flatMap((l,i)=>C.build(dev(),l.P,i)));
+ $('#expperf').onclick=()=>download('them-x-performances.syx',lib.flatMap((l,i)=>C.build(dev(),l.P,i)));
  $('#expall').onclick=()=>{const fake=lib.filter(l=>l.src==='list'&&!l.dirty).length;let incl=true;
   if(fake)incl=confirm(`${fake} of 128 performances haven't been read from the keyboard (they are factory-list approximations).\nOK = include them anyway, Cancel = leave them out.`);
   const msgs=[];lib.forEach((l,i)=>{if(incl||!(l.src==='list'&&!l.dirty))msgs.push(...C.build(dev(),l.P,i))});
   Object.keys(vcache).map(Number).sort((a,b)=>a-b).forEach(nn=>msgs.push(...C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn])));
   const nv=Object.keys(vcache).length;if(!nv)status('No user voices cached yet — connect (or press Read user voices) to include them');
-  download('mx-everything.syx',msgs)}}
+  download('them-x-everything.syx',msgs)}}
 async function writeModified(){const ps=lib.map((l,i)=>l.dirty?i:-1).filter(i=>i>=0),vs=[...vdirty].sort((a,b)=>a-b);
  if(!out)return alert('Connect MIDI first.');if(!ps.length&&!vs.length)return alert('Nothing has been modified.');
  if(!confirm(`Write ${ps.length} modified performance(s) and ${vs.length} modified user voice(s) to the keyboard?\nThis overwrites those slots. Bulk Protect must be off.`))return;
  let k=0;const tot=ps.length+vs.length;
  for(const nn of vs){status(`Writing user voice ${nn+1} (${++k}/${tot})…`);for(const m of C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn])){send(m);await sleep(12)}await sleep(150);vdirty.delete(nn)}
- for(const i of ps){status(`Writing ${slotName(i)} (${++k}/${tot})…`);await sendPerf(lib[i].P,i);await sleep(100);lib[i].dirty=false;lib[i].src='dev'}
- saveVoices();save();status(`Wrote ${ps.length} performance(s) and ${vs.length} user voice(s)`);render()}
+ const failed=[];for(const i of ps){status(`Writing ${slotName(i)} (${++k}/${tot})…`);
+  try{const r=await writeVerified(i,i);if(r.ok){lib[i].dirty=false;lib[i].src='dev';if(r.unverified)failed.push(slotName(i)+' (sent, not verified)')}else failed.push(slotName(i)+': '+r.diffs.join(', '))}catch(e){failed.push(slotName(i)+': '+e.message);break}
+  save()}
+ if(failed.length)alert('These performances need attention:\n\n  '+failed.join('\n  ')+'\n\nThey stay marked modified (or unverified). Check Bulk Protect and the connection, then write them again.')
+ saveVoices();save();status(`Wrote ${ps.length-(typeof failed!=='undefined'?failed.length:0)} of ${ps.length} performance(s) and ${vs.length} user voice(s)`);render()}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function download(name,msgs){const b=new Blob(msgs,{type:'application/octet-stream'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function touch(i){lib[i].dirty=true;save()}
@@ -485,14 +619,14 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  <div class="bar"><button id="pr" ${i>0?'':'disabled'}>◀</button><button id="nx" ${i<127?'':'disabled'}>▶</button>
  <button id="aud" class="pri" ${out?'':'disabled'}>Audition (send to edit buffer)</button><button id="wr" ${out?'':'disabled'}>Write to ${slotName(i)}</button>
  <button id="rd" ${out?'':'disabled'}>Re-read from keyboard</button><button id="tn" ${out?'':'disabled'}>Test note</button>
- <button id="exp">Export .syx</button><button id="dup">Copy to…</button><button id="clr" class="dng">Clear performance</button></div>
+ <button id="exp">Export .syx</button><button id="chk" title="Read this slot back from the keyboard and compare it with the editor" ${out?'':'disabled'}>Check keyboard</button><button id="dup">Copy to…</button><button id="clr" class="dng">Clear performance</button></div>
  <div class="card" style="margin-bottom:0"><div class="grid2">
  <label>Name<input id="nm" maxlength="10" value="${esc(C.getName(c))}"></label>
  <label>Keyboard mode<select id="md">${MODES.map((m,k)=>`<option value="${k}" ${c[CO_MODE]==k?'selected':''}>${m}</option>`).join('')}</select></label>
  <label>Split point (note ${NOTE(c[0x42])})<input id="sp" type="number" min="1" max="127" value="${c[0x42]}"></label>
  <label>Performance volume <b id="pvv" style="color:var(--fg)">${c[0x38]}</b><input id="pv" type="range" min="0" max="127" value="${c[0x38]}"></label>
  <label>Arpeggio<select id="ar"><option value="0" ${P.arpc[4]?'':'selected'}>off</option><option value="1" ${P.arpc[4]?'selected':''}>on</option></select></label>
- <label>Tempo<input id="tp" type="number" min="5" max="300" value="${(P.arpc[2]<<7)|P.arpc[3]}"></label></div></div>
+ <label>Tempo<input id="tp" type="number" min="5" max="300" value="${(P.arpc[2]<<7)|P.arpc[3]}"></label></div><div id="vbar"></div></div>
  </div>
  <div class="tabs"><button id="t-voices" class="${tab==='voices'?'on':''}">Voices (${act.length}/16)</button><button id="t-fx" class="${tab==='fx'?'on':''}">Effects &amp; EQ</button><button id="t-arp" class="${tab==='arp'?'on':''}">Arpeggio</button><button id="t-pat" class="${tab==='pat'?'on':''}">Rhythm pattern</button></div>
  <div id="tabbody"></div><pre id="log"></pre>
@@ -509,16 +643,16 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  $('#rd').onclick=()=>readSlot(i).then(renderDetail).catch(e=>status('Read failed: '+e.message));
  $('#tn').onclick=()=>{note(1);setTimeout(()=>note(0),600)};
  $('#exp').onclick=()=>download(`${slotName(i)}-${C.getName(c).trim()||'perf'}.syx`,C.build(dev(),P,i));
- $('#dup').onclick=()=>{const t=+(prompt('Copy to slot number (1-128):',String(i+2))||0);if(t>=1&&t<=128){lib[t-1]={P:C.clonePerf(P),src:'dev',dirty:true};save();go({type:'detail',i:t-1})}};
+ $('#chk').onclick=()=>checkSync(i);$('#dup').onclick=async()=>{const t=await pickPerfSlot('Copy this performance to which slot?','Copy here',null,i);if(t>=0){lib[t]={P:C.clonePerf(P),src:'dev',dirty:true};save();go({type:'detail',i:t})}};
  $('#clr').onclick=()=>{if(confirm('Remove all voices and reset this performance?')){const old=P;lib[i]={P:C.newPerformance('Init Perf',old),src:'dev',dirty:true};save();renderDetail()}};
  const body=$('#tabbody');
  if(tab==='fx'){body.append(fxTab(i));return}
  if(tab==='arp'){body.append(arpTab(i));return}
  if(tab==='pat'){body.append(patTab(i));return}
- let v='<div class="bar"><button id="add" class="pri" '+(act.length>=16?'disabled':'')+'>＋ Add voice</button></div><div class="parts">';
+ $('#vbar').innerHTML='<div class="bar" style="margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line)"><button id="add" class="pri" '+(act.length>=16?'disabled':'')+'>＋ Add voice</button><span id="insc" class="hint" style="padding:0 8px;align-self:center"></span><button id="reord" '+(act.length<2?'disabled':'')+'>Reorder</button></div>';let v='<div class="parts">';
  if(!act.length)v+='<div class="empty">No voices in this performance. Add one.</div>';
  act.forEach(k=>{const p=P.parts[k],vo=voiceOf(p);
-  v+=`<div class="part" data-k="${k}"><div class="n">${k+1}</div><div><div class="vn">${esc(vo?vo.n:'Unknown voice '+p[1]+'/'+p[2]+'/'+(p[3]+1))}</div>
+  v+=`<div class="part" data-k="${k}"><div class="n"><button class="mv up" data-k="${k}" title="Move up"${k===act[0]?' disabled':''}>⌃</button><div>${k+1}</div><button class="mv dn" data-k="${k}" title="Move down"${k===act[act.length-1]?' disabled':''}>⌄</button></div><div><div class="vn"><span class="vname" role="button" tabindex="0" title="Edit this voice" style="cursor:pointer">${esc(vo?vo.n:'Unknown voice '+p[1]+'/'+p[2]+'/'+(p[3]+1))}</span><label class="insl" title="Turns on this part's own voice insertion effect (the one set in the voice editor). The Data List allows only 4 parts at a time." style="display:inline-flex;gap:6px;align-items:center;margin-left:16px;font-size:13px;font-weight:400;color:var(--mute)"><input type="checkbox" class="insw" style="width:auto" ${C.insGet(P,k)?'checked':''}><span>Voice insertion effect (<span class="insn" data-key="${C.getVoiceKey(p)}">${esc(insLabel(C.getVoiceKey(p)))}</span>)</span></label></div>
   <div class="vs">${vo?`${vo.m} › ${vo.s} · `:''}MSB ${p[1]} LSB ${p[2]} PC ${p[3]+1}</div>
   <div class="sl"><label>Vol <input type="range" data-f="14" min="0" max="127" value="${p[14]}"></label><label>Pan <input type="range" data-f="15" min="1" max="127" value="${p[15]}"></label>
   <label>Rev <input type="range" data-f="18" min="0" max="127" value="${p[18]}"></label><label>Cho <input type="range" data-f="19" min="0" max="127" value="${p[19]}"></label>
@@ -526,14 +660,54 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
   <label>Shift <input type="number" data-f="22" min="40" max="88" value="${p[22]}" title="64 = 0"></label><label>Ch <input type="number" data-f="4" min="0" max="15" value="${p[4]}" title="0-based receive channel"></label><span class="hint" style="padding:0;align-self:center;flex:1;min-width:180px">Parts on the same channel play together when you press a key: that's how voices are layered.</span></div></div>
   <div style="display:flex;gap:6px;flex-direction:column"><button class="edv">Edit voice</button><button class="chg">Change voice</button><button class="rm dng">Remove</button></div></div>`});
  v+='</div>';body.innerHTML=v;
+ C.insClean(P);fillIns(i);const insInfo=()=>{const n=C.insCount(P),e=$('#insc');if(!e)return;const on=P.parts.map((p,q)=>C.active(p)&&C.insGet(P,q)?q:-1).filter(q=>q>=0);
+  e.innerHTML=`<span${n>C.INS_MAX?' style="color:var(--bad,#c0392b)"':''}>Voice insertion effects on: ${n} of ${C.INS_MAX} parts`+(n>C.INS_MAX?' — too many: the keyboard allows only '+C.INS_MAX+'. Turn some off.':'')+'</span>'+(on.length?' ('+on.map(q=>`<a href="#part${q+1}" class="insgo" data-k="${q}">Part ${q+1}</a>`).join(', ')+') <button class="insoff" style="padding:2px 8px">Turn all off</button>':'');
+  e.querySelectorAll('.insgo').forEach(a=>a.onclick=ev=>{ev.preventDefault();const t=document.querySelector('.part[data-k="'+a.dataset.k+'"]');if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.style.outline='2px solid var(--acc)';setTimeout(()=>t.style.outline='',1500)}});
+  const off=e.querySelector('.insoff');if(off)off.onclick=()=>{P.parts.forEach((p,q)=>C.insSet(P,q,0));document.querySelectorAll('.insw').forEach(c=>c.checked=false);touch(i);insInfo()}};insInfo();
  document.querySelectorAll('.part').forEach(el=>{const k=+el.dataset.k;
   el.querySelectorAll('[data-f]').forEach(inp=>inp.oninput=()=>{P.parts[k][+inp.dataset.f]=+inp.value;touch(i)});
   el.querySelector('.rm').onclick=()=>{C.removeVoice(P,k);touch(i);renderDetail()};
+  el.querySelector('.insw').onchange=e=>{if(e.target.checked&&C.insCount(P)>=C.INS_MAX){e.target.checked=false;const used=P.parts.map((p,q)=>C.active(p)&&C.insGet(P,q)?q:-1).filter(q=>q>=0).map(q=>{const v=voiceOf(P.parts[q]),key=C.getVoiceKey(P.parts[q]);return `  Part ${q+1}: ${v?v.n:'Unknown voice'}${insNames[key]?' ('+insNames[key]+')':''}`});
+   return alert(`Only ${C.INS_MAX} parts at a time can use their voice insertion effect. ${used.length} are in use:\n\n${used.join('\n')}\n\nTurn one off first.`)}
+   C.insSet(P,k,e.target.checked?1:0);touch(i);insInfo()};
   el.querySelector('.chg').onclick=()=>pick(v=>{C.setVoice(P.parts[k],v);touch(i);renderDetail()});
-  el.querySelector('.edv').onclick=()=>{const vo=voiceOf(P.parts[k]);if(!vo)return alert('This voice is not in the Data List, so it cannot be loaded for editing.');
-   openVoiceEditor(vo,{part:k,onSaved:nv=>{C.setVoice(P.parts[k],nv);touch(i);renderDetail()}})}});
- $('#add').onclick=()=>pick(v=>{const k=C.addVoice(P,v);if(k<0)return alert('All 16 parts are in use');
-  if(c[CO_MODE]===2&&act.length===1)P.parts[k][OFF.nlo]=c[0x42];touch(i);renderDetail()})}
+  const editV=()=>{const vo=voiceOf(P.parts[k]);if(!vo)return alert('This voice is not in the Data List, so it cannot be loaded for editing.');
+   openVoiceEditor(vo,{part:k,onSaved:nv=>{C.setVoice(P.parts[k],nv);touch(i);renderDetail()}})};el.querySelector('.edv').onclick=editV;const vn=el.querySelector('.vname');vn.onclick=editV;vn.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();editV()}}});
+ document.querySelectorAll('.mv').forEach(b=>b.onclick=()=>{const k=+b.dataset.k,ids=P.parts.map((p,q)=>q).filter(q=>C.active(P.parts[q])),rest=P.parts.map((p,q)=>q).filter(q=>!C.active(P.parts[q])),n=ids.indexOf(k),m=n+(b.classList.contains('up')?-1:1);if(m<0||m>=ids.length)return;ids.splice(m,0,ids.splice(n,1)[0]);C.reorderParts(P,ids.concat(rest));touch(i);renderDetail()});
+ $('#reord').onclick=async()=>{const o=await reorderDlg(P);if(!o)return;C.reorderParts(P,o);touch(i);renderDetail()};
+ $('#add').onclick=()=>pick(async v=>{const pos=await placeDlg(P,v);if(!pos)return;
+  const wasEmpty=!P.parts.some(C.active);const k=C.placeVoice(P,v,pos.t,pos.mode);if(k<0)return alert('No free part is available for that position.');
+  if(c[CO_MODE]===2&&wasEmpty)P.parts[k][OFF.nlo]=c[0x42];touch(i);renderDetail()})}
+function reorderDlg(P){return new Promise(res=>{const d=h('dialog',{style:'width:min(460px,95vw)'});let done=false,drag=-1;
+ const ids=P.parts.map((p,q)=>q).filter(q=>C.active(P.parts[q])),rest=P.parts.map((p,q)=>q).filter(q=>!C.active(P.parts[q]));
+ const nm=q=>{const vo=voiceOf(P.parts[q]);return vo?vo.n:'Unknown voice'};
+ const list=h('div',{style:'padding:8px 12px;max-height:60vh;overflow:auto'});
+ const draw=()=>{list.innerHTML='';ids.forEach((q,n)=>{const r=h('div',{class:'ro',draggable:'true'},h('b',{},String(n+1)),h('span',{},nm(q)));
+  r.addEventListener('dragstart',ev=>{drag=n;ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain',String(n))}catch(e){}setTimeout(()=>r.classList.add('dragging'),0)});
+  r.addEventListener('dragend',()=>{drag=-1;[...list.children].forEach(e=>e.classList.remove('dragging','dropb','dropa'))});
+  r.addEventListener('dragover',ev=>{if(drag<0)return;ev.preventDefault();const b=r.getBoundingClientRect();[...list.children].forEach(e=>e.classList.remove('dropb','dropa'));r.classList.add(ev.clientY>b.top+b.height/2?'dropa':'dropb')});
+  r.addEventListener('drop',ev=>{if(drag<0)return;ev.preventDefault();const b=r.getBoundingClientRect(),after=ev.clientY>b.top+b.height/2;const m=ids.splice(drag,1)[0];let at=n>drag?n-1:n;if(after)at++;ids.splice(at,0,m);drag=-1;draw()});
+  list.append(r)})};draw();
+ const ok=h('button',{class:'pri'},'OK'),x=h('button',{},'Cancel');
+ const fin=r=>{if(done)return;done=true;d.close();d.remove();res(r)};
+ ok.onclick=()=>{const o=ids.concat(rest);fin(o.every((q,n)=>q===n)?null:o)};x.onclick=()=>fin(null);d.addEventListener('close',()=>fin(null));
+ d.append(h('div',{class:'dh'},h('b',{style:'align-self:center;flex:1'},'Reorder voices')),h('div',{class:'hint',style:'padding:8px 12px 0'},'Drag a voice up or down. The parts are renumbered when you press OK.'),list,h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},x,ok));
+ document.body.append(d);d.showModal()})}
+function placeDlg(P,v){return new Promise(res=>{const d=h('dialog',{style:'width:min(520px,95vw)'});let done=false;
+ const nm=k=>{const vo=voiceOf(P.parts[k]);return vo?vo.n:'Unknown voice'},act=P.parts.map(p=>C.active(p));
+ const free=act.indexOf(false),full=free<0;
+ const sel=h('select',{style:'width:100%'});const grp=(label,items)=>{if(!items.length)return;const g=h('optgroup',{label});items.forEach(([val,t])=>g.append(h('option',{value:val},t)));sel.append(g)};
+ const idx=[...Array(16).keys()];
+ if(!full)grp('Quickest',[['free:'+free,'First free part (Part '+(free+1)+')']]);
+ grp('Use a free part',idx.filter(k=>!act[k]).map(k=>['at:'+k,'Part '+(k+1)+' — free']));
+ if(!full){grp('Insert before a voice (later voices move down one part)',idx.filter(k=>act[k]).map(k=>['ins:'+k,'Before Part '+(k+1)+' — '+nm(k)]));
+  grp('Insert after a voice (later voices move down one part)',idx.filter(k=>act[k]).map(k=>['ins:'+(k+1),'After Part '+(k+1)+' — '+nm(k)]))}
+ grp('Replace a voice',idx.filter(k=>act[k]).map(k=>['at:'+k,'Replace Part '+(k+1)+' — '+nm(k)]));
+ const ok=h('button',{class:'pri'},'Add voice'),x=h('button',{},'Cancel');
+ const fin=r=>{if(done)return;done=true;d.close();d.remove();res(r)};
+ ok.onclick=()=>{const [m,n]=sel.value.split(':');fin(m==='ins'?{t:+n,mode:'insert'}:{t:+n,mode:'at'})};x.onclick=()=>fin(null);d.addEventListener('close',()=>fin(null));
+ d.append(h('div',{class:'dh'},h('b',{style:'align-self:center;flex:1'},'Where should '+v.n+' go?')),h('div',{style:'padding:12px'},sel,h('div',{class:'hint',style:'padding:6px 0'},'Voices on the same channel are layered. Inserting shifts the following voices down one part, using the nearest free part.')),h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},x,ok));
+ document.body.append(d);d.showModal();sel.focus()})}
 function pick(cb){const d=$('#dlg'),q=$('#vq'),cat=$('#vc'),L=$('#vl');
  const draw=()=>{const s=q.value.toLowerCase(),m=cat.value;const r=DATA.voices.filter(v=>(!m||v.m===m)&&(!s||(v.n+' '+v.s+' '+v.m).toLowerCase().includes(s))).slice(0,300);
   L.innerHTML=r.map(v=>`<div data-k="${v.b}:${v.l}:${v.p}"><span class="c">${v.m} › ${esc(v.s)}</span><b>${esc(v.n)}</b><span style="margin-left:auto;color:var(--mute)">${v.b}/${v.l}/${v.p}</span><button class="ed" title="${out?'Open in the voice editor':'Connect MIDI to edit voices'}" ${(out||(v.b===63&&v.l===8&&vcache[v.p-1]))&&C.voiceAddr(v)?'':'disabled'}>Edit…</button></div>`).join('')||'<div>No matches</div>';
@@ -568,12 +742,11 @@ const UVLAB={mod:'<span class="tag mod">modified, not on keyboard</span>',stored
 async function uvGet(nn){if(vcache[nn])return C.cloneVoice(vcache[nn]);if(!out)throw new Error('Voice '+(nn+1)+' has not been read yet. Connect to the keyboard and press Read from keyboard.');
  const V=await requestVoice([0x0e,0x0a,nn]);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'));return C.cloneVoice(V)}
 function uvPut(nn,V,name){if(name!=null)C.setVoiceName(V,name);cacheVoice(nn,V,true);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}
-function uvAsk(msg,def){const t=+(prompt(msg,def)||0);return t>=1&&t<=128?t-1:-1}
 function uvConfirmOverwrite(nn,used){const k=userVoices()[nn],u=used[nn];return confirm(`User voice ${nn+1}${k?' ("'+k+'")':''} will be replaced in this editor`+(u?`\nIt is used by ${u.size} performance(s): ${[...u].slice(0,6).map(slotName).join(', ')}${u.size>6?'…':''}`:'')+'\nThe keyboard is not changed until you write.')}
 async function uvAction(nn,act){const used=usedByMap();
  try{
  if(act==='edit'){const vo=vByKey.get('63:8:'+(nn+1));if(!vo)return;openVoiceEditor(vo,{pre:nn,onSaved:()=>{$('#ved').close();renderUV()}});return}
- if(act==='rename'){const V=await uvGet(nn),n=prompt('New name (max 10 characters):',C.voiceName(V));if(n==null)return;uvPut(nn,V,n)}
+ if(act==='rename'){const V=await uvGet(nn),n=await nameDlg('Rename user voice '+(nn+1),C.voiceName(V).trim());if(n==null)return;uvPut(nn,V,n)}
  else if(act==='copy'){const V=await uvGet(nn),t=await pickSlotDlg(`Copy "${C.voiceName(V)}" (slot ${nn+1}) to…`,'Copy here',nn);if(t<0||t===nn)return;if(!uvConfirmOverwrite(t,used))return;uvPut(t,V);view.flash=t}
  else if(act==='swap'){const t=await pickSlotDlg(`Swap user voice ${nn+1} ("${known0(nn)}") with…`,'Swap with this slot',nn);if(t<0||t===nn)return;const A=await uvGet(nn),B=await uvGet(t);uvPut(nn,B);uvPut(t,A)}
  else if(act==='export'){const V=await uvGet(nn);download(`user-voice-${nn+1}-${C.voiceName(V).trim()||'voice'}.syx`,C.buildVoice(dev(),V,[0x0e,0x0a,nn]))}
@@ -610,7 +783,7 @@ function renderUV(){const q=(view.q||'').toLowerCase(),f=view.f||'all',known=use
  $('#uvimp').onclick=()=>$('#file').click();$('#file').onchange=window.importHandler;
  $('#uvw').onclick=()=>uvWrite(sel.size?[...sel].sort((a,b)=>a-b):[...vdirty].sort((a,b)=>a-b));
  $('#uvexp').onclick=async()=>{const list=sel.size?[...sel].sort((a,b)=>a-b):Object.keys(vcache).map(Number).sort((a,b)=>a-b);if(!list.length)return status('No user voices to export yet. Press Read from keyboard first.');
-  const msgs=[];for(const nn of list){if(vcache[nn])msgs.push(...C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn]))}download(sel.size?'mx-user-voices-selected.syx':'mx-user-voices.syx',msgs)};
+  const msgs=[];for(const nn of list){if(vcache[nn])msgs.push(...C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn]))}download(sel.size?'them-x-user-voices-selected.syx':'them-x-user-voices.syx',msgs)};
  $('#uvall').onchange=e=>{shown.forEach(n=>e.target.checked?sel.add(n):sel.delete(n));renderUV()};
  wireLinks($('#app'));
  document.querySelectorAll('#app tr[data-n]').forEach(r=>{const nn=+r.dataset.n;
@@ -619,8 +792,8 @@ function renderUV(){const q=(view.q||'').toLowerCase(),f=view.f||'all',known=use
   r.querySelector('.uvmore').onchange=e=>{const a=e.target.value;e.target.value='';if(a)uvAction(nn,a)}})}
 
 const known0=nn=>userVoices()[nn]??'not read';
-function pickSlotDlg(title,okLabel,from){return new Promise(res=>{const d=h('dialog',{style:'width:min(680px,96vw);padding:0'});let sel=null,done=false;
- const used=usedByMap(),q=h('input',{placeholder:'Filter by number or name…',style:'flex:1'}),x=h('button',{},'Cancel'),ok=h('button',{class:'pri',disabled:true},okLabel),list=h('div',{class:'dl'}),info=h('div',{class:'hint',style:'padding:8px 12px'});
+function pickSlotDlg(title,okLabel,from,pre){return new Promise(res=>{const d=h('dialog',{style:'width:min(680px,96vw);padding:0'});let sel=pre==null?null:pre,done=false;
+ const used=usedByMap(),q=h('input',{placeholder:'Filter by number or name…',style:'flex:1'}),x=h('button',{},'Cancel'),ok=h('button',{class:'pri',disabled:sel==null},okLabel),list=h('div',{class:'dl'}),info=h('div',{class:'hint',style:'padding:8px 12px'});
  const fin=v=>{if(done)return;done=true;d.close();d.remove();res(v)};
  const draw=()=>{const f=q.value.toLowerCase(),known=userVoices();list.innerHTML='';
   for(let nn=0;nn<128;nn++){const name=known[nn],st=uvState(nn),u=used[nn];if(nn===from)continue;
@@ -710,6 +883,50 @@ function patTab(i){const P=lib[i].P,c=P.common,t=()=>touch(i),box=h('div');
  box.append(h('div',{class:'card'},h('div',{style:'display:flex;gap:16px;align-items:center;flex-wrap:wrap'},h('span',{},'Current rhythm pattern: ',cur),h('label',{style:'display:flex;gap:6px;align-items:center'},'Auto key-on start',aks))),
   h('div',{class:'bar'},q,cat),list,h('div',{class:'hint',style:'padding:8px 0'},'The rhythm pattern is the drum/accompaniment pattern stored with the performance (208 patterns). Click a pattern to select it, then Audition or Write the performance.'));
  draw();return box}
+
+// ---------- Voice insertion effect names (read from voice dumps, remembered in the browser) ----------
+let insNames={},insFail=new Set(),insBusy=false;try{insNames=JSON.parse(localStorage.getItem('mxins')||'{}')}catch(e){}
+function insTypeName(blk){const t=FX.types.find(t=>t[5]&&t[1]===blk[0]&&t[2]===blk[1]);return t?t[0]:null}
+function noteIns(key,V){const blk=V.blocks[C.vkey(0x40,3)]||V.blocks[C.vkey(0x46,3)];if(!blk)return;const n=insTypeName(blk)||'unknown type';if(insNames[key]===n)return;insNames[key]=n;
+ try{localStorage.setItem('mxins',JSON.stringify(insNames))}catch(e){}}
+function insLabel(key){return insNames[key]!==undefined?insNames[key]:insFail.has(key)?'could not read':out?'reading…':'connect to read'}
+async function fillIns(i){if(!out)return;if(insBusy||namesBusy){if(view.type==='detail'&&view.i===i)setTimeout(()=>fillIns(i),1500);return}insBusy=true;
+ try{const P=lib[i].P,keys=[...new Set(P.parts.filter(p=>C.active(p)).map(p=>C.getVoiceKey(p)))];
+  for(const key of keys){if(insNames[key]!==undefined||insFail.has(key))continue;if(view.type!=='detail'||view.i!==i||!out)break;
+   const vo=vByKey.get(key),addr=vo&&C.voiceAddr(vo);if(!addr){insFail.add(key);continue}
+   try{const V=await requestVoice(addr);noteIns(key,V)}catch(e){insFail.add(key)}
+   document.querySelectorAll('.insn').forEach(el=>{if(el.dataset.key===key)el.textContent=insLabel(key)})}}
+ finally{insBusy=false}}
+
+// ---------- List choosers (used instead of free-text prompts) ----------
+function chooseDlg({title,okLabel,rows,pre,hint,filterPlaceholder}){return new Promise(res=>{
+ // rows: [{id, cols:[...text], right:'text', style}] ; returns the chosen id or null
+ const d=h('dialog',{style:'width:min(680px,96vw);padding:0'});let sel=pre==null?null:pre,done=false;
+ const q=h('input',{placeholder:filterPlaceholder||'Filter…',style:'flex:1'}),x=h('button',{},'Cancel'),ok=h('button',{class:'pri',disabled:sel==null},okLabel),list=h('div',{class:'dl'}),info=h('div',{class:'hint',style:'padding:8px 12px'},hint||'');
+ const fin=v=>{if(done)return;done=true;d.close();d.remove();res(v)};
+ const draw=()=>{const f=q.value.toLowerCase();list.innerHTML='';rows.forEach(r=>{if(f&&!r.text.toLowerCase().includes(f))return;
+   const el=h('div',{style:sel===r.id?'background:var(--panel2);outline:1px solid var(--acc)':''},h('span',{class:'c',style:'width:54px'},r.lead),h('b',{style:'min-width:120px'},r.name),h('span',{style:'margin-left:auto;color:var(--mute);font-size:12px'},r.right||''));
+   el.onclick=()=>{sel=r.id;ok.disabled=false;draw()};el.ondblclick=()=>fin(r.id);list.append(el)});
+  if(!list.children.length)list.append(h('div',{class:'empty'},'Nothing matches.'))};
+ q.oninput=draw;x.onclick=()=>fin(null);d.addEventListener('close',()=>fin(null));ok.onclick=()=>fin(sel);
+ d.append(h('div',{class:'dh'},h('b',{style:'align-self:center'},title),q,x),info,list,h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},ok));
+ document.body.append(d);draw();d.showModal();q.focus()})}
+// Performance slot (A01-H16). Returns the slot index or -1.
+async function pickPerfSlot(title,okLabel,pre,skip){
+ const rows=lib.map((l,i)=>({id:i,lead:slotName(i),name:C.getName(l.P.common).trim()||'(unnamed)',right:l.dirty?'modified':l.src==='dev'?'read from keyboard':'factory list',text:slotName(i)+' '+C.getName(l.P.common)})).filter(r=>r.id!==skip);
+ const v=await chooseDlg({title,okLabel,rows,pre,hint:'Choose a performance slot. It will be replaced in this editor. The keyboard is not changed until you write it.',filterPlaceholder:'Filter by slot or name…'});return v==null?-1:v}
+// Drum key (C0-C6). Returns the key index (0-72) or -1.
+async function pickDrumKey(title,okLabel,kn,kon,skip){
+ const rows=[...Array(73).keys()].filter(k=>k!==skip).map(k=>({id:k,lead:kn(k),name:kon(k)?'● has a sound':'○ empty',right:'note '+(k+24),text:kn(k)+' '+(k+24)}));
+ const v=await chooseDlg({title,okLabel,rows,hint:'Choose the key to copy to. Its own wave number is kept.',filterPlaceholder:'Filter by note name or number…'});return v==null?-1:v}
+// Voice name: free text cannot be a list, so it gets a validated dialog (10 characters, printable ASCII).
+function nameDlg(title,cur){return new Promise(res=>{const d=h('dialog',{style:'width:min(420px,95vw)'});let done=false;
+ const inp=h('input',{maxlength:10,value:cur,style:'width:100%'}),msg=h('div',{class:'hint',style:'padding:6px 0'},'Up to 10 characters: letters, digits, space and common symbols.'),ok=h('button',{class:'pri'},'Rename'),x=h('button',{},'Cancel');
+ const fin=v=>{if(done)return;done=true;d.close();d.remove();res(v)};
+ const chk=()=>{const bad=/[^\x20-\x7e]/.test(inp.value);ok.disabled=bad||!inp.value.trim();msg.textContent=bad?'Only plain ASCII characters are allowed.':'Up to 10 characters: letters, digits, space and common symbols.'};inp.oninput=chk;chk();
+ inp.onkeydown=e=>{if(e.key==='Enter'&&!ok.disabled)fin(inp.value)};ok.onclick=()=>fin(inp.value);x.onclick=()=>fin(null);d.addEventListener('close',()=>fin(null));
+ d.append(h('div',{class:'dh'},h('b',{style:'align-self:center;flex:1'},title)),h('div',{style:'padding:12px'},inp,msg),h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},x,ok));
+ document.body.append(d);d.showModal();inp.focus();inp.select()})}
 // ---------- Drum kit editor ----------
 async function openDrumEditor(vo,ctx,addr){ensureVed();
  const dlg=$('#ved');dlg.innerHTML='<div class="dh"><b>Loading '+esc(vo.n)+' from the keyboard…</b></div>';dlg.showModal();
@@ -731,8 +948,7 @@ async function openDrumEditor(vo,ctx,addr){ensureVed();
    const pv=h('button',{},'Play key'),pr=h('button',{},'◀'),nx=h('button',{},'▶'),cp=h('button',{},'Copy settings to key…');
    pr.onclick=()=>mv(-1);nx.onclick=()=>mv(1);
    pv.disabled=!out;pv.onclick=()=>{if(!out)return;const n=key+24;out.send([0x90,n,100]);setTimeout(()=>out.send([0x80,n,0]),400)};
-   cp.onclick=()=>{const tk=prompt('Copy key '+kn(key)+' settings to which note name or number (e.g. D1 or 38)?');if(!tk)return;let n=/^\d+$/.test(tk.trim())?+tk:null;if(n==null)for(let k=0;k<KEYS;k++)if(kn(k).toLowerCase()===tk.trim().toLowerCase())n=k+24;
-    if(n==null||n<24||n>96)return alert('Not a key between C0 (24) and C6 (96)');const d=n-24;const src=kb(key),dst=kb(d);for(let i=0;i<src.length;i++)if(i!==2&&i!==3)dst[i]=src[i];t();key=d;drawBody()};
+   cp.onclick=async()=>{const d=await pickDrumKey('Copy key '+kn(key)+' settings to…','Copy here',kn,kon,key);if(d<0)return;const src=kb(key),dst=kb(d);for(let i=0;i<src.length;i++)if(i!==2&&i!==3)dst[i]=src[i];t();key=d;drawBody()};
    bodyEl.append(h('div',{class:'bar',style:'margin-bottom:8px'},pr,sel,nx,pv,cp,h('span',{class:'hint'},'● = key has a drum sound assigned')));
    const b=kb(key);if(!b){bodyEl.append(h('div',{class:'empty'},'This key was not included in the dump.'));return}
    const by=new Map(DSPEC.elem.map(sp=>[sp.n,sp]));let k0=0;
@@ -762,7 +978,7 @@ let vcache={},vdirty=new Set(),vsaveT=null;
 const b64=u=>{let t='';u.forEach(x=>t+=String.fromCharCode(x));return btoa(t)},unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
 function saveVoices(){clearTimeout(vsaveT);vsaveT=setTimeout(()=>{try{localStorage.setItem('mxvoices',JSON.stringify({d:[...vdirty],v:Object.fromEntries(Object.entries(vcache).map(([nn,V])=>[nn,Object.fromEntries(Object.entries(V.blocks).map(([k,b])=>[k,b64(b)]))]))}))}catch(e){}},400)}
 function loadVoices(){try{const o=JSON.parse(localStorage.getItem('mxvoices')||'null');if(o){vdirty=new Set(o.d);for(const nn in o.v)vcache[nn]={hdr:[0x0a,+nn],blocks:Object.fromEntries(Object.entries(o.v[nn]).map(([k,t])=>[k,unb64(t)]))}}}catch(e){}}
-function cacheVoice(nn,V,dirty){vcache[nn]={hdr:[0x0a,nn],blocks:V.blocks};dirty?vdirty.add(nn):vdirty.delete(nn);saveVoices()}
+function cacheVoice(nn,V,dirty){vcache[nn]={hdr:[0x0a,nn],blocks:V.blocks};noteIns('63:8:'+(nn+1),V);dirty?vdirty.add(nn):vdirty.delete(nn);saveVoices()}
 const DSPEC={
  common:[{o:0x3f,s:1,n:'Volume',lo:0,hi:127},{o:0x46,s:1,n:'Insertion effect reverb send',lo:0,hi:127},{o:0x47,s:1,n:'Insertion effect chorus send',lo:0,hi:127}],
  elem:[{o:0,s:1,n:'Element switch',lo:0,hi:1,lab:{0:'off',1:'on'}},{o:2,s:2,n:'Wave number',lo:0,hi:1565,k:'wave'},{o:4,s:1,n:'Receive note off',lo:0,hi:1,lab:{0:'off',1:'on'}},{o:5,s:1,n:'Key assign mode',lo:0,hi:1,lab:{0:'single',1:'multi'}},{o:6,s:1,n:'Alternate group',lo:0,hi:127,k:'lin',a:0,b:127,u:''},
@@ -821,9 +1037,13 @@ async function openVoiceEditor(vo,ctx){
 
 $('#bulk').onchange=e=>{const i=+e.target.value;if(i<0||!out)return;bulkIdx=i;try{send([0xf0,0x43,0x10|dev(),0x7f,0x17,0,0,0x1f,i,0xf7]);status('Bulk interval set to '+BULK[i]+' ms')}catch(err){status(err.message)}};fillBulk(false);
 const VERSION='0.0.1';
-$('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);padding:0'});const a=(u,t)=>h('a',{href:u,target:'_blank',rel:'noopener noreferrer',style:'color:var(--acc2)'},t);
+{const ts=document.getElementById('theme');ts.value=window.__theme;ts.onchange=()=>{document.documentElement.dataset.theme=ts.value;try{localStorage.setItem('mxtheme',ts.value)}catch(e){}}}
+$('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);padding:0;max-height:92vh;overflow:auto'});const a=(u,t)=>h('a',{href:u,target:'_blank',rel:'noopener noreferrer',style:'color:var(--acc2)'},t);
  const x=h('button',{class:'pri'},'Close');x.onclick=()=>{d.close();d.remove()};d.onclose=()=>d.remove();
- d.append(h('div',{class:'dh'},h('b',{style:'font-size:16px;align-self:center'},'MX Performance Editor'),h('span',{class:'tag',style:'align-self:center'},'Version '+VERSION)),
+ let on=true;try{on=localStorage.getItem('mxabout')!=='0'}catch(e){}
+ const sw=h('input',{type:'checkbox',style:'width:auto'});sw.checked=on;sw.onchange=()=>{try{localStorage.setItem('mxabout',sw.checked?'1':'0')}catch(e){}};
+ const swl=h('label',{style:'display:flex;gap:6px;align-items:center;font-size:13px;margin-right:auto'},sw,'Show this popup on startup');
+ d.append(h('div',{class:'dh'},h('b',{style:'font-size:16px;align-self:center'},'THEM-X Performance Editor'),h('span',{class:'tag',style:'align-self:center'},'Version '+VERSION)),
   h('div',{style:'padding:14px 16px;display:grid;gap:12px;font-size:13px;line-height:1.5'},
    h('p',{style:'margin:0'},'A browser-based editor for performances, voices and effects on Yamaha MX49, MX61 and MX88 keyboards, using Web MIDI.'),
    h('p',{style:'margin:0'},h('b',{},'License. '),'This software is free software released under the ',a('https://www.gnu.org/licenses/gpl-3.0.html','GNU General Public License, version 3 (GPL-3.0)'),'. You may use, study, share and modify it under the terms of that license. It comes with no warranty.'),
@@ -832,10 +1052,11 @@ $('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);paddin
    h('p',{style:'margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)'},h('b',{},'Experimental software. '),'This editor is experimental. Before you use it, back up your keyboard\'s data (Export everything) and copy the backup to a USB drive or other safe storage. No guarantee of correctness or suitability for any purpose is expressed or implied.'),
    h('p',{style:'margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)'},h('b',{},'Bug reports and contributions. '),'Bug reports are welcome, but there is no guarantee, expressed or implied, that any fix will be made or will be forthcoming. You are encouraged to clone the repository and use Claude or another AI tool to improve and extend the software as you see fit, as long as you follow the terms of the GPL-3.0 license.'),
    h('p',{style:'margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)'},h('b',{},'Use at your own risk. '),'This software sends system exclusive data that can overwrite performances and user voices on your keyboard. It is provided "as is", without warranty of any kind. You use it entirely at your own risk, and the authors are not liable for lost data or damage. Back up your keyboard (Export everything) before writing to it.')),
-  h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0'},x));
+  h('div',{class:'dh',style:'justify-content:flex-end;border-top:1px solid var(--line);border-bottom:0;position:sticky;bottom:0;background:var(--panel)'},swl,x));
  document.body.append(d);d.showModal()};
 const setHH=()=>document.documentElement.style.setProperty('--hh',$('header').offsetHeight+'px');addEventListener('resize',setHH);setHH();new ResizeObserver(setHH).observe($('header'));
 $('#conn').onclick=connect;$('#mi').onchange=$('#mo').onchange=()=>access&&bindPorts();
 loadLib();loadVoices();ensureUserSlots();Object.entries(userVoices()).forEach(([k,n])=>registerUser(+k,n));render();
 if(location.protocol==='http:'&&!/localhost|127\.0\.0\.1/.test(location.hostname))status('Web MIDI needs https or localhost');
+try{if(localStorage.getItem('mxabout')!=='0')$('#about').click()}catch(e){$('#about').click()}
 </script></body></html>

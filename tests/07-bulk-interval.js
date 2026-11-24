@@ -3,7 +3,7 @@ const {chromium}=require('playwright');
 await pg.addInitScript(`const inp={id:'i1',name:'MX61',onmidimessage:null};window.__sent=[];const o={id:'o1',name:'MX61',send(d){const a=Array.from(d);window.__sent.push(a);
  if(a[0]===0xf0&&(a[2]&0xf0)===0x30&&a[7]===0x1f)setTimeout(()=>inp.onmidimessage({data:[0xf0,0x43,0x10,0x7f,0x17,0,0,0x1f,18,0xf7]}),3)}};
 navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',o]]),onstatechange:null});`);
-await pg.goto('file://'+require('path').resolve(__dirname,'..','mx-performance-editor.html'));
+await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
 console.log('before connect disabled',await pg.locator('#bulk').isDisabled());
 await pg.click('#conn');await pg.waitForFunction(()=>!document.querySelector('#bulk').disabled);await pg.waitForTimeout(300);
 console.log('value read',await pg.locator('#bulk option:checked').textContent());
