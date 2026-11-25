@@ -133,7 +133,7 @@ Only Node.js is needed to build. The built HTML file has no external dependencie
 
 ## Contributing
 
-Issues and pull requests are welcome at <https://github.com/YamMXEditor/yammxeditor>, with the caveat above that no fixes are guaranteed. Reports from real keyboards (model, firmware, what worked, what did not) are especially useful at this stage. Forks that extend the editor, with or without an AI assistant, are encouraged as long as they follow the GPL-3.0.
+Issues and pull requests are welcome at <https://github.com/themxeditor/them-x-editor>, with the caveat above that no fixes are guaranteed. Reports from real keyboards (model, firmware, what worked, what did not) are especially useful at this stage. Forks that extend the editor, with or without an AI assistant, are encouraged as long as they follow the GPL-3.0.
 
 ## License
 
@@ -143,5 +143,5 @@ Read the license: <https://www.gnu.org/licenses/gpl-3.0.html>
 
 ## Links
 
-- Source code: <https://github.com/YamMXEditor/yammxeditor>
+- Source code: <https://github.com/themxeditor/them-x-editor>
 - GNU GPL v3: <https://www.gnu.org/licenses/gpl-3.0.html>
