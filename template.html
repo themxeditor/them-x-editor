@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
- THEM-X Performance Editor v0.0.1
+ THEM-X Performance Editor v0.0.2
  Copyright (C) the THEM-X Performance Editor contributors
  This program is free software: you can redistribute it and/or modify it under the terms of the
  GNU General Public License version 3 as published by the Free Software Foundation.
@@ -810,7 +810,7 @@ async function openVoiceEditor(vo,ctx){
 
 $('#dev').addEventListener('change',()=>syncBulk());
 $('#bulk').onchange=e=>{const i=+e.target.value;if(i<0||!out)return;bulkIdx=i;bulkFor=bulkKey();try{send([0xf0,0x43,0x10|dev(),0x7f,0x17,0,0,0x1f,i,0xf7]);status('Bulk interval set to '+BULK[i]+' ms')}catch(err){status(err.message)}};fillBulk(false);
-const VERSION='0.0.1';
+const VERSION='0.0.2';
 {const ts=document.getElementById('theme');ts.value=window.__theme;ts.onchange=()=>{document.documentElement.dataset.theme=ts.value;try{localStorage.setItem('mxtheme',ts.value)}catch(e){}}}
 $('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);padding:0;max-height:92vh;overflow:auto'});const a=(u,t)=>h('a',{href:u,target:'_blank',rel:'noopener noreferrer',style:'color:var(--acc2)'},t);
  const x=h('button',{class:'pri'},'Close');x.onclick=()=>{d.close();d.remove()};d.onclose=()=>d.remove();
