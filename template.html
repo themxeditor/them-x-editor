@@ -128,7 +128,7 @@ function bindPorts(){
  else if(!hadLink&&linked&&linkEpoch)status(`Reconnected: ${out.name}. The keyboard may differ from the editor now. Use Check keyboard on a performance to compare.`);
  else status(linked?`Connected: ${out.name}`:'Select MIDI in/out ports');
  hadLink=linked;render();
- fillBulk(false);if(inp&&out&&namesFor!==out.id){namesFor=out.id;readBulk().then(autoReadNames)}}
+ const bp=syncBulk();if(inp&&out&&namesFor!==out.id){namesFor=out.id;Promise.resolve(bp).then(autoReadNames)}}
 let namesFor=null,namesBusy=false;
 async function autoReadNames(){if(namesBusy)return;namesBusy=true;const known=userVoices();let n=0;
  try{for(let nn=0;nn<128;nn++){if(known[nn]!==undefined)continue;try{const V=await requestVoice([0x0e,0x0a,nn]);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'));n++;if(n===1&&nn>2&&!Object.keys(userVoices()).length)break}catch(e){if(!n&&nn>=2){namesFor=null;return}}
@@ -137,11 +137,16 @@ async function autoReadNames(){if(namesBusy)return;namesBusy=true;const known=us
 const BULK=[0,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900];let bulkIdx=18;
 const bulkMs=()=>BULK[bulkIdx]??900;
 function fillBulk(known){const b=$('#bulk');b.innerHTML=(known?'':'<option value="-1">? ms</option>')+BULK.map((v,i)=>`<option value="${i}">${v} ms</option>`).join('');b.value=known?bulkIdx:-1;b.disabled=!(inp&&out)}
-function readBulk(){return new Promise(res=>{if(!out)return res();const t=setTimeout(()=>{bulkWait=null;res()},1200);bulkWait=()=>{clearTimeout(t);bulkWait=null;res()};try{send([0xf0,0x43,0x30|dev(),0x7f,0x17,0,0,0x1f,0xf7])}catch(e){res()}})}
+let bulkFor=null;const bulkKey=()=>out?out.id+':'+dev():null;
+function readBulk(){return new Promise(async res=>{ // ask up to 3 times; the answer also updates the box if it arrives late
+ for(let a=0;a<3&&out;a++){const ok=await new Promise(r=>{const t=setTimeout(()=>{bulkWait=null;r(false)},1200);bulkWait=()=>{clearTimeout(t);bulkWait=null;r(true)};try{send([0xf0,0x43,0x30|dev(),0x7f,0x17,0,0,0x1f,0xf7])}catch(e){clearTimeout(t);bulkWait=null;r(false)}});if(ok)break}
+ res()})}
+// Show the bulk interval: keep the known value for the same keyboard/device number, otherwise ask the keyboard again.
+function syncBulk(){const k=bulkKey();if(!k){bulkFor=null;fillBulk(false);return}if(k===bulkFor){fillBulk(true);return}bulkFor=null;fillBulk(false);return readBulk()}
 let bulkWait=null;
 let vasm=new C.VoiceAssembler(),vwaiter=null;
 function onMsg(e){const d=e.data;if(d[0]!==0xf0)return;
- if((d[2]&0xf0)===0x10&&d[5]===0&&d[6]===0&&d[7]===0x1f&&d[8]<BULK.length){bulkIdx=d[8];fillBulk(true);if(bulkWait)bulkWait();return}
+ if((d[2]&0xf0)===0x10&&d[5]===0&&d[6]===0&&d[7]===0x1f&&d[8]<BULK.length){bulkIdx=d[8];bulkFor=bulkKey();fillBulk(true);if(bulkWait)bulkWait();return}
 const r=asm.feed(d);if(r&&waiter)waiter(r);const v=vasm.feed(d);if(v&&vwaiter)vwaiter(v)}
 let vq=Promise.resolve();
 function requestVoice(addr,timeout){const run=async()=>{let last;for(let a=0;a<3;a++){try{return await requestVoiceRaw(addr,timeout)}catch(e){last=e;if(/disconnect|No MIDI/.test(e.message))break;await sleep(120)}}throw last};const p=vq.then(run,run);vq=p.catch(()=>{});return p} // one voice request at a time
@@ -803,7 +808,8 @@ async function openVoiceEditor(vo,ctx){
  dlg.innerHTML='';dlg.append(h('div',{class:'dh'},h('b',{style:'align-self:center'},vo.n+' › '),nm,h('span',{style:'flex:1'}),tryBtn,saveBtn,closeBtn),tabsEl,msgEl,bodyEl);
  drawTabs();drawBody()}
 
-$('#bulk').onchange=e=>{const i=+e.target.value;if(i<0||!out)return;bulkIdx=i;try{send([0xf0,0x43,0x10|dev(),0x7f,0x17,0,0,0x1f,i,0xf7]);status('Bulk interval set to '+BULK[i]+' ms')}catch(err){status(err.message)}};fillBulk(false);
+$('#dev').addEventListener('change',()=>syncBulk());
+$('#bulk').onchange=e=>{const i=+e.target.value;if(i<0||!out)return;bulkIdx=i;bulkFor=bulkKey();try{send([0xf0,0x43,0x10|dev(),0x7f,0x17,0,0,0x1f,i,0xf7]);status('Bulk interval set to '+BULK[i]+' ms')}catch(err){status(err.message)}};fillBulk(false);
 const VERSION='0.0.1';
 {const ts=document.getElementById('theme');ts.value=window.__theme;ts.onchange=()=>{document.documentElement.dataset.theme=ts.value;try{localStorage.setItem('mxtheme',ts.value)}catch(e){}}}
 $('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);padding:0;max-height:92vh;overflow:auto'});const a=(u,t)=>h('a',{href:u,target:'_blank',rel:'noopener noreferrer',style:'color:var(--acc2)'},t);

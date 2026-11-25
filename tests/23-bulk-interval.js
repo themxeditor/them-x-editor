@@ -1,0 +1,12 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");
+await pg.addInitScript(`window.__asks=0;window.__drop=0;const inp={id:'i1',name:'MX61',onmidimessage:null,state:'connected'};const out={id:'o1',name:'MX61',state:'connected',send(a){a=Array.from(a);
+ if(a[0]===0xf0&&(a[2]&0xf0)===0x30&&a[7]===0x1f){window.__asks++;if(window.__drop>0){window.__drop--;return}setTimeout(()=>inp.onmidimessage({data:[0xf0,0x43,0x10|(a[2]&15),0x7f,0x17,0,0,0x1f,3,0xf7]}),5)}}};
+const acc={inputs:new Map([['i1',inp]]),outputs:new Map([['o1',out]]),onstatechange:null};window.__acc=acc;navigator.requestMIDIAccess=async()=>acc;`);
+await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
+const val=async()=>pg.locator('#bulk option:checked').innerText();
+await pg.evaluate(()=>{window.__drop=2});await pg.click('#conn');await pg.waitForTimeout(4500);console.log('after 2 dropped replies:',await val(),'asks',await pg.evaluate(()=>window.__asks));
+await pg.evaluate(()=>{window.__acc.onstatechange&&window.__acc.onstatechange()});await pg.waitForTimeout(300);console.log('after a port refresh:',await val());
+await pg.selectOption('#mo','o1');await pg.waitForTimeout(300);console.log('after reselect:',await val());
+await pg.fill('#dev','2');await pg.dispatchEvent('#dev','change');await pg.waitForTimeout(500);console.log('after Dev# change:',await val(),'asks',await pg.evaluate(()=>window.__asks));
+console.log(errs);await b.close()})();
