@@ -12,7 +12,7 @@ const out={id:'o1',name:'MX61',state:'connected',send(a){a=Array.from(a);const C
    if(h===0x37&&m.addr[1]===0&&window.__m.dropOnce){window.__m.dropOnce=false;return}
    if(A){const r=A.feed(new Uint8Array(a));if(r){window.__m.store[A.key]=r;A=null}}}}};
 navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',out]]),onstatechange:null});`);
-await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
+await pg.goto('file://'+'/home/claude/mx-editor/them-x-performance-editor.html');
 await pg.evaluate(()=>{const C=MXCore,Q=C.newPerformance('Stored');[[0,0],[3,65],[0,9]].forEach(([l,p],k)=>{Q.parts[k].set(C.newPart?C.newPart(k):Q.parts[k]);Q.parts[k][1]=63;Q.parts[k][2]=l;Q.parts[k][3]=p;Q.parts[k][4]=k});window.__m.store[0]=Q});
 await pg.click('#conn');await pg.waitForTimeout(300);await pg.click('#app tbody tr');await pg.waitForTimeout(300);
 const names=async()=>pg.locator('.part .vname').allInnerTexts();

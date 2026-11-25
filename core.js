@@ -239,7 +239,14 @@
       const [h, mi, l] = m.addr;
       if (h === 0x0e) { V = { hdr: [mi, l], blocks: {} }; return null; }
       if (!V) return null;
-      if (h === 0x0f) { const r = V; V = null; return (r.blocks[vkey(0x40, 0)] || r.blocks[vkey(0x46, 0)]) ? r : null; }
+      if (h === 0x0f) {
+        const r = V; V = null; if (!(r.blocks[vkey(0x40, 0)] || r.blocks[vkey(0x46, 0)])) return null;
+        // completeness: required blocks present and the right size (a partial dump would otherwise look like an "Initialize" voice)
+        const need = r.blocks[vkey(0x46, 0)] ? [[0x46, 0], [0x46, 3], [0x46, 8]] : [[0x40, 0], [0x40, 3], [0x40, 6], [0x40, 0x30], [0x41, 0], [0x42, 0]];
+        r._missing = need.filter(([a, b]) => !r.blocks[vkey(a, b)]).map(([a, b]) => a.toString(16) + ':' + b);
+        VOICE_BLOCKS.forEach(([a, b, c, n]) => { const x = r.blocks[vkey(a, b)]; if (x && x.length !== n) r._missing.push(a.toString(16) + ':' + b + ' size ' + x.length + ' not ' + n); });
+        return r;
+      }
       V.blocks[vkey(h, mi)] = Uint8Array.from(m.data); return null;
     };
   }
@@ -250,6 +257,8 @@
     out.push(msg(dev, [0x0f, target[1], target[2]], []));
     return out;
   }
+  // Which blocks differ between two voices (blocks present in A only are compared).
+  function voiceDiff(A, B) { const d = []; Object.keys(A.blocks).forEach(k => { const x = A.blocks[k], y = B.blocks[k]; if (!y || x.length !== y.length || x.some((v, i) => v !== y[i])) d.push(k); }); return d; }
   const isDrum = V => !!V.blocks[vkey(0x46, 0)];
   const commonOf = V => V.blocks[vkey(0x40, 0)] || V.blocks[vkey(0x46, 0)];
   const voiceName = V => { let s = ''; const c = commonOf(V); for (let i = 0; i < 10; i++) s += String.fromCharCode(c[i] >= 32 && c[i] < 127 ? c[i] : 32); return s.replace(/\s+$/, ''); };
@@ -259,7 +268,7 @@
   const pget = (b, sp) => sp.s === 2 ? (b[sp.o] << 7) | b[sp.o + 1] : b[sp.o];
   const pset = (b, sp, v) => { v = Math.max(sp.lo, Math.min(sp.hi, v | 0)); if (sp.s === 2) { b[sp.o] = v >> 7; b[sp.o + 1] = v & 127; } else b[sp.o] = v; };
 
-  root.MXCore = {fxGet, fxSet, fxType, fxDefaults, setFxType, voiceAddr, VoiceAssembler, buildVoice, isDrum, commonOf, voiceName, setVoiceName, cloneVoice, vkey, pget, pset, VOICE_BLOCKS, SIZES, OFF, CO, checksum, msg, requestMsg, requestFor, parse, build, Assembler, parseSyx, parseSyxAll, newPerformance, clonePerf, newPart, newArp,
+  root.MXCore = {fxGet, fxSet, fxType, fxDefaults, setFxType, voiceAddr, VoiceAssembler, voiceDiff, buildVoice, isDrum, commonOf, voiceName, setVoiceName, cloneVoice, vkey, pget, pset, VOICE_BLOCKS, SIZES, OFF, CO, checksum, msg, requestMsg, requestFor, parse, build, Assembler, parseSyx, parseSyxAll, newPerformance, clonePerf, newPart, newArp,
     setName, getName, active, setVoice, getVoiceKey, noteName, perfDiff, perfInvalid, blockLabel, addVoice, placeVoice, reorderParts, removeVoice, insGet, insSet, insCount, insClean, INS_MAX };
   if (typeof module !== 'undefined') module.exports = root.MXCore;
 })(typeof window !== 'undefined' ? window : globalThis);

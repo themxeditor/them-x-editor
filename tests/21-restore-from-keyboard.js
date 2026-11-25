@@ -1,0 +1,12 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));pg.on('dialog',d=>d.accept());await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");
+await pg.addInitScript(`const inp={id:'i1',name:'MX61',onmidimessage:null,state:'connected'};const out={id:'o1',name:'MX61',state:'connected',send(a){a=Array.from(a);const C=MXCore;
+ if(a[0]===0xf0&&(a[2]&0xf0)===0x20&&a[5]===0x0e&&a[6]===0x50){const P=C.newPerformance('FromKbd');C.setName(P.common,'FromKbd');C.build(0,P,a[7]).forEach((x,i)=>setTimeout(()=>inp.onmidimessage({data:Array.from(x)}),2+i))}}};
+navigator.requestMIDIAccess=async()=>({inputs:new Map([['i1',inp]]),outputs:new Map([['o1',out]]),onstatechange:null});`);
+await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
+await pg.evaluate(()=>{lib[2].dirty=true;lib[2].P.common[0]=0x41;render()});
+console.log('btns offline',await pg.locator('.rfk').count(),await pg.locator('.rfk').first().isDisabled());
+await pg.click('#conn');await pg.waitForTimeout(300);
+console.log('enabled',!(await pg.locator('.rfk').first().isDisabled()));
+await pg.click('.rfk');await pg.waitForTimeout(1200);
+console.log('after',await pg.locator('.rfk').count(),await pg.locator('tr.row').nth(2).innerText().then(t=>t.replace(/\s+/g,' ')));console.log(errs);await b.close()})();
