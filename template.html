@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
- THEM-X Performance Editor v0.1.1
+ THEM-X Performance Editor v0.1.2
  Copyright (C) the THEM-X Performance Editor contributors
  This program is free software: you can redistribute it and/or modify it under the terms of the
  GNU General Public License version 3 as published by the Free Software Foundation.
@@ -131,7 +131,7 @@ function bindPorts(){
  const bp=syncBulk();if(inp&&out&&namesFor!==out.id){namesFor=out.id;Promise.resolve(bp).then(autoReadNames)}}
 let namesFor=null,namesBusy=false;
 async function autoReadNames(){if(namesBusy)return;namesBusy=true;const known=userVoices();let n=0;
- try{for(let nn=0;nn<128;nn++){if(known[nn]!==undefined)continue;try{const V=await requestVoice([0x0e,0x0a,nn]);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'));n++;if(n===1&&nn>2&&!Object.keys(userVoices()).length)break}catch(e){if(!n&&nn>=2){namesFor=null;return}}
+ try{for(let nn=0;nn<128;nn++){if(known[nn]!==undefined)continue;try{const V=await readUV(nn);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'));n++;if(n===1&&nn>2&&!Object.keys(userVoices()).length)break}catch(e){if(!n&&nn>=2){namesFor=null;return}}
    if(nn%16===15&&view.type!=='detail')render()}
   if(n){status('Read '+n+' user voice names');render()}}finally{namesBusy=false}}
 const BULK=[0,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900];let bulkIdx=18;
@@ -175,7 +175,8 @@ function preflight(i){const P=lib[i].P,errors=[],warns=[],dirtyUV=new Set();
   if(!VALID_BANKS.some(([x,y])=>x===b&&y===l)){errors.push(`${lab}: bank ${b}/${l} is not a valid voice bank, so the keyboard would show "Initialize" or the wrong voice.`);return}
   if(pc>127){errors.push(`${lab}: program number ${pc+1} is out of range.`);return}
   if(b===63&&l===8){const nn=pc,nm=userVoices()[nn];
-   if(vdirty.has(nn)){dirtyUV.add(nn);warns.push(`${lab}: user voice ${nn+1} ("${nm||''}") is changed here but not yet on the keyboard.`)}
+   if(stagedBlank(nn))warns.push(`${lab}: the editor holds a blank staged copy of user voice ${nn+1}. It will NOT be written; the keyboard's voice is left alone.`);
+   else if(vdirty.has(nn)){dirtyUV.add(nn);warns.push(`${lab}: user voice ${nn+1} ("${nm||''}") is changed here but not yet on the keyboard.`)}
    else if(nm===undefined)warns.push(`${lab}: user voice ${nn+1} has not been read from the keyboard, so it can't be confirmed to exist.`);
    else if(/^\s*init/i.test(nm))errors.push(`${lab}: user voice ${nn+1} on the keyboard is empty ("${nm.trim()}"). The part would show "Initialize".`)}
   else if(b===63&&l===40){}
@@ -205,7 +206,7 @@ async function writeVerified(i,target,st){const P=lib[i].P;let diffs=[],unverifi
   else if(a>=2)return{ok:true,attempts:a,unverified:true,diffs:[]}
   log('verify mismatch (attempt '+a+'): '+diffs.join(', '))}
  return{ok:false,attempts:3,unverified,diffs}}
-async function writeUserVoicesFirst(list,st){for(const nn of list){const r=await writeUserVoice(nn,vcache[nn],st);if(r.skipped)throw new Error('Writing user voice '+(nn+1)+' was cancelled');if(!r.ok)throw new Error('User voice '+(nn+1)+' did not verify on the keyboard');vdirty.delete(nn)}saveVoices()}
+async function writeUserVoicesFirst(list,st){for(const nn of list){if(stagedBlank(nn))continue;const r=await writeUserVoice(nn,vcache[nn],st);if(r.skipped)throw new Error('Writing user voice '+(nn+1)+' was cancelled');if(!r.ok)throw new Error('User voice '+(nn+1)+' did not verify on the keyboard');vdirty.delete(nn)}saveVoices()}
 async function checkSync(i){if(!out)return alert('Connect MIDI first.');status('Reading '+slotName(i)+' from the keyboard…');
  let back;try{back=await readPerfChecked(i)}catch(e){status('Could not read from the keyboard: '+e.message);return alert('Could not read '+slotName(i)+' from the keyboard ('+e.message+').')}
  const d=C.perfDiff(lib[i].P,back);status('Checked '+slotName(i));
@@ -215,9 +216,9 @@ function resultMsg(name,r){return r.ok?(r.unverified?`${name} was sent, but the 
 async function writeSlot(i){if(!out)return alert('Connect MIDI first.');
  const pf=preflight(i);let withVoices=false;
  if(pf.errors.length||pf.warns.length||pf.dirtyUV.length){
-  const extra=pf.dirtyUV.length?h('label',{style:'display:flex;gap:6px;align-items:center;padding:8px 12px;font-size:13px'},h('input',{type:'checkbox',checked:true,style:'width:auto',id:'pfuv'}),`Also write the ${pf.dirtyUV.length} changed user voice(s) used here (${pf.dirtyUV.map(n=>n+1).join(', ')}) first`):null;
+  const extra=pf.dirtyUV.length?h('label',{style:'display:flex;gap:6px;align-items:center;padding:8px 12px;font-size:13px'},h('input',{type:'checkbox',checked:false,style:'width:auto',id:'pfuv'}),`Also write the ${pf.dirtyUV.length} changed user voice(s) used here (${pf.dirtyUV.map(n=>n+1).join(', ')}) first. This replaces them on the keyboard; leave unticked to write only the performance`):null;
   const ok=await problemDlg({title:`Write ${slotName(i)} to the keyboard?`,errors:pf.errors,warns:pf.warns,okLabel:pf.errors.length?'Write anyway':'Write',extra});
-  if(!ok)return;withVoices=!!(extra&&document.getElementById('pfuv')?.checked!==false)}
+  if(!ok)return;withVoices=!!(extra&&document.getElementById('pfuv')?.checked===true)}
  else if(!confirm(`Overwrite performance ${slotName(i)} on the keyboard?\n(Bulk Protect must be OFF on the instrument.)`))return;
  try{if(withVoices)await writeUserVoicesFirst(pf.dirtyUV,status);
   const r=await writeVerified(i,i,t=>status(slotName(i)+': '+t));
@@ -239,8 +240,11 @@ function go(v){const changed=v.type==='detail'&&(view.type!=='detail'||view.i!==
 // Make the keyboard switch to the selected performance. Unsaved local edits go to the edit buffer; otherwise recall the stored slot.
 let followOn=true;
 async function recall(i){if(!out||!followOn)return;const ch=Math.max(0,Math.min(15,(+$('#fch').value||1)-1));
- if(lib[i].dirty){await sendPerf(lib[i].P,'edit');status(`Sent ${slotName(i)} (with your edits) to the edit buffer`)}
- else{out.send([0xb0|ch,0,63]);out.send([0xb0|ch,32,80]);out.send([0xc0|ch,i]);status(`Keyboard switched to ${slotName(i)}`)}}
+ // Always select the slot first so the keyboard moves to that performance number...
+ out.send([0xb0|ch,0,63]);out.send([0xb0|ch,32,80]);out.send([0xc0|ch,i]);
+ // ...then, if it has edits the keyboard doesn't have, load them into the edit buffer on top.
+ if(lib[i].dirty){await sleep(350);await sendPerf(lib[i].P,'edit');status(`Keyboard switched to ${slotName(i)} and loaded your edits (not stored on the keyboard until you write)`)}
+ else status(`Keyboard switched to ${slotName(i)}`)}
 function render(){view.type==='list'?renderList():view.type==='uv'?renderUV():view.type==='av'?renderAV():renderDetail()}
 function modLabel(l){return l.dirty?'<span class="tag mod">modified</span>':l.src==='dev'?'<span class="tag dev">from keyboard</span>':'<span class="tag">factory list</span>'}
 function vnames(P){return P.parts.map((p,i)=>C.active(p)?(voiceOf(p)?.n||`${p.slice(1,4).join('/')}`):null).filter(Boolean)}
@@ -285,12 +289,14 @@ async function writeModified(){const ps=lib.map((l,i)=>l.dirty?i:-1).filter(i=>i
  if(!out)return alert('Connect MIDI first.');if(!ps.length&&!vs.length)return alert('Nothing has been modified.');
  if(!confirm(`Write ${ps.length} modified performance(s) and ${vs.length} modified user voice(s) to the keyboard?\nThis overwrites those slots. Bulk Protect must be off.`))return;
  let k=0;const tot=ps.length+vs.length;
- for(const nn of vs){status(`Writing user voice ${nn+1} (${++k}/${tot})…`);for(const m of C.buildVoice(dev(),vcache[nn],[0x0e,0x0a,nn])){send(m);await sleep(12)}await sleep(150);vdirty.delete(nn)}
- const failed=[];for(const i of ps){status(`Writing ${slotName(i)} (${++k}/${tot})…`);
-  try{const r=await writeVerified(i,i);if(r.ok){lib[i].dirty=false;lib[i].src='dev';if(r.unverified)failed.push(slotName(i)+' (sent, not verified)')}else failed.push(slotName(i)+': '+r.diffs.join(', '))}catch(e){failed.push(slotName(i)+': '+e.message);break}
+ const failed=[];let vw=0,pw=0;
+ for(const nn of vs){status(`Writing user voice ${nn+1} (${++k}/${tot})…`);
+  try{const r=await writeUserVoice(nn,vcache[nn],status);if(r.skipped){failed.push('User voice '+(nn+1)+' (skipped, still modified)');continue}if(r.ok){vdirty.delete(nn);vw++;if(r.unverified)failed.push('User voice '+(nn+1)+' (sent, not verified)')}else failed.push('User voice '+(nn+1)+': '+r.diffs.join(', '))}catch(e){failed.push('User voice '+(nn+1)+': '+e.message);break}}
+ for(const i of ps){status(`Writing ${slotName(i)} (${++k}/${tot})…`);
+  try{const r=await writeVerified(i,i);if(r.ok){pw++;lib[i].dirty=false;lib[i].src='dev';if(r.unverified)failed.push(slotName(i)+' (sent, not verified)')}else failed.push(slotName(i)+': '+r.diffs.join(', '))}catch(e){failed.push(slotName(i)+': '+e.message);break}
   save()}
  if(failed.length)alert('These performances need attention:\n\n  '+failed.join('\n  ')+'\n\nThey stay marked modified (or unverified). Check Bulk Protect and the connection, then write them again.')
- saveVoices();save();status(`Wrote ${ps.length-(typeof failed!=='undefined'?failed.length:0)} of ${ps.length} performance(s) and ${vs.length} user voice(s)`);render()}
+ saveVoices();save();status(`Wrote ${pw} of ${ps.length} performance(s) and ${vw} user voice(s)`);render()}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function download(name,msgs){const b=new Blob(msgs,{type:'application/octet-stream'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function touch(i){lib[i].dirty=true;save()}
@@ -491,7 +497,7 @@ function usedByMap(){const m={};lib.forEach((l,i)=>l.P.parts.forEach(p=>{if(C.ac
 function uvState(nn){return vdirty.has(nn)?'mod':vcache[nn]?'stored':userVoices()[nn]!==undefined?'name':'unread'}
 const UVLAB={mod:'<span class="tag mod">modified, not on keyboard</span>',stored:'<span class="tag dev">on keyboard</span>',name:'<span class="tag">name only</span>',unread:'<span class="tag">not read</span>'};
 async function uvGet(nn){if(vcache[nn])return C.cloneVoice(vcache[nn]);if(!out)throw new Error('Voice '+(nn+1)+' has not been read yet. Connect to the keyboard and press Read from keyboard.');
- const V=await requestVoice([0x0e,0x0a,nn]);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'));return C.cloneVoice(V)}
+ const V=await readUV(nn);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'));return C.cloneVoice(V)}
 function uvPut(nn,V,name){if(name!=null)C.setVoiceName(V,name);cacheVoice(nn,V,true);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}
 function uvConfirmOverwrite(nn,used){const k=userVoices()[nn],u=used[nn];return confirm(`User voice ${nn+1}${k?' ("'+k+'")':''} will be replaced in this editor`+(u?`\nIt is used by ${u.size} performance(s): ${[...u].slice(0,6).map(slotName).join(', ')}${u.size>6?'…':''}`:'')+'\nThe keyboard is not changed until you write.')}
 async function uvAction(nn,act){const used=usedByMap();
@@ -502,7 +508,7 @@ async function uvAction(nn,act){const used=usedByMap();
  else if(act==='swap'){const t=await pickSlotDlg(`Swap user voice ${nn+1} ("${known0(nn)}") with…`,'Swap with this slot',nn);if(t<0||t===nn)return;const A=await uvGet(nn),B=await uvGet(t);uvPut(nn,B);uvPut(t,A)}
  else if(act==='export'){const V=await uvGet(nn);download(`user-voice-${nn+1}-${C.voiceName(V).trim()||'voice'}.syx`,C.buildVoice(dev(),V,[0x0e,0x0a,nn]))}
  else if(act==='reread'){if(!out)return alert('Connect to the keyboard first.');if(vdirty.has(nn)&&!confirm('Discard your changes to user voice '+(nn+1)+' and re-read it from the keyboard?'))return;
-  const V=await requestVoice([0x0e,0x0a,nn]);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}
+  const V=await readUV(nn);cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}
  else if(act==='write'){await uvWrite([nn]);return}
  else if(act==='restore'){const B=vbak[nn];if(!B)return;if(!confirm(`Restore the backup of user voice ${nn+1} ("${C.voiceName(B.V).trim()}", taken ${new Date(B.t).toLocaleString()})?\nIt goes back into the editor as modified; press Write to send it to the keyboard.`))return;const V=C.cloneVoice(B.V);cacheVoice(nn,V,true);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}
  }catch(e){alert(e.message)}
@@ -783,9 +789,17 @@ async function writeUserVoice(nn,V,st){
  }
  return {ok:false,diffs}}
 let vcache={},vdirty=new Set(),vsaveT=null;
+// A staged (modified) user voice that is blank/"Initialize" is never written implicitly.
+const stagedBlank=nn=>vdirty.has(nn)&&!!vcache[nn]&&isInitName(C.voiceName(vcache[nn]));
+// Read a user voice; if the keyboard answers "Initialize" for a slot we knew as a real voice, ask again before believing it.
+async function readUV(nn){let V=await requestVoice([0x0e,0x0a,nn]);const known=userVoices()[nn];
+ if(isInitName(C.voiceName(V))&&known!==undefined&&!isInitName(known)){await sleep(300);try{const V2=await requestVoice([0x0e,0x0a,nn]);if(!isInitName(C.voiceName(V2)))V=V2;else log('user voice '+(nn+1)+' now reads as Initialize (was "'+known+'")')}catch(e){log('re-read of user voice '+(nn+1)+' failed: '+e.message)}}
+ return V}
 const b64=u=>{let t='';u.forEach(x=>t+=String.fromCharCode(x));return btoa(t)},unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
 function saveVoices(){clearTimeout(vsaveT);vsaveT=setTimeout(()=>{try{localStorage.setItem('mxvoices',JSON.stringify({d:[...vdirty],v:Object.fromEntries(Object.entries(vcache).map(([nn,V])=>[nn,Object.fromEntries(Object.entries(V.blocks).map(([k,b])=>[k,b64(b)]))]))}))}catch(e){}},400)}
-function loadVoices(){try{const o=JSON.parse(localStorage.getItem('mxvoices')||'null');if(o){vdirty=new Set(o.d);for(const nn in o.v)vcache[nn]={hdr:[0x0a,+nn],blocks:Object.fromEntries(Object.entries(o.v[nn]).map(([k,t])=>[k,unb64(t)]))}}}catch(e){}}
+function loadVoices(){try{const o=JSON.parse(localStorage.getItem('mxvoices')||'null');if(o){vdirty=new Set(o.d);for(const nn in o.v)vcache[nn]={hdr:[0x0a,+nn],blocks:Object.fromEntries(Object.entries(o.v[nn]).map(([k,t])=>[k,unb64(t)]))};
+  // blank staged voices from an earlier session are not carried over as 'modified'
+  [...vdirty].forEach(nn=>{if(!vcache[nn]||isInitName(C.voiceName(vcache[nn])))vdirty.delete(nn)})}}catch(e){}}
 function cacheVoice(nn,V,dirty){vcache[nn]={hdr:[0x0a,nn],blocks:V.blocks};noteIns('63:8:'+(nn+1),V);dirty?vdirty.add(nn):vdirty.delete(nn);saveVoices()}
 const DSPEC={
  common:[{o:0x3f,s:1,n:'Volume',lo:0,hi:127},{o:0x46,s:1,n:'Insertion effect reverb send',lo:0,hi:127},{o:0x47,s:1,n:'Insertion effect chorus send',lo:0,hi:127}],
@@ -802,7 +816,7 @@ function registerKit(nn,name){const u=userKits();u[nn]=name;try{localStorage.set
  const key='63:40:'+(nn+1);let v=vByKey.get(key);if(!v){v={m:'DR',s:'User',n:name,b:63,l:40,p:nn+1,y:'-'};DATA.voices.push(v);vByKey.set(key,v)}else v.n=name;return v}
 function ensureUserSlots(){for(let nn=0;nn<8;nn++)registerKit(nn,userKits()[nn]||'User Kit '+(nn+1));for(let nn=0;nn<128;nn++){const key='63:8:'+(nn+1);if(!vByKey.has(key)){const v={m:'USER',s:'User',n:'User '+String(nn+1).padStart(3,'0'),b:63,l:8,p:nn+1,y:'?'};DATA.voices.push(v);vByKey.set(key,v)}}}
 async function readUserNames(btn){let ok=0;for(let nn=0;nn<128;nn++){btn.textContent=`Reading user voices ${nn+1}/128…`;
-  try{const V=await requestVoice([0x0e,0x0a,nn]);if(!vdirty.has(nn)){cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}ok++}catch(e){if(!ok&&nn>=2){btn.textContent='No response — check connection';return}}}
+  try{const V=await readUV(nn);if(!vdirty.has(nn)){cacheVoice(nn,V,false);registerUser(nn,C.voiceName(V)||'User '+String(nn+1).padStart(3,'0'))}ok++}catch(e){if(!ok&&nn>=2){btn.textContent='No response — check connection';return}}}
  btn.textContent=`Read ${ok}/128 — read again`}
 function userVoices(){try{return JSON.parse(localStorage.getItem('mxuser')||'{}')}catch(e){return{}}}
 function registerUser(nn,name){const u=userVoices();u[nn]=name;try{localStorage.setItem('mxuser',JSON.stringify(u))}catch(e){}
@@ -845,7 +859,7 @@ async function openVoiceEditor(vo,ctx){
 
 $('#dev').addEventListener('change',()=>syncBulk());
 $('#bulk').onchange=e=>{const i=+e.target.value;if(i<0||!out)return;bulkIdx=i;bulkFor=bulkKey();try{send([0xf0,0x43,0x10|dev(),0x7f,0x17,0,0,0x1f,i,0xf7]);status('Bulk interval set to '+BULK[i]+' ms')}catch(err){status(err.message)}};fillBulk(false);
-const VERSION='0.1.1';
+const VERSION='0.1.2';
 {const ts=document.getElementById('theme');ts.value=window.__theme;ts.onchange=()=>{document.documentElement.dataset.theme=ts.value;try{localStorage.setItem('mxtheme',ts.value)}catch(e){}}}
 $('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);padding:0;max-height:92vh;overflow:auto'});const a=(u,t)=>h('a',{href:u,target:'_blank',rel:'noopener noreferrer',style:'color:var(--acc2)'},t);
  const x=h('button',{class:'pri'},'Close');x.onclick=()=>{d.close();d.remove()};d.onclose=()=>d.remove();
