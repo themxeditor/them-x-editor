@@ -1,5 +1,7 @@
 # THEM-X Performance Editor
 
+Access the editor at: <https://themxeditor.github.io/them-x-editor/them-x-performance-editor.html>
+
 **Version 0.1.2**
 
 A browser-based editor for the performances, voices, drum kits, effects and arpeggios of Yamaha MX49, MX61 and MX88 keyboards. It talks to the keyboard over USB using the Web MIDI API, so there is nothing to install: open one HTML file in Chrome or Edge.
