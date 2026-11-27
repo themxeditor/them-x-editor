@@ -1,0 +1,13 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:900}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");
+await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));await pg.click('#app tbody tr');await pg.waitForTimeout(200);
+await pg.click('#t-knobs');await pg.waitForTimeout(200);
+const P=()=>pg.evaluate(()=>{const P=lib[view.i].P,c=P.common,p=P.parts.find(x=>MXCore.active(x));return {fn:c[0x1e],link:c[0x44],cut:c[0x2a],a1:c[0x2c],a2:c[0x2d],pan:c[0x1f],pcut:p[0x2d],pa1:p[0x3c],rx:p[0x21]}});
+console.log('start',await P());
+await pg.selectOption('.card select, #tabbody select >> nth=0','2').catch(()=>{});
+const sels=pg.locator('#tabbody select');await sels.nth(0).selectOption('2');await sels.nth(1).selectOption('1');
+const rs=pg.locator('#tabbody input[type=range]');await rs.nth(0).fill('80');await rs.nth(8).fill('100');await rs.nth(9).fill('10');
+const nums=pg.locator('#tabbody table input[type=number]');await nums.nth(0).fill('-20');await nums.nth(6).fill('15');
+const ck=pg.locator('#tabbody table input[type=checkbox]');await ck.nth(0).uncheck();
+console.log('after',await P(),await pg.locator('#tabbody table tbody tr').count());
+await pg.screenshot({path:'/tmp/knobs.png'});console.log(errs);await b.close()})();

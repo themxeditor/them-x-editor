@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
- THEM-X Performance Editor v0.1.0
+ THEM-X Performance Editor v0.1.1
  Copyright (C) the THEM-X Performance Editor contributors
  This program is free software: you can redistribute it and/or modify it under the terms of the
  GNU General Public License version 3 as published by the Free Software Foundation.
@@ -54,7 +54,7 @@ dialog::backdrop{background:#0008}.dh{padding:12px;display:flex;gap:8px;border-b
 .dl{overflow:auto;max-height:60vh}.dl div{padding:6px 12px;display:flex;gap:10px;cursor:pointer;border-bottom:1px solid var(--line)}
 .dl div:hover{background:var(--panel2)}.dl .c{color:var(--mute);width:120px;flex:none;font-size:12px}
 #log{font:11px ui-monospace,monospace;color:var(--mute);max-height:90px;overflow:auto;margin-top:12px}
-.tabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tbl th,.tbl td{padding:4px 6px;text-align:left;border-bottom:1px solid var(--line)}.tbl th{color:var(--mute);font-weight:500;white-space:nowrap}.tabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:8px 14px;color:var(--mute)}
 .tabs button.on{color:var(--fg);border-color:var(--acc);font-weight:600}.tabs button.off{opacity:.5}
 details.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:10px}
@@ -646,19 +646,19 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  <button id="exp">Export .syx</button><button id="chk" title="Read this slot back from the keyboard and compare it with the editor" ${out?'':'disabled'}>Check keyboard</button><button id="dup">Copy to…</button><button id="clr" class="dng">Clear performance</button></div>
  <div class="card" style="margin-bottom:0"><div class="grid2">
  <label>Name<input id="nm" maxlength="10" value="${esc(C.getName(c))}"></label>
- <label>Keyboard mode<select id="md">${MODES.map((m,k)=>`<option value="${k}" ${c[CO_MODE]==k?'selected':''}>${m}</option>`).join('')}</select></label>
+ <label title="single: only the selected part (1 or 2) sounds from the keyboard. layer: Parts 1 and 2 sound together. split: Part 1 above the split point, Part 2 below it. This applies to Parts 1 and 2 only.">Keyboard mode<select id="md">${MODES.map((m,k)=>`<option value="${k}" ${c[CO_MODE]==k?'selected':''}>${m}</option>`).join('')}</select></label>
  <label>Split point (note ${NOTE(c[0x42])})<input id="sp" type="number" min="1" max="127" value="${c[0x42]}"></label>
  <label>Performance volume <b id="pvv" style="color:var(--fg)">${c[0x38]}</b><input id="pv" type="range" min="0" max="127" value="${c[0x38]}"></label>
  <label>Arpeggio<select id="ar"><option value="0" ${P.arpc[4]?'':'selected'}>off</option><option value="1" ${P.arpc[4]?'selected':''}>on</option></select></label>
  <label>Tempo<input id="tp" type="number" min="5" max="300" value="${(P.arpc[2]<<7)|P.arpc[3]}"></label></div><div id="vbar"></div></div>
  </div>
- <div class="tabs"><button id="t-voices" class="${tab==='voices'?'on':''}">Voices (${act.length}/16)</button><button id="t-fx" class="${tab==='fx'?'on':''}">Effects &amp; EQ</button><button id="t-arp" class="${tab==='arp'?'on':''}">Arpeggio</button><button id="t-pat" class="${tab==='pat'?'on':''}">Rhythm pattern</button></div>
+ <div class="tabs"><button id="t-voices" class="${tab==='voices'?'on':''}">Voices (${act.length}/16)</button><button id="t-fx" class="${tab==='fx'?'on':''}">Effects &amp; EQ</button><button id="t-knobs" class="${tab==='knobs'?'on':''}">Knobs</button><button id="t-arp" class="${tab==='arp'?'on':''}">Arpeggio</button><button id="t-pat" class="${tab==='pat'?'on':''}">Rhythm pattern</button></div>
  <div id="tabbody"></div><pre id="log"></pre>
  <dialog id="dlg"><div class="dh"><input id="vq" placeholder="Search voices…" style="flex:1"><select id="vc"><option value="">All categories</option>${[...new Set(DATA.voices.map(v=>v.m))].map(m=>`<option>${m}</option>`).join('')}</select><button id="vu" title="Reads the names of the 128 user voices from the keyboard">Read user voices</button><button id="vx">Close</button></div><div class="dl" id="vl"></div></dialog>
  <dialog id="ved" class="big"></dialog><input type="file" id="file" accept=".syx" hidden>`;
  $('#app').innerHTML=h0;
  $('#back').onclick=()=>go({type:'list'});$('#pr').onclick=()=>go({type:'detail',i:i-1,tab:view.tab});$('#nx').onclick=()=>go({type:'detail',i:i+1,tab:view.tab});
- $('#t-voices').onclick=()=>{view.tab='voices';renderDetail()};$('#t-fx').onclick=()=>{view.tab='fx';renderDetail()};$('#t-arp').onclick=()=>{view.tab='arp';renderDetail()};$('#t-pat').onclick=()=>{view.tab='pat';renderDetail()};
+ $('#t-voices').onclick=()=>{view.tab='voices';renderDetail()};$('#t-fx').onclick=()=>{view.tab='fx';renderDetail()};$('#t-knobs').onclick=()=>{view.tab='knobs';renderDetail()};$('#t-arp').onclick=()=>{view.tab='arp';renderDetail()};$('#t-pat').onclick=()=>{view.tab='pat';renderDetail()};
  $('#nm').oninput=e=>{C.setName(c,e.target.value);touch(i)};
  $('#md').onchange=e=>{c[CO_MODE]=+e.target.value;touch(i)};$('#sp').oninput=e=>{c[0x42]=Math.max(1,Math.min(127,+e.target.value||1));touch(i)};
  $('#pv').oninput=e=>{c[0x38]=+e.target.value;$('#pvv').textContent=e.target.value;touch(i)};$('#ar').onchange=e=>{P.arpc[4]=+e.target.value;touch(i)};
@@ -671,6 +671,7 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
  $('#clr').onclick=()=>{if(confirm('Remove all voices and reset this performance?')){const old=P;lib[i]={P:C.newPerformance('Init Perf',old),src:'dev',dirty:true};save();renderDetail()}};
  const body=$('#tabbody');
  if(tab==='fx'){body.append(fxTab(i));return}
+ if(tab==='knobs'){body.append(knobsTab(i));return}
  if(tab==='arp'){body.append(arpTab(i));return}
  if(tab==='pat'){body.append(patTab(i));return}
  $('#vbar').innerHTML='<div class="bar" style="margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line)"><button id="add" class="pri" '+(act.length>=16?'disabled':'')+'>＋ Add voice</button><span id="insc" class="hint" style="padding:0 8px;align-self:center"></span><button id="reord" '+(act.length<2?'disabled':'')+'>Reorder</button></div>';let v='<div class="parts">';
@@ -681,7 +682,7 @@ function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.
   <div class="sl"><label>Vol <input type="range" data-f="14" min="0" max="127" value="${p[14]}"></label><label>Pan <input type="range" data-f="15" min="1" max="127" value="${p[15]}"></label>
   <label>Rev <input type="range" data-f="18" min="0" max="127" value="${p[18]}"></label><label>Cho <input type="range" data-f="19" min="0" max="127" value="${p[19]}"></label>
   <label>Note ≥ <input type="number" data-f="8" min="0" max="127" value="${p[8]}" title="${NOTE(p[8])}"></label><label>≤ <input type="number" data-f="9" min="0" max="127" value="${p[9]}" title="${NOTE(p[9])}"></label>
-  <label>Shift <input type="number" data-f="22" min="40" max="88" value="${p[22]}" title="64 = 0"></label><label>Ch <input type="number" data-f="4" min="0" max="15" value="${p[4]}" title="0-based receive channel"></label><span class="hint" style="padding:0;align-self:center;flex:1;min-width:180px">Parts on the same channel play together when you press a key: that's how voices are layered.</span></div></div>
+  <label>Shift <input type="number" data-f="22" min="40" max="88" value="${p[22]}" title="64 = 0"></label><label>Ch <input type="number" data-f="4" min="0" max="15" value="${p[4]}" title="0-based receive channel"></label><span class="hint" style="padding:0;align-self:center;flex:1;min-width:180px">Parts on the same channel play together when you press a key: that's how voices are layered. (From the keyboard, Keyboard mode applies to Parts 1 and 2.)</span></div></div>
   <div style="display:flex;gap:6px;flex-direction:column"><button class="edv">Edit voice</button><button class="chg">Change voice</button><button class="rm dng">Remove</button></div></div>`});
  v+='</div>';body.innerHTML=v;
  C.insClean(P);fillIns(i);const insInfo=()=>{const n=C.insCount(P),e=$('#insc');if(!e)return;const on=P.parts.map((p,q)=>C.active(p)&&C.insGet(P,q)?q:-1).filter(q=>q>=0);
@@ -884,6 +885,40 @@ function pickArp(cur,cb){const d=h('dialog',{style:'width:min(640px,96vw);paddin
    r.onclick=()=>{d.close();d.remove();cb(a[0],tc.firstChild.checked,a[5])};list.append(r)})};
  q.oninput=draw;cat.onchange=draw;x.onclick=()=>{d.close();d.remove()};
  d.append(h('div',{class:'dh'},q,cat,x),tc,list);document.body.append(d);draw();d.showModal();q.focus()}
+
+// ---- Knobs tab: the four front-panel knobs (A-D), their three function pages, and the values they edit
+const KNOB_PAGES=['Tone 1: A Cutoff · B Resonance · C Chorus send · D Reverb send','Tone 2: A Attack · B Decay · C Sustain · D Release','Tone 3: A Volume · B Pan · C Assign 1 · D Assign 2'];
+function knobsTab(i){const P=lib[i].P,c=P.common,t=()=>touch(i),box=h('div');
+ const sgn=v=>(v-64>0?'+':'')+(v-64),pan=v=>v===64?'C':v<64?'L'+(64-v):'R'+(v-64);
+ // one slider: arr[off] with a readable value; kind 'off' = -64..+63 around 0x40, 'pan' = L63..R63, 'lin' = 0..127
+ const ctl=(label,arr,off,kind,tip)=>{const lo=kind==='pan'?1:0,out=h('b',{style:'color:var(--fg);min-width:34px;display:inline-block;text-align:right'}),show=v=>kind==='off'?sgn(v):kind==='pan'?pan(v):String(v);
+  const r=h('input',{type:'range',min:lo,max:127,value:arr[off]});out.textContent=show(arr[off]);r.oninput=()=>{arr[off]=+r.value;out.textContent=show(+r.value);t()};
+  return h('label',{title:tip||''},label+' ',out,r)};
+ const grid=(...k)=>h('div',{class:'grid2'},...k);
+ // knob function page
+ const fs=h('select',{},...KNOB_PAGES.map((n,k)=>h('option',{value:k},n)));fs.value=Math.min(2,c[0x1e]);fs.onchange=()=>{c[0x1e]=+fs.value;t()};
+ const lk=h('select',{},h('option',{value:0},'off — knobs change only the selected part'),h('option',{value:1},'on — knobs change Parts 1 and 2 together'));lk.value=c[0x44]?1:0;lk.onchange=()=>{c[0x44]=+lk.value;t();note()};
+ const nt=h('div',{class:'hint',style:'padding:6px 0 0'});const note=()=>{nt.textContent=c[0x44]?'Part 1-2 Link is on: the knobs edit the performance values below (they apply to Parts 1 and 2).':'Part 1-2 Link is off: the knobs edit the values of the selected part (see the per-part table below).'};note();
+ box.append(sec('Knob function and link',h('div',{style:'padding:8px 12px'},grid(h('label',{},'Knob function page (the [KNOB FUNCTION] button)',fs),h('label',{},'Part 1-2 Link',lk)),nt)));
+ box.append(sec('Performance values (Part 1-2 Link on)',h('div',{style:'padding:8px 12px'},grid(
+  ctl('Cutoff',c,0x2a,'off'),ctl('Resonance',c,0x2b,'off'),ctl('Chorus send',c,0x3c,'lin'),ctl('Reverb send',c,0x3b,'lin'),
+  ctl('Attack',c,0x21,'off'),ctl('Decay',c,0x22,'off'),ctl('Sustain',c,0x23,'off'),ctl('Release',c,0x24,'off'),
+  ctl('Pan',c,0x1f,'pan'),ctl('Assign 1',c,0x2c,'off','Offset applied to whatever the voices assign to the ASSIGN 1 knob (knob C on page Tone 3). What it does is set per voice in the voice Ctrl Set.'),ctl('Assign 2',c,0x2d,'off','Offset applied to whatever the voices assign to the ASSIGN 2 knob (knob D on page Tone 3). What it does is set per voice in the voice Ctrl Set.')),
+  h('div',{class:'hint',style:'padding:6px 0 0'},'Volume is the Performance volume at the top of the page. These are offsets from the voice’s own settings; 0 means no change.'))));
+ // per part
+ const act=P.parts.map((p,k)=>k).filter(k=>C.active(P.parts[k]));
+ const tb=h('table',{class:'tbl',style:'width:100%;font-size:13px'});
+ const cols=[['Cutoff',0x2d],['Resonance',0x2e],['Attack',0x23],['Decay',0x24],['Sustain',0x25],['Release',0x26],['Assign 1',0x3c],['Assign 2',0x3d]];
+ tb.append(h('thead',{},h('tr',{},h('th',{},'Part'),h('th',{},'Voice'),...cols.map(x=>h('th',{},x[0])),h('th',{title:'Part receives the ASSIGN 1 knob'},'Rx A1'),h('th',{title:'Part receives the ASSIGN 2 knob'},'Rx A2'))));
+ const tbody=h('tbody');
+ act.forEach(k=>{const p=P.parts[k],vo=voiceOf(p);
+  const num=(off)=>{const e=h('input',{type:'number',min:-64,max:63,value:p[off]-64,style:'width:62px'});e.onchange=()=>{const v=Math.max(-64,Math.min(63,Math.round(+e.value||0)));e.value=v;p[off]=v+64;t()};return h('td',{},e)};
+  const bit=(b)=>{const e=h('input',{type:'checkbox'});e.checked=!!(p[0x21]&(1<<b));e.onchange=()=>{p[0x21]=e.checked?(p[0x21]|(1<<b)):(p[0x21]&~(1<<b));t()};return h('td',{style:'text-align:center'},e)};
+  tbody.append(h('tr',{},h('td',{},String(k+1)),h('td',{},vo?vo.n:'Unknown voice'),...cols.map(x=>num(x[1])),bit(3),bit(4)))});
+ if(!act.length)tbody.append(h('tr',{},h('td',{colspan:11},'No voices in this performance.')));
+ tb.append(tbody);
+ box.append(sec('Per-part values (Part 1-2 Link off, and what each part responds to)',h('div',{style:'padding:8px 12px;overflow:auto'},tb,h('div',{class:'hint',style:'padding:6px 0 0'},'Offsets are -64 to +63 (0 = no change). “Rx A1/A2” choose whether the part follows the ASSIGN 1/2 knobs. Sustain and Release have no effect on drum voices.'))));
+ return box}
 function arpTab(i){const P=lib[i].P,t=()=>touch(i),box=h('div');
  const rows=(blk,specs)=>specs.map(sp=>specRow(blk,sp,t));
  box.append(sec('Common arpeggio settings',simpleGrid(rows(P.arpc,ASPEC.common)),true),h('div',{class:'hint',style:'padding:0 0 10px'},'Tempo and the main on/off switch are also at the top of the page. Offsets are added to each part\'s own settings.'));
@@ -1084,7 +1119,7 @@ async function openVoiceEditor(vo,ctx){
 
 $('#dev').addEventListener('change',()=>syncBulk());
 $('#bulk').onchange=e=>{const i=+e.target.value;if(i<0||!out)return;bulkIdx=i;bulkFor=bulkKey();try{send([0xf0,0x43,0x10|dev(),0x7f,0x17,0,0,0x1f,i,0xf7]);status('Bulk interval set to '+BULK[i]+' ms')}catch(err){status(err.message)}};fillBulk(false);
-const VERSION='0.1.0';
+const VERSION='0.1.1';
 {const ts=document.getElementById('theme');ts.value=window.__theme;ts.onchange=()=>{document.documentElement.dataset.theme=ts.value;try{localStorage.setItem('mxtheme',ts.value)}catch(e){}}}
 $('#about').onclick=()=>{const d=h('dialog',{style:'width:min(560px,95vw);padding:0;max-height:92vh;overflow:auto'});const a=(u,t)=>h('a',{href:u,target:'_blank',rel:'noopener noreferrer',style:'color:var(--acc2)'},t);
  const x=h('button',{class:'pri'},'Close');x.onclick=()=>{d.close();d.remove()};d.onclose=()=>d.remove();

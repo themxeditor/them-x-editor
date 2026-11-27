@@ -1,6 +1,6 @@
 # THEM-X Performance Editor
 
-**Version 0.1.0**
+**Version 0.1.1**
 
 A browser-based editor for the performances, voices, drum kits, effects and arpeggios of Yamaha MX49, MX61 and MX88 keyboards. It talks to the keyboard over USB using the Web MIDI API, so there is nothing to install: open one HTML file in Chrome or Edge.
 
@@ -26,6 +26,7 @@ An MX keyboard stores 128 user performances. Each performance is a stored setup 
 - **Effects and EQ.** Choose the performance's reverb and chorus types and edit every parameter of each, with values in real units. Edit the five-band master EQ.
 - **Arpeggio.** Edit the common arpeggio settings and, for every part, the six arpeggio type slots (chosen from all 999 types by name or category, optionally adopting the type's original tempo) plus playback, range, timing, random and offset settings.
 - **Rhythm pattern.** Pick the performance's rhythm pattern from all 208 patterns by category or search, and set Auto key-on start.
+- **Knobs.** A Knobs tab edits the front-panel knob settings stored in each performance: the knob function page (Tone 1/2/3), Part 1-2 Link, the performance-wide Cutoff, Resonance, Chorus/Reverb send, Attack/Decay/Sustain/Release, Pan and Assign 1/2 values, and a per-part table with the same values plus whether each part follows the Assign 1/2 knobs.
 - **Safe writing.** Before a performance is sent, the editor checks each part's voice: invalid banks, empty (initialized) user voices, user voices changed in the editor but not yet on the keyboard (it offers to write those first), unknown voices and more than 4 insertion effects. After sending, it reads the performance back and compares every part's voice, retrying more slowly up to 3 times, and tells you if the keyboard still differs. Reads are checked for missing blocks and retried. **Check keyboard** compares a slot on the keyboard with the editor at any time, and the editor warns when the MIDI connection is lost. User voices get the same care: the current contents of a keyboard slot are backed up before it is overwritten (More… → Restore previous), blanking a real voice with an empty one needs explicit confirmation, writes are read back and verified, and incomplete or stale voice reads are rejected.
 - **Copy and clear.** Copy a performance to another slot chosen from a list, or clear one.
 
