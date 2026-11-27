@@ -1,5 +1,6 @@
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.addInitScript(()=>{window.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{lib.forEach(l=>{if(!l.dirty)l.src='dev'});render()}catch(e){}},0))});
 await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));
 await pg.click('#app tbody tr,#app .row,#app [data-i]');await pg.waitForTimeout(200);
 await pg.click('#t-arp');await pg.waitForTimeout(100);

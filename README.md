@@ -46,7 +46,7 @@ An MX keyboard stores 128 user performances. Each performance is a stored setup 
 - **Read and write.** Read one or all performances from the keyboard, audition edits in the edit buffer, and write them back to a slot.
 - **Backup and sharing.** Export and import `.syx` files. Export everything (all performances and all user voices) in a single file, and import it again later.
 - **Bulk interval.** Set the keyboard's Bulk Dump Interval (0 to 900 ms) from the top bar. Lower values make reading from the keyboard much faster.
-- **Works offline.** You can browse and edit performances without a keyboard connected. The list starts from the factory performance list, and imported or previously read data is kept in the browser. Voice data for presets is read from the keyboard when you open the voice editor.
+- **Needs the keyboard for its data.** Performances show "Connect" until they have been read from the keyboard (or imported); nothing is shown from a built-in factory list. Imported or previously read data is kept in the browser. Voice data for presets is read from the keyboard when you open the voice editor.
 - **Guide.** The Guide button in the top bar opens the guide in a new tab. Keep the guide file in the same folder as the editor.
 
 ## Requirements

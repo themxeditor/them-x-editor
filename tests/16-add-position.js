@@ -1,5 +1,6 @@
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1300,height:800}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));await pg.addInitScript("try{localStorage.setItem('mxabout','0')}catch(e){}");
+await pg.addInitScript(()=>{window.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{lib.forEach(l=>{if(!l.dirty)l.src='dev'});render()}catch(e){}},0))});
 await pg.goto('file://'+require('path').resolve(__dirname,'..','them-x-performance-editor.html'));await pg.click('#app tbody tr');await pg.waitForTimeout(200);
 const add=async(opt,n)=>{await pg.click('#add');await pg.fill('#vq','');await pg.click('#dlg .dl div[data-k]:nth-child('+(n||1)+')');if(opt)await pg.selectOption('body > dialog[open] select',{label:opt});await pg.click('body > dialog[open] button.pri');await pg.waitForTimeout(100)};
 const names=async()=>pg.locator('.part .vname').allInnerTexts();

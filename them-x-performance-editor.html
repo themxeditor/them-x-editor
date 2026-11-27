@@ -525,7 +525,7 @@ function vnames(P){return P.parts.map((p,i)=>C.active(p)?(voiceOf(p)?.n||`${p.sl
 function renderList(){const q=(view.q||'').toLowerCase();
  let h=`<div class="bar"><input id="q" placeholder="Search name or voice…" value="${view.q||''}" style="flex:1;min-width:200px">
  <button id="rall" ${out?'':'disabled'}>Read all from keyboard</button><button id="imp">Import .syx</button><button id="wall" ${out?'':'disabled'}>Write all modified to keyboard</button><button id="expall">Export everything (.syx)</button><button id="expperf">Export performances only</button><button id="avb">Voices…</button><button id="uvb">User voices…</button><button id="rst" class="dng">Reset library</button><button id="rapp" class="dng" title="Erase everything this app stores in the browser">Reset app</button><label style="font-size:13px;color:var(--mute);display:flex;gap:5px;align-items:center;white-space:nowrap" title="When on, selecting a performance here also switches the keyboard to it"><input id="follow" type="checkbox" ${followOn?'checked':''} style="width:auto"> Follow</label></div>
- <div class="warn" ${out?'hidden':''}>Not connected. You can browse and edit the factory list offline; connect to read, audition and write your real performances.</div>
+ <div class="warn" ${out?'hidden':''}>Not connected. Connect to read, audition and write your performances.</div>
  <table><thead><tr><th>Slot</th><th>Name</th><th>Mode</th><th>Voices</th><th>#</th><th>Source</th></tr></thead><tbody>`;
  lib.forEach((l,i)=>{const nodata=!l.dirty&&l.src!=='dev';const names=nodata?[]:vnames(l.P);const nm=nodata?'Connect':C.getName(l.P.common);
   if(q&&!(nodata?slotName(i):nm+' '+names.join(' ')+slotName(i)).toLowerCase().includes(q))return;
@@ -644,6 +644,9 @@ function fxTab(i){const P=lib[i].P,t=()=>touch(i),out=h('div');
  return out}
 // ---------- Detail ----------
 function renderDetail(){const i=view.i,l=lib[i],P=l.P,c=P.common;const tab=view.tab||'voices';
+ if(!l.dirty&&l.src!=='dev'){ // never read from the keyboard: nothing real to show
+  $('#app').innerHTML=`<div class="stick"><div class="crumb"><a id="back">All performances</a> › ${slotName(i)}</div></div><div class="card" style="margin:16px 0;padding:24px;text-align:center"><b>Connect to keyboard first</b><div class="hint" style="margin-top:6px">${slotName(i)} has not been read from the keyboard yet.</div>${out?'<div style="margin-top:12px"><button id="rd1" class="pri">Read '+slotName(i)+' from keyboard</button></div>':''}</div>`;
+  $('#back').onclick=()=>go({type:'list'});const r1=$('#rd1');if(r1)r1.onclick=async()=>{try{status('Reading '+slotName(i)+'…');await readSlot(i);render()}catch(e){alert('Could not read '+slotName(i)+': '+e.message)}};return}
  const act=P.parts.map((p,k)=>C.active(p)?k:-1).filter(k=>k>=0);
  let h0=`<div class="stick"><div class="crumb"><a id="back">All performances</a> › ${slotName(i)} ${modLabel(l)}</div>
  <div class="bar"><button id="pr" ${i>0?'':'disabled'}>◀</button><button id="nx" ${i<127?'':'disabled'}>▶</button>
